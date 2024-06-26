@@ -1,6 +1,11 @@
+- FPS controller
+- Interactive music
+- Skinnable UI
+- Mouse capture
 - Global scene
 - Global utils
-- FPS controller
+- Maximized when not in debug mode
+- Screen space shaders
 - Settings menu
 - Boot screen
 - Preload step
@@ -11,3 +16,4 @@
 - Guns
 - Tracers
 - Night vision
+- Icon

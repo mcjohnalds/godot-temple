@@ -40,7 +40,6 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	await get_tree().create_timer(0.1).timeout
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
 func _physics_process(delta: float) -> void:
@@ -67,7 +66,7 @@ func _physics_process_force_pid(delta: float) -> void:
 	var distance := query.from.distance_to(point) - offset
 	var error := ground_clearance - distance
 	var error_delta := (error - _last_force_error) / delta
-	var kp := 80000.0
+	var kp := 8000.0
 	var max_force := 8000.0
 	var td := 0.1
 	var up_force := minf(kp * (error + td * error_delta), max_force)
@@ -77,13 +76,13 @@ func _physics_process_force_pid(delta: float) -> void:
 		var friction := (
 			-Vector3(linear_velocity.x, 0.0, linear_velocity.z)
 			* 1600.0
-		).limit_length(16000.0)
+		).limit_length(5000.0)
 		var horiz_vel := Vector3(linear_velocity.x, 0.0, linear_velocity.z)
 		if input2.length() > 0.0:
 			var input3 := Vector3(input2.x, 0.0, input2.y).normalized().rotated(Vector3.UP, camera.rotation.y + TAU / 2.0)
 			var perp := input3.rotated(Vector3.UP, TAU / 4.0).normalized()
 			if horiz_vel.length() < 6.0:
-				apply_central_force(input3 * 16000.0)
+				apply_central_force(input3 * 3000.0)
 			apply_central_force(friction.project(perp))
 		else:
 			apply_central_force(friction)
@@ -94,8 +93,8 @@ func _physics_process_upright_torque_pid(delta: float) -> void:
 	var target := Vector3.MODEL_TOP
 	var current := global_basis.y
 	var error := current.cross(target)
-	var kp := 8000.0
-	var td := 0.1
+	var kp := 1000.0
+	var td := 0.2
 	var error_delta := (error - _last_upright_torque_error) / delta
 	var torque := kp * (error + td * error_delta)
 	apply_torque(torque)
@@ -106,8 +105,8 @@ func _physics_process_yaw_torque_pid(delta: float) -> void:
 	var target := -Vector3(camera.global_basis.z.x, 0.0, camera.global_basis.z.z).normalized()
 	var current := Vector3(global_basis.z.x, 0.0, global_basis.z.z).normalized()
 	var error := current.cross(target)
-	var kp := 8000.0
-	var td := 0.1
+	var kp := 1000.0
+	var td := 0.5
 	var error_delta := (error - _last_yaw_torque_error) / delta
 	var torque := kp * (error + td * error_delta)
 	apply_torque(torque)
@@ -123,18 +122,6 @@ func _input(event: InputEvent) -> void:
 		var ry := camera.rotation.y - motion.relative.x * mouse_sensitivity
 		camera.rotation.x = clamp(rx, -m, m)
 		camera.rotation.y = ry
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		get_tree().quit()
-	if event.is_action_pressed("action"):
-		get_viewport().get_camera_3d().current = false
-	if (
-		event is InputEventMouseButton
-		and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE
-	):
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func _update() -> void:
