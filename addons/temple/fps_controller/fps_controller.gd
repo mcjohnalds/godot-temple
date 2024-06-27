@@ -2,6 +2,8 @@
 class_name FpsController
 extends RigidBody3D
 
+@export var aim_sensitivity := 0.002
+@export var aim_limit := 0.24 * TAU
 @export var standing_force_p_gain := 100.0
 @export var standing_force_d_gain := 10.0
 @export var upright_force_p_gain := 30.0
@@ -84,7 +86,7 @@ func _physics_process_standing_force(delta: float) -> bool:
 	var is_on_ground := error > 0.0
 	if is_on_ground:
 		apply_central_force(Vector3.UP * up_accel * mass)
-	_last_force_error = error
+	_last_standing_error = error
 	return is_on_ground
 
 
@@ -162,11 +164,9 @@ func _physics_process_turn_force(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	var motion := event as InputEventMouseMotion 
 	if motion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		var mouse_sensitivity := 0.002
-		var m := 0.9 * TAU / 4.0
-		var rx := camera.rotation.x - motion.relative.y * mouse_sensitivity
-		var ry := camera.rotation.y - motion.relative.x * mouse_sensitivity
-		camera.rotation.x = clamp(rx, -m, m)
+		var rx := camera.rotation.x - motion.relative.y * aim_sensitivity
+		var ry := camera.rotation.y - motion.relative.x * aim_sensitivity
+		camera.rotation.x = clamp(rx, -aim_limit, aim_limit)
 		camera.rotation.y = ry
 
 

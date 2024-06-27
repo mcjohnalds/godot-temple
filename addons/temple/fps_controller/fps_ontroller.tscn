@@ -21,6 +21,21 @@ size = Vector3(0.1, 0.1, 0.1)
 [node name="FpsController" type="RigidBody3D"]
 mass = 80.0
 script = ExtResource("1_fjmka")
+aim_sensitivity = null
+aim_limit = null
+standing_force_p_gain = null
+standing_force_d_gain = null
+upright_force_p_gain = null
+upright_force_d_gain = null
+turn_force_p_gain = null
+turn_force_d_gain = null
+ground_friction_coefficient = null
+walk_acceleration = null
+walk_speed_max = null
+walk_overspeed_deceleration = null
+ground_clearance = null
+height = null
+radius = null
 
 [node name="CollisionShape" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
