@@ -38,9 +38,9 @@ extends RigidBody3D
 		_update_tree()
 
 
-var _last_force_error: float
-var _last_upright_torque_error: Vector3
-var _last_yaw_torque_error: Vector3
+var _last_standing_error: float
+var _last_upright_error: Vector3
+var _last_turn_error: Vector3
 @onready var collision_shape: CollisionShape3D = $CollisionShape
 @onready var debug_capsule: MeshInstance3D = $DebugCapsule
 @onready var camera: Camera3D = $Camera3D
@@ -77,7 +77,7 @@ func _physics_process_standing_force(delta: float) -> bool:
 		distance = query.from.distance_to(point) - offset
 
 	var error := ground_clearance - distance
-	var error_delta := (error - _last_force_error) / delta
+	var error_delta := (error - _last_standing_error) / delta
 	var up_accel := (
 		standing_force_p_gain * error + standing_force_d_gain * error_delta
 	)
@@ -137,12 +137,12 @@ func _physics_process_upright_force(delta: float) -> void:
 	var target := Vector3.MODEL_TOP
 	var current := global_basis.y
 	var error := current.cross(target)
-	var error_delta := (error - _last_upright_torque_error) / delta
+	var error_delta := (error - _last_upright_error) / delta
 	var accel := (
 		upright_force_p_gain * error + upright_force_d_gain * error_delta
 	)
 	apply_torque(accel * get_actual_inertia())
-	_last_upright_torque_error = error
+	_last_upright_error = error
 
 
 func _physics_process_turn_force(delta: float) -> void:
@@ -153,10 +153,10 @@ func _physics_process_turn_force(delta: float) -> void:
 		global_basis.z.x, 0.0, global_basis.z.z
 	).normalized()
 	var error := current.cross(target)
-	var error_delta := (error - _last_yaw_torque_error) / delta
+	var error_delta := (error - _last_turn_error) / delta
 	var torque := turn_force_p_gain * error + turn_force_d_gain * error_delta
 	apply_torque(torque * get_actual_inertia())
-	_last_yaw_torque_error = error
+	_last_turn_error = error
 
 
 func _input(event: InputEvent) -> void:
