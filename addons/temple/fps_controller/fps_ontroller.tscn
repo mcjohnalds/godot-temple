@@ -21,9 +21,6 @@ size = Vector3(0.1, 0.1, 0.1)
 [node name="FpsController" type="RigidBody3D"]
 mass = 80.0
 script = ExtResource("1_fjmka")
-friction_coefficient = 20.0
-forward_friction_coefficient = 2.0
-standing_force_p_gain = null
 
 [node name="CollisionShape" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
