@@ -15,6 +15,8 @@ extends RigidBody3D
 @export var walk_speed_max := 6.0
 @export var walk_overspeed_deceleration := 2.0
 @export var jump_accel := 6.0
+@export var air_control_min_acceleration := 3.5
+@export var air_control_max_acceleration := 7.0
 
 
 @export var ground_clearance := 0.3:
@@ -61,6 +63,7 @@ func _physics_process(delta: float) -> void:
 		return
 	var is_on_ground := _physics_process_standing_force(delta)
 	_physics_process_walking_force(is_on_ground)
+	_physics_process_air_control(is_on_ground)
 	_physics_process_upright_force(delta)
 	_physics_process_turn_force(delta)
 	camera.global_position = camera_anchor.global_position
@@ -83,7 +86,7 @@ func _physics_process_standing_force(delta: float) -> bool:
 	var error_delta := (error - _last_standing_error) / delta
 	var up_accel := minf(
 		standing_force_p_gain * error + standing_force_d_gain * error_delta,
-		standing_force_p_gain
+		standing_force_p_gain * 2.0
 	)
 	var is_on_ground := error > 0.0
 	if is_on_ground:
@@ -135,6 +138,45 @@ func _physics_process_walking_force(is_on_ground: bool) -> void:
 		) * ground_friction_coefficient
 
 	apply_central_force(mass * accel)
+
+
+func _physics_process_air_control(is_on_ground: bool) -> void:
+	var horiz_vel2 := Vector3(linear_velocity.x, 0.0, linear_velocity.z)
+	print(horiz_vel2.length())
+	if is_on_ground:
+		return
+
+	var camera_space_input := Input.get_vector(
+		"move_right",
+		"move_left",
+		"move_backward",
+		"move_forward"
+	)
+
+	var global_space_input := (
+		Vector3(camera_space_input.x, 0.0, camera_space_input.y)
+			.rotated(Vector3.UP, camera.rotation.y + TAU / 2.0)
+	)
+
+	var horiz_vel := Vector3(linear_velocity.x, 0.0, linear_velocity.z)
+	var vel_space := (
+		Basis.IDENTITY if horiz_vel.is_zero_approx()
+		else Basis.looking_at(horiz_vel, Vector3.UP, true)
+	)
+	var vel_space_vel := vel_space.transposed() * horiz_vel
+	var vel_space_input := vel_space.transposed() * global_space_input
+	var air_control_accel := lerpf(
+		air_control_min_acceleration,
+		air_control_max_acceleration,
+		minf(horiz_vel.length() / walk_speed_max, 1.0)
+	)
+	var vel_space_accel := air_control_accel * Vector3(
+		vel_space_input.x,
+		0.0,
+		vel_space_input.z if vel_space_vel.z < walk_speed_max else 0.0
+	)
+	var global_space_accel = vel_space * vel_space_accel
+	apply_central_force(mass * global_space_accel)
 
 
 func _physics_process_upright_force(delta: float) -> void:

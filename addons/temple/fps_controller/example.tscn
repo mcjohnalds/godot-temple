@@ -79,21 +79,21 @@ environment = SubResource("Environment_x1r06")
 
 [node name="FpsController" parent="." instance=ExtResource("2_63b4k")]
 transform = Transform3D(-0.834915, 0, -0.550379, 0, 1, 0, 0.550379, 0, -0.834915, 0, 0.448096, 0)
-aim_sensitivity = null
-aim_limit = null
-standing_force_p_gain = null
-standing_force_d_gain = null
-upright_force_p_gain = null
-upright_force_d_gain = null
-turn_force_p_gain = null
-turn_force_d_gain = null
-ground_friction_coefficient = null
-walk_acceleration = null
-walk_speed_max = null
-walk_overspeed_deceleration = null
-ground_clearance = null
-height = null
-radius = null
+aim_sensitivity = 0.002
+aim_limit = 1.50796
+standing_force_p_gain = 100.0
+standing_force_d_gain = 10.0
+upright_force_p_gain = 30.0
+upright_force_d_gain = 6.0
+turn_force_p_gain = 71.0
+turn_force_d_gain = 35.0
+ground_friction_coefficient = 20.0
+walk_acceleration = 35.0
+walk_speed_max = 6.0
+walk_overspeed_deceleration = 2.0
+ground_clearance = 0.3
+height = 1.7
+radius = 0.6
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(0.493942, 0.506153, -0.706987, 2.83599e-16, 0.813101, 0.582123, 0.869495, -0.287535, 0.401625, -3.0403, 3.45558, 1.73057)

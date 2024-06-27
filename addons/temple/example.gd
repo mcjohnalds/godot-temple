@@ -10,8 +10,11 @@ func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
-func _process(_delta: float) -> void:
-	camera.look_at(fps_controller.global_position)
+func _process(delta: float) -> void:
+	var current := -camera.global_basis.z
+	var target := camera.global_position.direction_to(fps_controller.global_position)
+	var	new_dir := current.slerp(target, minf(delta * 5.0, 1.0))
+	camera.look_at(camera.global_position + new_dir)
 
 
 func _unhandled_input(event: InputEvent) -> void:
