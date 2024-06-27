@@ -45,13 +45,14 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
-	_physics_process_force_pid(delta)
+	var is_on_ground := _physics_process_force_pid(delta)
+	_physics_process_walking(is_on_ground)
 	_physics_process_upright_torque_pid(delta)
 	_physics_process_yaw_torque_pid(delta)
 	camera.global_position = camera_anchor.global_position
 
 
-func _physics_process_force_pid(delta: float) -> void:
+func _physics_process_force_pid(delta: float) -> bool:
 	var query := PhysicsRayQueryParameters3D.new()
 	var offset := 0.1
 	query.from = global_position + Vector3(0.0, ground_clearance + offset, 0.0)
@@ -59,34 +60,68 @@ func _physics_process_force_pid(delta: float) -> void:
 	query.exclude = [self.get_rid()]
 	var collision := get_world_3d().direct_space_state.intersect_ray(query)
 
-	if not collision:
-		return
+	var distance := 10.0
+	if collision:
+		var point: Vector3 = collision.position
+		distance = query.from.distance_to(point) - offset
 
-	var point: Vector3 = collision.position
-	var distance := query.from.distance_to(point) - offset
 	var error := ground_clearance - distance
 	var error_delta := (error - _last_force_error) / delta
 	var kp := 8000.0
 	var max_force := 8000.0
 	var td := 0.1
 	var up_force := minf(kp * (error + td * error_delta), max_force)
-	if error > 0.0:
+	var is_on_ground := error > 0.0
+	if is_on_ground:
 		apply_central_force(Vector3.UP * up_force)
-		var input2 := Input.get_vector("move_right", "move_left", "move_backward", "move_forward")
-		var friction := (
-			-Vector3(linear_velocity.x, 0.0, linear_velocity.z)
-			* 1600.0
-		).limit_length(5000.0)
-		var horiz_vel := Vector3(linear_velocity.x, 0.0, linear_velocity.z)
-		if input2.length() > 0.0:
-			var input3 := Vector3(input2.x, 0.0, input2.y).normalized().rotated(Vector3.UP, camera.rotation.y + TAU / 2.0)
-			var perp := input3.rotated(Vector3.UP, TAU / 4.0).normalized()
-			if horiz_vel.length() < 6.0:
-				apply_central_force(input3 * 3000.0)
-			apply_central_force(friction.project(perp))
-		else:
-			apply_central_force(friction)
 	_last_force_error = error
+	return is_on_ground
+
+
+func _physics_process_walking(is_on_ground: bool) -> void:
+	if not is_on_ground:
+		return
+
+	var camera_space_input := Input.get_vector(
+		"move_right",
+		"move_left",
+		"move_backward",
+		"move_forward"
+	)
+
+	var global_space_input := (
+		Vector3(camera_space_input.x, 0.0, camera_space_input.y)
+			.rotated(Vector3.UP, camera.rotation.y + TAU / 2.0)
+	)
+
+	var global_space_friction := -Vector3(
+		linear_velocity.x, 0.0, linear_velocity.z
+	) * 1600.0
+
+	var is_walking := camera_space_input.length() > 0.0
+	var force: Vector3
+	if is_walking:
+		var walk_space := Basis.looking_at(
+			global_space_input, Vector3.UP, true
+		)
+		var walk_space_vel := walk_space.transposed() * linear_velocity
+		var walk_space_friction := (
+			walk_space.transposed() * global_space_friction
+		)
+		var walk_force := (
+			global_space_input.length() * 3000.0 if walk_space_vel.z < 6.0
+			else walk_space_friction.z * 0.1
+		)
+		var walk_space_force := Vector3(
+			walk_space_friction.x,
+			0.0,
+			maxf(walk_space_friction.z, walk_force)
+		)
+		force = walk_space * walk_space_force
+	else:
+		force = global_space_friction
+
+	apply_central_force(force)
 
 
 func _physics_process_upright_torque_pid(delta: float) -> void:
