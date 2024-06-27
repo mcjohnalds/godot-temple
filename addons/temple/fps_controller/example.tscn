@@ -79,7 +79,8 @@ environment = SubResource("Environment_x1r06")
 
 [node name="FpsController" parent="." instance=ExtResource("2_63b4k")]
 transform = Transform3D(-0.834915, 0, -0.550379, 0, 1, 0, 0.550379, 0, -0.834915, 0, 0.448096, 0)
-radius = 0.0
+friction_coefficient = 20.0
+forward_friction_coefficient = 2.0
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(0.493942, 0.506153, -0.706987, 2.83599e-16, 0.813101, 0.582123, 0.869495, -0.287535, 0.401625, -3.0403, 3.45558, 1.73057)

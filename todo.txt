@@ -4,6 +4,7 @@
 - Mouse capture
 - Global scene
 - Global utils
+  - get intertia
 - Maximized when not in debug mode
 - Screen space shaders
 - Settings menu
