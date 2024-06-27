@@ -14,6 +14,7 @@ extends RigidBody3D
 @export var walk_acceleration := 35.0
 @export var walk_speed_max := 6.0
 @export var walk_overspeed_deceleration := 2.0
+@export var jump_accel := 6.0
 
 
 @export var ground_clearance := 0.3:
@@ -80,8 +81,9 @@ func _physics_process_standing_force(delta: float) -> bool:
 
 	var error := ground_clearance - distance
 	var error_delta := (error - _last_standing_error) / delta
-	var up_accel := (
-		standing_force_p_gain * error + standing_force_d_gain * error_delta
+	var up_accel := minf(
+		standing_force_p_gain * error + standing_force_d_gain * error_delta,
+		standing_force_p_gain
 	)
 	var is_on_ground := error > 0.0
 	if is_on_ground:
@@ -162,12 +164,17 @@ func _physics_process_turn_force(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	var motion := event as InputEventMouseMotion 
-	if motion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+	if (
+		event is InputEventMouseMotion
+		and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
+	):
+		var motion := event as InputEventMouseMotion 
 		var rx := camera.rotation.x - motion.relative.y * aim_sensitivity
 		var ry := camera.rotation.y - motion.relative.x * aim_sensitivity
 		camera.rotation.x = clamp(rx, -aim_limit, aim_limit)
 		camera.rotation.y = ry
+	if event.is_action_pressed("jump"):
+		apply_central_impulse(mass * jump_accel * Vector3.UP)
 
 
 func _update_tree() -> void:
