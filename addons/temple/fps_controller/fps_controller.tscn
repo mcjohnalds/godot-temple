@@ -1,52 +1,44 @@
-[gd_scene load_steps=7 format=3 uid="uid://dx0l2eirb1rdq"]
+[gd_scene load_steps=8 format=3 uid="uid://dx0l2eirb1rdq"]
 
 [ext_resource type="Script" path="res://addons/temple/fps_controller/fps_controller.gd" id="1_fjmka"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_htpuj"]
-radius = 0.6
-height = 1.4
+radius = 0.25
+height = 1.2
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_5b8il"]
-radius = 0.6
-height = 1.4
+radius = 0.25
+height = 1.2
 
 [sub_resource type="BoxMesh" id="BoxMesh_6cavi"]
-size = Vector3(0.1, 0.5, 0.1)
+size = Vector3(0.1, 0.697, 0.1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_b7mo1"]
 size = Vector3(0.1, 0.1, 0.1)
 
 [sub_resource type="PrismMesh" id="PrismMesh_cpr36"]
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_2lvi7"]
+radius = 0.23
+
 [node name="FpsController" type="RigidBody3D"]
+axis_lock_angular_x = true
+axis_lock_angular_z = true
 mass = 80.0
 script = ExtResource("1_fjmka")
-aim_sensitivity = null
-aim_limit = null
-standing_force_p_gain = null
-standing_force_d_gain = null
-upright_force_p_gain = null
-upright_force_d_gain = null
-turn_force_p_gain = null
-turn_force_d_gain = null
-ground_friction_coefficient = null
-walk_acceleration = null
-walk_speed_max = null
-walk_overspeed_deceleration = null
-ground_clearance = null
-height = null
-radius = null
+air_control_min_acceleration = 3.5
+air_control_max_acceleration = 7.0
 
 [node name="CollisionShape" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.01327, 0)
 shape = SubResource("CapsuleShape3D_htpuj")
 
 [node name="DebugCapsule" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.01327, 0)
 mesh = SubResource("CapsuleMesh_5b8il")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.349412, 0)
 mesh = SubResource("BoxMesh_6cavi")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
@@ -65,3 +57,11 @@ transform = Transform3D(1.09278e-08, -4.37114e-08, -0.5, -0.25, -2.18557e-08, -2
 visible = false
 mesh = SubResource("PrismMesh_cpr36")
 skeleton = NodePath("../../CameraAnchor")
+
+[node name="ShapeCast3D" type="ShapeCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.997412, 0)
+shape = SubResource("SphereShape3D_2lvi7")
+target_position = Vector3(2.08165e-12, -2.69, 2.08165e-12)
+
+[node name="HipAnchor" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.420997, 0)

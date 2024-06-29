@@ -15,8 +15,8 @@ extends RigidBody3D
 @export var walk_speed_max := 6.0
 @export var walk_overspeed_deceleration := 2.0
 @export var jump_accel := 6.0
-@export var air_control_min_acceleration := 3.5
-@export var air_control_max_acceleration := 7.0
+@export var air_control_min_acceleration := 100.0
+@export var air_control_max_acceleration := 200.0
 
 
 @export var ground_clearance := 0.3:
@@ -24,7 +24,7 @@ extends RigidBody3D
 		ground_clearance = value
 		if not is_node_ready():
 			await ready
-		_update_tree()
+		# _update_tree()
 
 
 @export var height := 1.7:
@@ -32,7 +32,7 @@ extends RigidBody3D
 		height = value
 		if not is_node_ready():
 			await ready
-		_update_tree()
+		# _update_tree()
 
 
 @export var radius := 0.6:
@@ -40,7 +40,7 @@ extends RigidBody3D
 		radius = value
 		if not is_node_ready():
 			await ready
-		_update_tree()
+		# _update_tree()
 
 
 var _last_standing_error: float
@@ -50,6 +50,8 @@ var _last_turn_error: Vector3
 @onready var debug_capsule: MeshInstance3D = $DebugCapsule
 @onready var camera: Camera3D = $Camera3D
 @onready var camera_anchor: Node3D = $CameraAnchor
+@onready var shape_cast: ShapeCast3D = $ShapeCast3D
+@onready var hip_anchor: Node3D = $HipAnchor
 
 
 func _ready() -> void:
@@ -63,33 +65,40 @@ func _physics_process(delta: float) -> void:
 		return
 	var is_on_ground := _physics_process_standing_force(delta)
 	_physics_process_walking_force(is_on_ground)
-	_physics_process_air_control(is_on_ground)
-	_physics_process_upright_force(delta)
-	_physics_process_turn_force(delta)
+	# _physics_process_air_control(is_on_ground)
+	# _physics_process_upright_force(delta)
+	# _physics_process_turn_force(delta)
 	camera.global_position = camera_anchor.global_position
 
 
 func _physics_process_standing_force(delta: float) -> bool:
-	var query := PhysicsRayQueryParameters3D.new()
-	var offset := 0.1
-	query.from = global_position + Vector3(0.0, ground_clearance + offset, 0.0)
-	query.to = global_position - 10.0 * Vector3(0.0, ground_clearance, 0.0)
-	query.exclude = [self.get_rid()]
-	var collision := get_world_3d().direct_space_state.intersect_ray(query)
+	# var query := PhysicsRayQueryParameters3D.new()
+	# var offset := 0.1
+	# query.from = global_position + Vector3(0.0, ground_clearance + offset, 0.0)
+	# query.to = global_position - 10.0 * Vector3(0.0, ground_clearance, 0.0)
+	# query.exclude = [self.get_rid()]
+	# var collision := get_world_3d().direct_space_state.intersect_ray(query)
 
-	var distance := 10.0
-	if collision:
-		var point: Vector3 = collision.position
-		distance = query.from.distance_to(point) - offset
+	# var distance := 10.0
+	# if collision:
+	# 	var point: Vector3 = collision.position
+	# 	distance = query.from.distance_to(point) - offset
 
-	var error := ground_clearance - distance
+	var distance := hip_anchor.position.y
+	if shape_cast.is_colliding():
+		distance = absf(hip_anchor.global_position.y - shape_cast.get_collision_point(0).y)
+
+	var error := hip_anchor.position.y - distance
 	var error_delta := (error - _last_standing_error) / delta
 	var up_accel := minf(
 		standing_force_p_gain * error + standing_force_d_gain * error_delta,
-		standing_force_p_gain * 2.0
+		1000.0
 	)
+	print(roundi(0.1 * up_accel))
 	var is_on_ground := error > 0.0
-	if is_on_ground:
+	var is_close_to_ground := error > -0.0
+	if is_close_to_ground:
+		# apply_force(Vector3.UP * up_accel * mass, hip_anchor.global_position - global_position)
 		apply_central_force(Vector3.UP * up_accel * mass)
 	_last_standing_error = error
 	return is_on_ground
@@ -141,8 +150,6 @@ func _physics_process_walking_force(is_on_ground: bool) -> void:
 
 
 func _physics_process_air_control(is_on_ground: bool) -> void:
-	var horiz_vel2 := Vector3(linear_velocity.x, 0.0, linear_velocity.z)
-	print(horiz_vel2.length())
 	if is_on_ground:
 		return
 

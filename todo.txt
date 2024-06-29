@@ -1,4 +1,5 @@
 - FPS controller
+  - Bonk assist
 - Interactive music
 - Skinnable UI
 - Mouse capture
