@@ -1,3 +1,4 @@
+- Better crouch/uncrouch sound
 - FPS controller
   - Bonk assist
 - Interactive music

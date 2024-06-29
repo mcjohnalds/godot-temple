@@ -288,9 +288,6 @@ var _default_height : float
 ## Above head collision checker, used for crouching and jumping.
 @onready var head_check: RayCast3D = get_node(NodePath("Head Check"))
 
-## Crouch Ability, change size collider and velocity.
-@onready var crouch_ability: CrouchAbility3D = get_node(NodePath("Crouch Ability 3D"))
-
 ## Ability that adds extra speed when actived.
 @onready var sprint_ability: SprintAbility3D = get_node(NodePath("Sprint Ability 3D"))
 
@@ -357,6 +354,10 @@ func _input(event: InputEvent) -> void:
 	# Mouse look (only if the mouse is captured).
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		rotate_head(event.relative)
+	elif event.is_action_pressed("move_crouch"):
+		_on_crouched()
+	elif event.is_action_released("move_crouch"):
+		_on_uncrouched()
 
 
 func _on_controller_emerged():
@@ -380,7 +381,7 @@ func rotate_head(mouse_axis : Vector2) -> void:
 ## based on whether swim or fly mode is active.
 ## Afterwards, the [b]move()[/b] of the base class [CharacterMovement3D] is called
 ## It is then called functions responsible for head bob if necessary.
-func move(_delta: float, input_axis := Vector2.ZERO, input_jump := false, input_crouch := false, input_sprint := false, input_swim_down := false, input_swim_up := false):
+func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_crouch := false, input_sprint := false, input_swim_down := false, input_swim_up := false):
 	if is_fly_mode() or is_floating():
 		_direction_base_node = head
 	else:
@@ -390,37 +391,42 @@ func move(_delta: float, input_axis := Vector2.ZERO, input_jump := false, input_
 	if not swim_ability.is_floating():
 		_check_landed()
 	if not jump_ability.is_actived() and not is_fly_mode() and not is_submerged() and not is_floating():
-		velocity.y -= gravity * _delta
+		velocity.y -= gravity * delta
 
 	swim_ability.set_active(!fly_ability.is_actived())
 	jump_ability.set_active(input_jump and is_on_floor() and not head_check.is_colliding())
 	var is_walking := not is_fly_mode() and not swim_ability.is_floating()
-	crouch_ability.set_active(input_crouch and is_on_floor() and not is_floating() and not is_submerged() and not is_fly_mode())
-	sprint_ability.set_active(input_sprint and is_on_floor() and  input_axis.y >= 0.5 and !is_crouching() and not is_fly_mode() and not swim_ability.is_floating() and not swim_ability.is_submerged())
+	var is_crouching := input_crouch and is_on_floor() and not is_floating() and not is_submerged() and not is_fly_mode()
+	sprint_ability.set_active(input_sprint and is_on_floor() and  input_axis.y >= 0.5 and !is_crouching and not is_fly_mode() and not swim_ability.is_floating() and not swim_ability.is_submerged())
 
 	var multiplier = 1.0
 	for ability in _abilities:
 		multiplier *= ability.get_speed_modifier()
+	if is_crouching:
+		multiplier *= crouch_speed_multiplier
 	speed = _normal_speed * multiplier
 
 	for ability in _abilities:
-		velocity = ability.apply(velocity, speed, is_on_floor(), direction, _delta)
-	if is_walking:
-		_physics_process_walk(direction, _delta)
+		velocity = ability.apply(velocity, speed, is_on_floor(), direction, delta)
+	_physics_process_walk(is_walking, direction, delta)
+	_physics_process_crouch(is_crouching, delta)
 
 	move_and_slide()
 	_horizontal_velocity = Vector3(velocity.x, 0.0, velocity.z)
 
 	if not is_fly_mode() and not swim_ability.is_floating() and not swim_ability.is_submerged():
-		_check_step(_delta)
+		_check_step(delta)
 #	TODO Make in exemple this
 #	if not is_fly_mode() and not swim_ability.is_floating() and not swim_ability.is_submerged()
-#		camera.set_fov(lerp(camera.fov, normal_fov, _delta * fov_change_speed))
+#		camera.set_fov(lerp(camera.fov, normal_fov, delta * fov_change_speed))
 
-	head_bob.head_bob_process(_horizontal_velocity, input_axis, is_sprinting(), is_on_floor(), _delta)
+	head_bob.head_bob_process(_horizontal_velocity, input_axis, is_sprinting(), is_on_floor(), delta)
 
 
-func _physics_process_walk(direction: Vector3, delta: float):
+func _physics_process_walk(is_walking: bool, direction: Vector3, delta: float):
+	if not is_walking:
+		return
+
 	# Using only the horizontal velocity, interpolate towards the input.
 	var temp_vel := velocity
 	temp_vel.y = 0
@@ -442,17 +448,21 @@ func _physics_process_walk(direction: Vector3, delta: float):
 	velocity.z = temp_vel.z
 
 
+func _physics_process_crouch(is_crouching: bool, delta: float) -> void:
+	if is_crouching:
+		collision.shape.height -= delta * 8
+	elif not head_check.is_colliding():
+		collision.shape.height += delta * 8
+	collision.shape.height = clamp(collision.shape.height , height_in_crouch, _default_height)
+	var crouch_factor = (_default_height - height_in_crouch) - (collision.shape.height - height_in_crouch)/ (_default_height - height_in_crouch)
+
+
 func _on_jumped():
 	emit_signal("jumped")
 	jump_stream.stream = audio_interact.jump_audio
 	jump_stream.play()
 	head_bob.do_bob_jump()
 	head_bob.reset_cycles()
-
-
-## Returns true if the character controller is crouched
-func is_crouching() -> bool:
-	return crouch_ability.is_actived()
 
 
 ## Returns true if the character controller is sprinting
@@ -500,8 +510,6 @@ func _load_nodes(nodePaths: Array) -> Array[MovementAbility3D]:
 
 
 func _connect_signals():
-	crouch_ability.actived.connect(_on_crouched.bind())
-	crouch_ability.deactived.connect(_on_uncrouched.bind())
 	sprint_ability.actived.connect(_on_sprinted.bind())
 	jump_ability.actived.connect(_on_jumped.bind())
 	fly_ability.actived.connect(_on_fly_mode_actived.bind())
@@ -516,11 +524,6 @@ func _connect_signals():
 
 func _start_variables():
 	sprint_ability.speed_multiplier = sprint_speed_multiplier
-	crouch_ability.speed_multiplier = crouch_speed_multiplier
-	crouch_ability.default_height = _default_height
-	crouch_ability.height_in_crouch = height_in_crouch
-	crouch_ability.collision = collision
-	crouch_ability.head_check = head_check
 	jump_ability.height = jump_height
 	fly_ability.speed_modifier = fly_mode_speed_modifier
 	swim_ability.submerged_height = submerged_height
