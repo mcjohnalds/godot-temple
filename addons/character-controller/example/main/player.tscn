@@ -15,6 +15,19 @@ input_sprint_action_name = "move_sprint"
 input_jump_action_name = "move_jump"
 input_crouch_action_name = "move_crouch"
 input_fly_mode_action_name = "move_fly_mode"
+fov_change_speed = 4
+sprint_fov_multiplier = 1.1
+crouch_fov_multiplier = 0.95
+swim_fov_multiplier = 1.0
+mouse_sensitivity = 2.0
+vertical_angle_limit = 90.0
+step_bob_enabled = true
+vertical_horizontal_ratio = 2
+jump_bob_enabled = true
+rotation_to_move = true
+speed_rotation = 4.0
+angle_limit_for_rotation = 0.1
 underwater_env = ExtResource("3_dxksd")
+abilities_path = Array[NodePath]([NodePath("Sprint Ability 3D"), NodePath("Crouch Ability 3D"), NodePath("Walk Ability 3D"), NodePath("Jump Ability 3D"), NodePath("Fly Ability 3D"), NodePath("Swim Ability 3D")])
 
 [node name="Player Audios" parent="." index="9" instance=ExtResource("4_ux8kv")]
