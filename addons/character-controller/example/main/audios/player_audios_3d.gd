@@ -12,7 +12,7 @@ class_name PlayerAudios3D
 @onready var uncrouch_stream: AudioStreamPlayer3D = get_node(NodePath("Uncrouch"))
 @onready var raycast: RayCast3D = get_node(NodePath("Detect Ground"))
 @onready var character_body: CharacterBody3D = get_node(NodePath(".."))
-@onready var character_controller: CharacterController3D = get_node(NodePath(".."))
+@onready var character_controller: Player = get_node(NodePath(".."))
 
 ## Default audio interact used
 @export var audio_interact : Resource
