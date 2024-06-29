@@ -1,7 +1,6 @@
-[gd_scene load_steps=21 format=3 uid="uid://2oxdgu03lnbk"]
+[gd_scene load_steps=20 format=3 uid="uid://2oxdgu03lnbk"]
 
 [ext_resource type="Script" path="res://addons/character-controller/example/main/player.gd" id="2_8r0nc"]
-[ext_resource type="Script" path="res://addons/character-controller/abilities/walk_ability_3d.gd" id="3_7x176"]
 [ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://addons/character-controller/example/main/underwater.tres" id="3_dxksd"]
 [ext_resource type="Script" path="res://addons/character-controller/abilities/sprint_ability_3d.gd" id="4_bps5d"]
 [ext_resource type="Script" path="res://addons/character-controller/abilities/crouch_ability_3d.gd" id="5_831yf"]
@@ -30,16 +29,13 @@ physic_materials = Array[PhysicsMaterial]([ExtResource("14_si4e4"), ExtResource(
 audio_interacts = Array[Resource]([ExtResource("13_3a686"), ExtResource("17_waqq3"), ExtResource("18_tv50m")])
 water_audio_interact = ExtResource("19_5825u")
 underwater_env = ExtResource("3_dxksd")
-abilities_path = Array[NodePath]([NodePath("Sprint Ability 3D"), NodePath("Crouch Ability 3D"), NodePath("Walk Ability 3D"), NodePath("Jump Ability 3D"), NodePath("Fly Ability 3D"), NodePath("Swim Ability 3D")])
+abilities_path = Array[NodePath]([NodePath("Sprint Ability 3D"), NodePath("Crouch Ability 3D"), NodePath("Jump Ability 3D"), NodePath("Fly Ability 3D"), NodePath("Swim Ability 3D")])
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_fn1rj")
 
 [node name="Head Check" type="RayCast3D" parent="."]
 target_position = Vector3(0, 1, 0)
-
-[node name="Walk Ability 3D" type="Node3D" parent="."]
-script = ExtResource("3_7x176")
 
 [node name="Sprint Ability 3D" type="Node3D" parent="."]
 script = ExtResource("4_bps5d")
