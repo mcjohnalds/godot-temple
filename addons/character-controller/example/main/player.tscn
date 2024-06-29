@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://2oxdgu03lnbk"]
+[gd_scene load_steps=21 format=3 uid="uid://2oxdgu03lnbk"]
 
 [ext_resource type="Script" path="res://addons/character-controller/example/main/player.gd" id="2_8r0nc"]
 [ext_resource type="Script" path="res://addons/character-controller/abilities/walk_ability_3d.gd" id="3_7x176"]
@@ -11,7 +11,6 @@
 [ext_resource type="Script" path="res://addons/character-controller/fps/head_movement_3d.gd" id="9_8sr0j"]
 [ext_resource type="Script" path="res://addons/character-controller/fps/bob/head_bob.gd" id="10_2nnp1"]
 [ext_resource type="Curve" path="res://addons/character-controller/fps/bob/bob_curve.tres" id="11_o5imr"]
-[ext_resource type="Script" path="res://addons/character-controller/example/main/audios/player_audios_3d.gd" id="12_wdm0t"]
 [ext_resource type="Resource" uid="uid://boafje76qrf27" path="res://addons/character-controller/example/main/audio_interacts/grass_audio_interact.tres" id="13_3a686"]
 [ext_resource type="PhysicsMaterial" path="res://addons/character-controller/example/main/physics/grass.tres" id="14_si4e4"]
 [ext_resource type="PhysicsMaterial" uid="uid://bklf2cx3fydt3" path="res://addons/character-controller/example/main/physics/stone.tres" id="15_ogelp"]
@@ -26,6 +25,10 @@
 [node name="Player" type="CharacterBody3D"]
 floor_snap_length = 0.5
 script = ExtResource("2_8r0nc")
+audio_interact = ExtResource("13_3a686")
+physic_materials = Array[PhysicsMaterial]([ExtResource("14_si4e4"), ExtResource("15_ogelp"), ExtResource("16_wga6f")])
+audio_interacts = Array[Resource]([ExtResource("13_3a686"), ExtResource("17_waqq3"), ExtResource("18_tv50m")])
+water_audio_interact = ExtResource("19_5825u")
 underwater_env = ExtResource("3_dxksd")
 abilities_path = Array[NodePath]([NodePath("Sprint Ability 3D"), NodePath("Crouch Ability 3D"), NodePath("Walk Ability 3D"), NodePath("Jump Ability 3D"), NodePath("Fly Ability 3D"), NodePath("Swim Ability 3D")])
 
@@ -78,11 +81,6 @@ bob_curve = ExtResource("11_o5imr")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
 
 [node name="Player Audios" type="Node3D" parent="."]
-script = ExtResource("12_wdm0t")
-audio_interact = ExtResource("13_3a686")
-physic_materials = Array[PhysicsMaterial]([ExtResource("14_si4e4"), ExtResource("15_ogelp"), ExtResource("16_wga6f")])
-audio_interacts = Array[Resource]([ExtResource("13_3a686"), ExtResource("17_waqq3"), ExtResource("18_tv50m")])
-water_audio_interact = ExtResource("19_5825u")
 
 [node name="Jump" type="AudioStreamPlayer3D" parent="Player Audios"]
 stream = ExtResource("20_qovk2")

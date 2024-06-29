@@ -84,6 +84,20 @@ signal stopped_floating
 @export var input_crouch_action_name := "move_crouch"
 @export var input_fly_mode_action_name := "move_fly_mode"
 
+@export_group("Audio")
+
+## Default audio interact used
+@export var audio_interact : Resource
+
+## List of [PhysicsMaterial] synchronized with the [AudioInteract] list
+@export var physic_materials : Array[PhysicsMaterial]
+
+## List of [AudioInteract] synchronized with the [PhysicsMaterial] list
+@export var audio_interacts : Array[Resource]
+
+## Specific case of audio interact that occurs when we are in the water
+@export var water_audio_interact : Resource
+
 @export_group("FOV")
 
 ## Speed at which the FOV changes
@@ -295,7 +309,12 @@ var _default_height : float
 ## Stores normal speed
 @onready var _normal_speed : float = speed
 
-
+@onready var step_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Step"))
+@onready var land_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Land"))
+@onready var jump_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Jump"))
+@onready var crouch_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Crouch"))
+@onready var uncrouch_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Uncrouch"))
+@onready var raycast: RayCast3D = get_node(NodePath("Player Audios/Detect Ground"))
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -408,6 +427,8 @@ func _check_head_bob(_delta, input_axis : Vector2):
 
 func _on_jumped():
 	emit_signal("jumped")
+	jump_stream.stream = audio_interact.jump_audio
+	jump_stream.play()
 	head_bob.do_bob_jump()
 	head_bob.reset_cycles()
 
@@ -532,6 +553,10 @@ func _step(is_on_floor:bool) -> bool:
 	_reset_step()
 	if(is_on_floor):
 		emit_signal("stepped")
+		var collision = raycast.get_collider()
+		_get_audio_interact_of_object(collision)
+		step_stream.stream = audio_interact.random_step()
+		step_stream.play()
 		return true
 	return false
 
@@ -556,10 +581,12 @@ func _on_fly_mode_deactived():
 
 func _on_crouched():
 	emit_signal("crouched")
+	crouch_stream.play()
 
 
 func _on_uncrouched():
 	emit_signal("uncrouched")
+	uncrouch_stream.play()
 
 
 func _on_sprinted():
@@ -567,6 +594,9 @@ func _on_sprinted():
 
 
 func _on_landed():
+	_get_audio_interact()
+	land_stream.stream = audio_interact.landed_audio
+	land_stream.play()
 	emit_signal("landed")
 
 
@@ -580,10 +610,15 @@ func _on_swim_ability_submerged():
 
 func _on_swim_ability_entered_the_water():
 	emit_signal("entered_the_water")
+	audio_interact = water_audio_interact
+	land_stream.stream = audio_interact.landed_audio
+	land_stream.play()
 
 
 func _on_swim_ability_exit_the_water():
 	emit_signal("exit_the_water")
+	jump_stream.stream = audio_interact.jump_audio
+	jump_stream.play()
 
 
 func _on_swim_ability_started_floating():
@@ -592,3 +627,24 @@ func _on_swim_ability_started_floating():
 
 func _on_swim_ability_stopped_floating():
 	emit_signal("stopped_floating")
+
+
+func _get_audio_interact():
+	var k_col = get_last_slide_collision()
+	var collision = k_col.get_collider(0)
+	_get_audio_interact_of_object(collision)
+
+
+func _get_audio_interact_of_object(collision):
+	if is_on_water():
+		audio_interact = water_audio_interact
+		return
+	if !collision:
+		return
+	if not "physics_material_override" in collision:
+		return
+	var mat = collision.physics_material_override
+	if mat:
+		var i = physic_materials.rfind(mat)
+		if i != -1:
+			audio_interact = audio_interacts[i]
