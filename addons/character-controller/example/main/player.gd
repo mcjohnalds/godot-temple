@@ -406,7 +406,7 @@ func move(_delta: float, input_axis := Vector2.ZERO, input_jump := false, input_
 	for ability in _abilities:
 		velocity = ability.apply(velocity, speed, is_on_floor(), direction, _delta)
 	if is_walking:
-		velocity = _apply_walk_velocity(velocity, speed, is_on_floor(), direction, _delta)
+		_physics_process_walk(direction, _delta)
 
 	move_and_slide()
 	_horizontal_velocity = Vector3(velocity.x, 0.0, velocity.z)
@@ -420,9 +420,9 @@ func move(_delta: float, input_axis := Vector2.ZERO, input_jump := false, input_
 	head_bob.head_bob_process(_horizontal_velocity, input_axis, is_sprinting(), is_on_floor(), _delta)
 
 
-func _apply_walk_velocity(vel: Vector3, speed : float, is_on_floor : bool, direction : Vector3, delta: float):
+func _physics_process_walk(direction: Vector3, delta: float):
 	# Using only the horizontal velocity, interpolate towards the input.
-	var temp_vel := vel
+	var temp_vel := velocity
 	temp_vel.y = 0
 
 	var temp_accel: float
@@ -433,14 +433,13 @@ func _apply_walk_velocity(vel: Vector3, speed : float, is_on_floor : bool, direc
 	else:
 		temp_accel = deceleration
 
-	if not is_on_floor:
+	if not is_on_floor():
 		temp_accel *= air_control
 
 	temp_vel = temp_vel.lerp(target, temp_accel * delta)
 
-	vel.x = temp_vel.x
-	vel.z = temp_vel.z
-	return vel
+	velocity.x = temp_vel.x
+	velocity.z = temp_vel.z
 
 
 func _on_jumped():
