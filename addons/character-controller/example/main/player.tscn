@@ -1,13 +1,108 @@
-[gd_scene load_steps=5 format=3 uid="uid://2oxdgu03lnbk"]
+[gd_scene load_steps=22 format=3 uid="uid://2oxdgu03lnbk"]
 
-[ext_resource type="PackedScene" uid="uid://8oy3xm2sff8" path="res://addons/character-controller/fps/fps_controller_3d.tscn" id="1_fbpun"]
 [ext_resource type="Script" path="res://addons/character-controller/example/main/player.gd" id="2_8r0nc"]
+[ext_resource type="Script" path="res://addons/character-controller/abilities/walk_ability_3d.gd" id="3_7x176"]
 [ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://addons/character-controller/example/main/underwater.tres" id="3_dxksd"]
-[ext_resource type="PackedScene" path="res://addons/character-controller/example/main/audios/player_audios.tscn" id="4_ux8kv"]
+[ext_resource type="Script" path="res://addons/character-controller/abilities/sprint_ability_3d.gd" id="4_bps5d"]
+[ext_resource type="Script" path="res://addons/character-controller/abilities/crouch_ability_3d.gd" id="5_831yf"]
+[ext_resource type="Script" path="res://addons/character-controller/abilities/jump_ability_3d.gd" id="6_3n7x3"]
+[ext_resource type="Script" path="res://addons/character-controller/abilities/fly_ability_3d.gd" id="7_v5hc8"]
+[ext_resource type="Script" path="res://addons/character-controller/abilities/swim_ability_3d.gd" id="8_k6rem"]
+[ext_resource type="Script" path="res://addons/character-controller/fps/head_movement_3d.gd" id="9_8sr0j"]
+[ext_resource type="Script" path="res://addons/character-controller/fps/bob/head_bob.gd" id="10_2nnp1"]
+[ext_resource type="Curve" path="res://addons/character-controller/fps/bob/bob_curve.tres" id="11_o5imr"]
+[ext_resource type="Script" path="res://addons/character-controller/example/main/audios/player_audios_3d.gd" id="12_wdm0t"]
+[ext_resource type="Resource" uid="uid://boafje76qrf27" path="res://addons/character-controller/example/main/audio_interacts/grass_audio_interact.tres" id="13_3a686"]
+[ext_resource type="PhysicsMaterial" path="res://addons/character-controller/example/main/physics/grass.tres" id="14_si4e4"]
+[ext_resource type="PhysicsMaterial" uid="uid://bklf2cx3fydt3" path="res://addons/character-controller/example/main/physics/stone.tres" id="15_ogelp"]
+[ext_resource type="PhysicsMaterial" path="res://addons/character-controller/example/main/physics/wood.tres" id="16_wga6f"]
+[ext_resource type="Resource" uid="uid://ci8kg40ae4vnl" path="res://addons/character-controller/example/main/audio_interacts/stone_audio_interact.tres" id="17_waqq3"]
+[ext_resource type="Resource" uid="uid://dx5kojv0cn4yl" path="res://addons/character-controller/example/main/audio_interacts/wood_audio_interact.tres" id="18_tv50m"]
+[ext_resource type="Resource" uid="uid://clro80qf2tdqi" path="res://addons/character-controller/example/main/audio_interacts/water_audio_interact.tres" id="19_5825u"]
+[ext_resource type="AudioStream" uid="uid://dyj8811150sq5" path="res://addons/character-controller/example/main/jute-dh-steps/stepdirt_1.wav" id="20_qovk2"]
 
-[node name="Player" instance=ExtResource("1_fbpun")]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fn1rj"]
+
+[node name="Player" type="CharacterBody3D"]
+floor_snap_length = 0.5
 script = ExtResource("2_8r0nc")
 underwater_env = ExtResource("3_dxksd")
 abilities_path = Array[NodePath]([NodePath("Sprint Ability 3D"), NodePath("Crouch Ability 3D"), NodePath("Walk Ability 3D"), NodePath("Jump Ability 3D"), NodePath("Fly Ability 3D"), NodePath("Swim Ability 3D")])
 
-[node name="Player Audios" parent="." index="9" instance=ExtResource("4_ux8kv")]
+[node name="Collision" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_fn1rj")
+
+[node name="Head Check" type="RayCast3D" parent="."]
+target_position = Vector3(0, 1, 0)
+
+[node name="Walk Ability 3D" type="Node3D" parent="."]
+script = ExtResource("3_7x176")
+
+[node name="Sprint Ability 3D" type="Node3D" parent="."]
+script = ExtResource("4_bps5d")
+
+[node name="Crouch Ability 3D" type="Node3D" parent="."]
+script = ExtResource("5_831yf")
+
+[node name="Jump Ability 3D" type="Node3D" parent="."]
+script = ExtResource("6_3n7x3")
+
+[node name="Fly Ability 3D" type="Node3D" parent="."]
+script = ExtResource("7_v5hc8")
+
+[node name="Swim Ability 3D" type="Node3D" parent="."]
+script = ExtResource("8_k6rem")
+
+[node name="RayCast3D" type="RayCast3D" parent="Swim Ability 3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+target_position = Vector3(0, -2, 0)
+collision_mask = 8
+hit_from_inside = true
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="Head" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
+script = ExtResource("9_8sr0j")
+
+[node name="Head Bob" type="Node" parent="Head"]
+script = ExtResource("10_2nnp1")
+head_path = NodePath("../FirstPersonCameraReference")
+bob_curve = ExtResource("11_o5imr")
+
+[node name="FirstPersonCameraReference" type="Marker3D" parent="Head"]
+
+[node name="Camera3D" type="Camera3D" parent="Head/FirstPersonCameraReference"]
+
+[node name="ThirdPersonCameraReference" type="Marker3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+
+[node name="Player Audios" type="Node3D" parent="."]
+script = ExtResource("12_wdm0t")
+audio_interact = ExtResource("13_3a686")
+physic_materials = Array[PhysicsMaterial]([ExtResource("14_si4e4"), ExtResource("15_ogelp"), ExtResource("16_wga6f")])
+audio_interacts = Array[Resource]([ExtResource("13_3a686"), ExtResource("17_waqq3"), ExtResource("18_tv50m")])
+water_audio_interact = ExtResource("19_5825u")
+
+[node name="Jump" type="AudioStreamPlayer3D" parent="Player Audios"]
+stream = ExtResource("20_qovk2")
+attenuation_filter_db = -65.4
+
+[node name="Step" type="AudioStreamPlayer3D" parent="Player Audios"]
+stream = ExtResource("20_qovk2")
+attenuation_filter_db = -65.4
+
+[node name="Land" type="AudioStreamPlayer3D" parent="Player Audios"]
+stream = ExtResource("20_qovk2")
+attenuation_filter_db = -65.4
+
+[node name="Crouch" type="AudioStreamPlayer3D" parent="Player Audios"]
+stream = ExtResource("20_qovk2")
+attenuation_filter_db = -65.4
+
+[node name="Uncrouch" type="AudioStreamPlayer3D" parent="Player Audios"]
+stream = ExtResource("20_qovk2")
+attenuation_filter_db = -65.4
+
+[node name="Detect Ground" type="RayCast3D" parent="Player Audios"]
+target_position = Vector3(0, -1.5, 0)

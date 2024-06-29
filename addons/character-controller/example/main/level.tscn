@@ -1,17 +1,24 @@
-[gd_scene load_steps=32 format=3 uid="uid://c2t6smyr8xtty"]
+[gd_scene load_steps=34 format=3 uid="uid://c2t6smyr8xtty"]
 
 [ext_resource type="Script" path="res://addons/character-controller/example/main/level.gd" id="1_cikgd"]
 [ext_resource type="PackedScene" uid="uid://2oxdgu03lnbk" path="res://addons/character-controller/example/main/player.tscn" id="2_nvo2f"]
 [ext_resource type="Material" uid="uid://2ciy11rdndma" path="res://addons/character-controller/example/main/materials/grass.tres" id="3_7vb8p"]
 [ext_resource type="PackedScene" uid="uid://b3wdcta6c4k4t" path="res://addons/character-controller/example/main/geometry/floor.tscn" id="3_80rlo"]
-[ext_resource type="PackedScene" uid="uid://dh7wg5y8ky5d8" path="res://addons/character-controller/example/main/water_area_3d.tscn" id="3_ebamq"]
 [ext_resource type="PackedScene" uid="uid://cbfe8rkt51tf8" path="res://addons/character-controller/example/main/geometry/wall.tscn" id="4_36qp7"]
+[ext_resource type="Material" uid="uid://wh8m6jb8ktpj" path="res://addons/character-controller/example/main/materials/water.tres" id="6_pji1d"]
 [ext_resource type="Material" uid="uid://o0b4tbh6yup4" path="res://addons/character-controller/example/main/materials/rock.tres" id="7_ngjv3"]
 [ext_resource type="PhysicsMaterial" uid="uid://bklf2cx3fydt3" path="res://addons/character-controller/example/main/physics/stone.tres" id="7_pqwbx"]
 [ext_resource type="PhysicsMaterial" path="res://addons/character-controller/example/main/physics/wood.tres" id="8_04xdu"]
 [ext_resource type="Material" uid="uid://c72msuxs6n2a8" path="res://addons/character-controller/example/main/materials/leaves.tres" id="8_fcbu8"]
 [ext_resource type="Material" uid="uid://ckvcdcn2iue87" path="res://addons/character-controller/example/main/materials/wood.tres" id="11_cakef"]
 [ext_resource type="Texture2D" uid="uid://svijnbaaeuol" path="res://addons/character-controller/example/main/textures/Free DEMO Pixel Skies Background pack by Digital Moons/demo01_PixelSky.png" id="12_olhen"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mctgj"]
+size = Vector3(20, 5, 50)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pgr5n"]
+material = ExtResource("6_pji1d")
+size = Vector3(20, 5, 50)
 
 [sub_resource type="BoxMesh" id="BoxMesh_egctf"]
 size = Vector3(8, 4, 4)
@@ -119,10 +126,20 @@ material_override = ExtResource("3_7vb8p")
 [node name="Player" parent="." instance=ExtResource("2_nvo2f")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.62268e-06, 6, 13)
 
-[node name="Camera3D" type="Camera3D" parent="Player/Head/FirstPersonCameraReference" index="0"]
-
-[node name="Area3D" parent="." instance=ExtResource("3_ebamq")]
+[node name="Area3D" type="Area3D" parent="."]
 transform = Transform3D(0.491574, 0, 0, 0, 1, 0, 0, 0, 0.555284, 0, -3, 5.93584)
+collision_layer = 8
+collision_mask = 8
+monitoring = false
+reverb_bus_enabled = true
+reverb_bus_amount = 0.47
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_mctgj")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Area3D"]
+mesh = SubResource("BoxMesh_pgr5n")
+surface_material_override/0 = ExtResource("6_pji1d")
 
 [node name="ArenaGeometry" type="Node3D" parent="."]
 
@@ -465,5 +482,3 @@ environment = SubResource("Environment_7ofk6")
 transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866026, -0.5, 0.75, -0.433013, 0, 5, 0)
 shadow_enabled = true
 directional_shadow_max_distance = 250.0
-
-[editable path="Player"]
