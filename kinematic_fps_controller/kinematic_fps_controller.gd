@@ -227,7 +227,6 @@ func _physics_process(delta: float) -> void:
 
 	if is_landed_on_floor_this_frame:
 		_play_land_audio(is_on_water, is_landed_on_floor_this_frame)
-		_reset_step()
 
 	if is_on_water and !_last_is_on_water:
 		_play_land_audio(is_on_water, is_landed_on_floor_this_frame)
@@ -294,10 +293,15 @@ func _physics_process(delta: float) -> void:
 
 	var horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
 
-	if not _is_flying and not is_floating and not is_submerged and _is_next_step(horizontal_velocity, delta):
-		_reset_step()
-		if is_on_floor():
-			_play_step_audio(is_on_water, is_landed_on_floor_this_frame)
+	var is_shuffling_feet := absf(horizontal_velocity.length()) < 0.1
+	if not _is_flying and not is_floating and not is_submerged and not is_shuffling_feet:
+		_step_cycle += (horizontal_velocity.length() + step_lengthen) * delta
+
+	var is_step_cycle_complete := _step_cycle > _next_step
+
+	if is_landed_on_floor_this_frame or is_step_cycle_complete:
+		_next_step = _step_cycle + step_interval
+		_play_step_audio(is_on_water, is_landed_on_floor_this_frame)
 
 	var max_locomotion_speed := (
 		base_speed * maxf(sprint_speed_multiplier, fly_mode_speed_modifier)
@@ -445,10 +449,6 @@ func _do_head_bobbing(
 	_camera.position = new_position
 
 
-func _reset_step():
-	_next_step = _step_cycle + step_interval
-
-
 func _get_input_direction(
 	input_horizontal: Vector2, input_vertical: float, is_floating: bool
 ) -> Vector3:
@@ -466,16 +466,6 @@ func _get_input_direction(
 	if allow_vertical:
 		input_direction.y += input_vertical
 	return input_direction.normalized()
-
-
-func _is_next_step(horizontal_velocity: Vector3, delta:float) -> bool:
-	var l := horizontal_velocity.length()
-	if abs(l) < 0.1:
-		return false
-	_step_cycle = _step_cycle + (l + step_lengthen) * delta
-	if(_step_cycle <= _next_step):
-		return false
-	return true
 
 
 func _get_material_audio_for_object(object: Object) -> MaterialAudio:
