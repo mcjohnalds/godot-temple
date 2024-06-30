@@ -59,7 +59,7 @@ material_audios = Array[ExtResource("10_3id2w")]([SubResource("Resource_ju83a"),
 water_material_audio = SubResource("Resource_kvpuo")
 head_bob_curve = ExtResource("10_jwnxu")
 
-[node name="Collision" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_fn1rj")
 
 [node name="Head" type="Marker3D" parent="."]

@@ -155,51 +155,46 @@ var _head_bob_cycle_position := Vector2.ZERO
 var _aim_rotation := Vector3()
 
 ## [HeadMovement3D] reference, where the rotation of the camera sight is calculated
-@onready var head: Node3D = $Head
+@onready var _head: Node3D = $Head
 
 ## First Person Camera3D reference
-@onready var first_person_camera_reference: Node3D = (
+@onready var _first_person_camera_reference: Node3D = (
 	$Head/FirstPersonCameraReference
 )
 
-## Third Person Camera3D reference
-@onready var third_person_camera_reference: Node3D = (
-	$Head/ThirdPersonCameraReference
-)
+## _collision of character controller.
+@onready var _collision: CollisionShape3D = $CollisionShape3D
 
-## Collision of character controller.
-@onready var collision: CollisionShape3D = $Collision
-
-## Above head collision checker, used for crouching and jumping.
+## Above head _collision checker, used for crouching and jumping.
 @onready var _head_ray_cast: RayCast3D = $HeadRayCast
 
 ## Stores normal speed
 @onready var _normal_speed := speed
 
-@onready var step_audio_stream_player: AudioStreamPlayer3D = (
+@onready var _step_audio_stream_player: AudioStreamPlayer3D = (
 	$StepAudioStreamPlayer
 )
-@onready var land_audio_stream_player: AudioStreamPlayer3D = (
+@onready var _land_audio_stream_player: AudioStreamPlayer3D = (
 	$LandAudioStreamPlayer
 )
-@onready var jump_audio_stream_player: AudioStreamPlayer3D = (
+@onready var _jump_audio_stream_player: AudioStreamPlayer3D = (
 	$JumpAudioStreamPlayer
 )
-@onready var crouch_audio_stream_player: AudioStreamPlayer3D = (
+@onready var _crouch_audio_stream_player: AudioStreamPlayer3D = (
 	$CrouchAudioStreamPlayer
 )
-@onready var uncrouch_audio_stream_player: AudioStreamPlayer3D = (
+@onready var _uncrouch_audio_stream_player: AudioStreamPlayer3D = (
 	$UncrouchAudioStreamPlayer
 )
-@onready var ground_ray_cast: RayCast3D = $GroundRayCast
-@onready var swim_ray_cast: RayCast3D = $SwimRayCast
+@onready var _ground_ray_cast: RayCast3D = $GroundRayCast
+@onready var _swim_ray_cast: RayCast3D = $SwimRayCast
 
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	_initial_capsule_height = collision.shape.height
-	_initial_head_position = first_person_camera_reference.position
-	_initial_head_rotation = first_person_camera_reference.quaternion
+	_initial_capsule_height = _collision.shape.height
+	_initial_head_position = _first_person_camera_reference.position
+	_initial_head_rotation = _first_person_camera_reference.quaternion
 	_aim_rotation.y = rotation.y
 
 
@@ -220,12 +215,12 @@ func _physics_process(delta):
 		input_crouch = Input.is_action_pressed("move_crouch")
 		input_sprint = Input.is_action_pressed("move_sprint")
 
-	var is_on_water := swim_ray_cast.is_colliding()
+	var is_on_water := _swim_ray_cast.is_colliding()
 
 	var depth_on_water := 2.1
 	if is_on_water:
-		var point := swim_ray_cast.get_collision_point()
-		depth_on_water = -swim_ray_cast.to_local(point).y
+		var point := _swim_ray_cast.get_collision_point()
+		depth_on_water = -_swim_ray_cast.to_local(point).y
 
 	var is_jumping := (
 		input_jump and is_on_floor() and not _head_ray_cast.is_colliding()
@@ -253,18 +248,18 @@ func _physics_process(delta):
 	)
 
 	if is_landed_on_floor_this_frame:
-		land_audio_stream_player.stream = _get_current_material_audio(
+		_land_audio_stream_player.stream = _get_current_material_audio(
 			is_on_water, is_landed_on_floor_this_frame
 		).landed_audio_stream
-		land_audio_stream_player.play()
+		_land_audio_stream_player.play()
 		_reset_step()
 
 	if is_on_water and !_last_is_on_water:
-		land_audio_stream_player.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).landed_audio_stream
-		land_audio_stream_player.play()
+		_land_audio_stream_player.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).landed_audio_stream
+		_land_audio_stream_player.play()
 	elif !is_on_water and _last_is_on_water:
-		jump_audio_stream_player.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).jump_audio_stream
-		jump_audio_stream_player.play()
+		_jump_audio_stream_player.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).jump_audio_stream
+		_jump_audio_stream_player.play()
 
 	if is_floating and !_last_is_floating:
 		# TODO: play started floating sound
@@ -279,8 +274,8 @@ func _physics_process(delta):
 		get_viewport().get_camera_3d().environment = null
 
 	if is_jumping:
-		jump_audio_stream_player.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).jump_audio_stream
-		jump_audio_stream_player.play()
+		_jump_audio_stream_player.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).jump_audio_stream
+		_jump_audio_stream_player.play()
 		_head_bob_cycle_position = Vector2.ZERO
 
 	var is_walking := not _is_flying and not is_floating
@@ -328,20 +323,23 @@ func _physics_process(delta):
 
 	var horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
 
-	if not _is_flying and not is_floating and not is_submerged:
-		if _is_step(horizontal_velocity.length(), delta):
-			_reset_step()
-			if(is_on_floor()):
-				step_audio_stream_player.stream = (
-					_get_current_material_audio(is_on_water, is_landed_on_floor_this_frame)
-						.step_audio_streams.pick_random()
-				)
-				step_audio_stream_player.play()
+	if not _is_flying and not is_floating and not is_submerged and _is_next_step(horizontal_velocity, delta):
+		_reset_step()
+		if is_on_floor():
+			var material_audio := _get_current_material_audio(
+				is_on_water, is_landed_on_floor_this_frame
+			)
+			_step_audio_stream_player.stream = (
+				material_audio .step_audio_streams.pick_random()
+			)
+			_step_audio_stream_player.play()
 #	TODO Make in exemple this
 #	if not _is_flying and not is_floating and not is_submerged
 #		camera.set_fov(lerp(camera.fov, normal_fov, delta * fov_change_speed))
 
-	_do_head_bobbing(horizontal_velocity, input_horizontal, is_sprinting, delta)
+	_do_head_bobbing(
+		horizontal_velocity, input_horizontal, is_sprinting, delta
+	)
 
 	_last_is_on_water = is_on_water
 	_last_is_floating = is_floating
@@ -360,11 +358,11 @@ func _input(event: InputEvent) -> void:
 		_aim_rotation.x = clamp(_aim_rotation.x - mouse_axis.y * (mouse_sensitivity/1000), -vertical_angle_limit, vertical_angle_limit)
 		
 		rotation.y = _aim_rotation.y
-		head.rotation.x = _aim_rotation.x
+		_head.rotation.x = _aim_rotation.x
 	elif event.is_action_pressed("move_crouch"):
-		crouch_audio_stream_player.play()
+		_crouch_audio_stream_player.play()
 	elif event.is_action_released("move_crouch"):
-		uncrouch_audio_stream_player.play()
+		_uncrouch_audio_stream_player.play()
 
 
 func _do_walking(is_walking: bool, input_direction: Vector3, delta: float):
@@ -394,11 +392,11 @@ func _do_walking(is_walking: bool, input_direction: Vector3, delta: float):
 
 func _do_crouching(is_crouching: bool, delta: float) -> void:
 	if is_crouching:
-		collision.shape.height -= delta * 8
+		_collision.shape.height -= delta * 8
 	elif not _head_ray_cast.is_colliding():
-		collision.shape.height += delta * 8
-	collision.shape.height = clamp(collision.shape.height , height_in_crouch, _initial_capsule_height)
-	# var crouch_factor = (_initial_capsule_height - height_in_crouch) - (collision.shape.height - height_in_crouch)/ (_initial_capsule_height - height_in_crouch)
+		_collision.shape.height += delta * 8
+	_collision.shape.height = clamp(_collision.shape.height , height_in_crouch, _initial_capsule_height)
+	# var crouch_factor = (_initial_capsule_height - height_in_crouch) - (_collision.shape.height - height_in_crouch)/ (_initial_capsule_height - height_in_crouch)
 
 
 func _do_swimming(input_direction: Vector3, is_floating: bool, depth_on_water: float) -> void:
@@ -456,10 +454,10 @@ func _do_head_bobbing(
 	if rotation_to_move:
 		var target_rotation : Quaternion
 		# target_rotation.from_euler(Vector3(input_horizontal.y * angle_limit_for_rotation, 0.0, -input_horizontal.x * angle_limit_for_rotation))
-		new_rotation += lerp(first_person_camera_reference.quaternion, target_rotation, speed_rotation * delta)
+		new_rotation += lerp(_first_person_camera_reference.quaternion, target_rotation, speed_rotation * delta)
 
-	first_person_camera_reference.position = new_position
-	first_person_camera_reference.quaternion = new_rotation
+	_first_person_camera_reference.position = new_position
+	_first_person_camera_reference.quaternion = new_rotation
 
 
 ## Returns the speed of character controller
@@ -475,7 +473,7 @@ func _get_input_direction(
 	input_horizontal: Vector2, input_vertical: float, is_floating: bool
 ) -> Vector3:
 	var allow_vertical := _is_flying or is_floating
-	var aim := head if allow_vertical else self
+	var aim := _head if allow_vertical else self
 	var input_direction := Vector3.ZERO
 	if input_horizontal.y >= 0.5:
 		input_direction -= aim.global_basis.z
@@ -490,10 +488,11 @@ func _get_input_direction(
 	return input_direction.normalized()
 
 
-func _is_step(velocity:float, delta:float) -> bool:
-	if(abs(velocity) < 0.1):
+func _is_next_step(horizontal_velocity: Vector3, delta:float) -> bool:
+	var l := horizontal_velocity.length()
+	if abs(l) < 0.1:
 		return false
-	_step_cycle = _step_cycle + ((velocity + step_lengthen) * delta)
+	_step_cycle = _step_cycle + (l + step_lengthen) * delta
 	if(_step_cycle <= _next_step):
 		return false
 	return true
@@ -524,6 +523,6 @@ func _get_current_material_audio(
 	if is_landed_on_floor_this_frame:
 		var k_col = get_last_slide_collision()
 		return _get_material_audio_for_object(k_col.get_collider(0))
-	if ground_ray_cast.get_collider():
-		return _get_material_audio_for_object(ground_ray_cast.get_collider())
+	if _ground_ray_cast.get_collider():
+		return _get_material_audio_for_object(_ground_ray_cast.get_collider())
 	return material_audios[0]
