@@ -12,3 +12,7 @@ static func is_compatibility_renderer() -> bool:
 static func get_inertia(body: RigidBody3D) -> Vector3:
 	var state := PhysicsServer3D.body_get_direct_state(body.get_rid())
 	return state.inverse_inertia.inverse()
+
+
+static func get_default_gravity() -> float:
+	return ProjectSettings.get_setting("physics/3d/default_gravity")

@@ -62,9 +62,6 @@ head_bob_curve = ExtResource("10_jwnxu")
 [node name="Collision" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_fn1rj")
 
-[node name="Head Check" type="RayCast3D" parent="."]
-target_position = Vector3(0, 1, 0)
-
 [node name="Head" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
 
@@ -75,27 +72,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
 [node name="ThirdPersonCameraReference" type="Marker3D" parent="Head"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
 
-[node name="Player Audios" type="Node3D" parent="."]
+[node name="HeadRayCast" type="RayCast3D" parent="."]
+target_position = Vector3(0, 1, 0)
 
-[node name="Jump" type="AudioStreamPlayer3D" parent="Player Audios"]
-stream = ExtResource("20_qovk2")
-attenuation_filter_db = -65.4
-
-[node name="Step" type="AudioStreamPlayer3D" parent="Player Audios"]
-stream = ExtResource("20_qovk2")
-attenuation_filter_db = -65.4
-
-[node name="Land" type="AudioStreamPlayer3D" parent="Player Audios"]
-stream = ExtResource("20_qovk2")
-attenuation_filter_db = -65.4
-
-[node name="Crouch" type="AudioStreamPlayer3D" parent="Player Audios"]
-stream = ExtResource("20_qovk2")
-attenuation_filter_db = -65.4
-
-[node name="Uncrouch" type="AudioStreamPlayer3D" parent="Player Audios"]
-stream = ExtResource("20_qovk2")
-attenuation_filter_db = -65.4
+[node name="GroundRayCast" type="RayCast3D" parent="."]
+target_position = Vector3(0, -1.5, 0)
 
 [node name="SwimRayCast" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -105,5 +86,22 @@ hit_from_inside = true
 collide_with_areas = true
 collide_with_bodies = false
 
-[node name="Detect Ground" type="RayCast3D" parent="."]
-target_position = Vector3(0, -1.5, 0)
+[node name="JumpAudioStreamPlayer" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("20_qovk2")
+attenuation_filter_db = -65.4
+
+[node name="StepAudioStreamPlayer" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("20_qovk2")
+attenuation_filter_db = -65.4
+
+[node name="LandAudioStreamPlayer" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("20_qovk2")
+attenuation_filter_db = -65.4
+
+[node name="CrouchAudioStreamPlayer" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("20_qovk2")
+attenuation_filter_db = -65.4
+
+[node name="UncrouchAudioStreamPlayer" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("20_qovk2")
+attenuation_filter_db = -65.4
