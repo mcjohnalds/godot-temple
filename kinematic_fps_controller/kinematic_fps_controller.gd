@@ -154,9 +154,7 @@ var _initial_head_rotation: Quaternion
 var _head_bob_cycle_position := Vector2.ZERO
 
 @onready var _head: Node3D = $Head
-@onready var _first_person_camera_reference: Node3D = (
-	$Head/FirstPersonCameraReference
-)
+@onready var _camera: Camera3D =  $Head/Camera3D
 @onready var _collision: CollisionShape3D = $CollisionShape3D
 @onready var _head_ray_cast: RayCast3D = $HeadRayCast
 @onready var _step_audio_stream_player: AudioStreamPlayer3D = (
@@ -180,8 +178,8 @@ var _head_bob_cycle_position := Vector2.ZERO
 
 func _ready():
 	_initial_capsule_height = _collision.shape.height
-	_initial_head_position = _first_person_camera_reference.position
-	_initial_head_rotation = _first_person_camera_reference.quaternion
+	_initial_head_position = _head.position
+	_initial_head_rotation = _head.quaternion
 
 
 func _physics_process(delta):
@@ -255,14 +253,9 @@ func _physics_process(delta):
 		pass
 
 	if is_submerged and not _last_is_submerged:
-		get_viewport().get_camera_3d().environment = underwater_env
+		_camera.environment = underwater_env
 	if not is_submerged and _last_is_submerged:
-		get_viewport().get_camera_3d().environment = null
-
-	if is_jumping:
-		_jump_audio_stream_player.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).jump_audio_stream
-		_jump_audio_stream_player.play()
-		_head_bob_cycle_position = Vector2.ZERO
+		_camera.environment = null
 
 	var is_walking := not _is_flying and not is_floating
 
@@ -306,6 +299,9 @@ func _physics_process(delta):
 	_do_flying(input_direction, speed)
 	if is_jumping:
 		velocity.y = jump_height
+		_jump_audio_stream_player.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).jump_audio_stream
+		_jump_audio_stream_player.play()
+		_head_bob_cycle_position = Vector2.ZERO
 
 	var horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
 
@@ -441,12 +437,19 @@ func _do_head_bobbing(
 	if is_sprinting:
 		input_horizontal *= 2.0
 	if rotation_to_move:
-		var target_rotation : Quaternion
-		# target_rotation.from_euler(Vector3(input_horizontal.y * angle_limit_for_rotation, 0.0, -input_horizontal.x * angle_limit_for_rotation))
-		new_rotation += lerp(_first_person_camera_reference.quaternion, target_rotation, speed_rotation * delta)
+		var target_rotation := Quaternion.from_euler(
+			Vector3(
+				input_horizontal.y * angle_limit_for_rotation,
+				0.0,
+				-input_horizontal.x * angle_limit_for_rotation
+			)
+		)
+		new_rotation += lerp(
+			_camera.quaternion, target_rotation, speed_rotation * delta
+		)
 
-	_first_person_camera_reference.position = new_position
-	_first_person_camera_reference.quaternion = new_rotation
+	_camera.position = new_position
+	_camera.quaternion = new_rotation
 
 
 func _reset_step():
@@ -482,19 +485,12 @@ func _is_next_step(horizontal_velocity: Vector3, delta:float) -> bool:
 	return true
 
 
-func _get_material_audio_for_material(
-	material: PhysicsMaterial
-) -> MaterialAudio:
-	for m in material_audios:
-		if m.physics_material == material:
-			return m
-	return null
-
-
 func _get_material_audio_for_object(object: Object) -> MaterialAudio:
 	if object.get("physics_material_override") is PhysicsMaterial:
-		var mat: PhysicsMaterial = object.physics_material_override
-		return _get_material_audio_for_material(mat)
+		var material: PhysicsMaterial = object.physics_material_override
+		for m in material_audios:
+			if m.physics_material == material:
+				return m
 	return null
 
 
