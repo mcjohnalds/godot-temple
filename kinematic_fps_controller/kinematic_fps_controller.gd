@@ -48,7 +48,7 @@ class_name KinematicFpsController
 @export var head_bob_curve_multiplier := Vector2(2,2)
 
 ## Maximum range value of headbob
-@export var head_bob_range = Vector2(0.07, 0.07)
+@export var head_bob_range := Vector2(0.07, 0.07)
 
 @export_group("Head Bob - Jump")
 
@@ -72,105 +72,87 @@ class_name KinematicFpsController
 ## Controller Gravity Multiplier
 ## The higher the number, the faster the controller will fall to the ground and 
 ## your jump will be shorter.
-@export var gravity_multiplier : float = 3.0
+@export var gravity_multiplier := 3.0
 
 ## Controller base speed
 ## Note: this speed is used as a basis for abilities to multiply their 
 ## respective values, changing it will have consequences on [b]all abilities[/b]
 ## that use velocity.
-@export var speed : float = 10.0
+@export var speed := 10.0
 
 ## Time for the character to reach full speed
-@export var acceleration : float = 8.0
+@export var acceleration := 8.0
 
 ## Time for the character to stop walking
-@export var deceleration : float = 10.0
+@export var deceleration := 10.0
 
 ## Sets control in the air
-@export var air_control : float = 0.3
+@export var air_control := 0.3
 
 
 @export_group("Sprint")
 
 ## Speed to be multiplied when active the ability
-@export var sprint_speed_multiplier : float = 1.6
+@export var sprint_speed_multiplier := 1.6
 
 
 @export_group("Footsteps")
 
 ## Maximum counter value to be computed one step
-@export var step_lengthen : float = 0.7
+@export var step_lengthen := 0.7
 
 ## Value to be added to compute a step, each frame that the character is walking this value 
 ## is added to a counter
-@export var step_interval : float = 6.0
+@export var step_interval := 6.0
 
 
 @export_group("Crouch")
 
 ## Collider height when crouch actived
-@export var height_in_crouch : float = 1.0
+@export var height_in_crouch := 1.0
 
 ## Speed multiplier when crouch is actived
-@export var crouch_speed_multiplier : float = 0.7
+@export var crouch_speed_multiplier := 0.7
 
 
 @export_group("Jump")
 
 ## Jump/Impulse height
-@export var jump_height : float = 10.0
+@export var jump_height := 10.0
 
 
 @export_group("Fly")
 
 ## Speed multiplier when fly mode is actived
-@export var fly_mode_speed_modifier : float = 2.0
+@export var fly_mode_speed_modifier := 2.0
 
 
 @export_group("Swim")
 
 ## Minimum height for [CharacterController3D] to be completely submerged in water.
-@export var submerged_height : float = 0.36
+@export var submerged_height := 0.36
 
 ## Minimum height for [CharacterController3D] to be float in water.
-@export var floating_height : float = 0.75
+@export var floating_height := 0.75
 
 ## Speed multiplier when floating water
-@export var on_water_speed_multiplier : float = 0.75
+@export var on_water_speed_multiplier := 0.75
 
 ## Speed multiplier when submerged water
-@export var submerged_speed_multiplier : float = 0.5
+@export var submerged_speed_multiplier := 0.5
 
-## Current counter used to calculate next step.
-var _step_cycle : float = 0
-
-## Maximum value for _step_cycle to compute a step.
-var _next_step : float = 0
-
-## Default controller height, affects collider
-var _default_height : float
-
+var _step_cycle := 0.0
+var _next_step := 0.0
+var _initial_capsule_height: float
+var _is_flying := false
 var _last_is_on_water := false
 var _last_is_floating := false
 var _last_is_submerged := false
 var _last_is_on_floor := false
-
-var _is_flying := false
-
-## Store original position of head for headbob reference
-var original_head_position : Vector3
-
-## Store original rotation of head for headbob reference
-var original_head_rotation : Quaternion
-
-## Actual cycle x of step headbob
-var head_bob_cycle_position_x: float = 0
-
-## Actual cycle x of step headbob
-var head_bob_cycle_position_y: float = 0
-
-## Actual rotation of movement
-var actual_head_rotation := Vector3()
+var _initial_head_position: Vector3
+var _initial_head_rotation: Quaternion
+var _head_bob_cycle_position := Vector2.ZERO
+var _aim_rotation := Vector3()
 
 ## [HeadMovement3D] reference, where the rotation of the camera sight is calculated
 @onready var head: Node3D = get_node(NodePath("Head"))
@@ -182,7 +164,10 @@ var actual_head_rotation := Vector3()
 @onready var third_person_camera_reference : Marker3D = get_node(NodePath("Head/ThirdPersonCameraReference"))
 
 ## Get the gravity from the project settings to be synced with RigidDynamicBody nodes.
-@onready var gravity: float = (ProjectSettings.get_setting("physics/3d/default_gravity") * gravity_multiplier)
+@onready var gravity: float = (
+	ProjectSettings.get_setting("physics/3d/default_gravity")
+	* gravity_multiplier
+)
 
 ## Collision of character controller.
 @onready var collision: CollisionShape3D = get_node(NodePath("Collision"))
@@ -191,7 +176,7 @@ var actual_head_rotation := Vector3()
 @onready var head_check: RayCast3D = get_node(NodePath("Head Check"))
 
 ## Stores normal speed
-@onready var _normal_speed : float = speed
+@onready var _normal_speed := speed
 
 @onready var step_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Step"))
 @onready var land_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Land"))
@@ -204,10 +189,10 @@ var actual_head_rotation := Vector3()
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	_default_height = collision.shape.height
-	original_head_position = first_person_camera_reference.position
-	original_head_rotation = first_person_camera_reference.quaternion
-	actual_head_rotation.y = rotation.y
+	_initial_capsule_height = collision.shape.height
+	_initial_head_position = first_person_camera_reference.position
+	_initial_head_rotation = first_person_camera_reference.quaternion
+	_aim_rotation.y = rotation.y
 
 
 func _physics_process(delta):
@@ -288,8 +273,7 @@ func _physics_process(delta):
 	if is_jumping:
 		jump_stream.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).jump_audio_stream
 		jump_stream.play()
-		head_bob_cycle_position_x = 0
-		head_bob_cycle_position_y = 0
+		_head_bob_cycle_position = Vector2.ZERO
 
 	var is_walking := not _is_flying and not is_floating
 
@@ -363,12 +347,12 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		var mouse_axis: Vector2 = event.relative
 		# Horizontal mouse look.
-		actual_head_rotation.y -= mouse_axis.x * (mouse_sensitivity/1000)
+		_aim_rotation.y -= mouse_axis.x * (mouse_sensitivity/1000)
 		# Vertical mouse look.
-		actual_head_rotation.x = clamp(actual_head_rotation.x - mouse_axis.y * (mouse_sensitivity/1000), -vertical_angle_limit, vertical_angle_limit)
+		_aim_rotation.x = clamp(_aim_rotation.x - mouse_axis.y * (mouse_sensitivity/1000), -vertical_angle_limit, vertical_angle_limit)
 		
-		rotation.y = actual_head_rotation.y
-		head.rotation.x = actual_head_rotation.x
+		rotation.y = _aim_rotation.y
+		head.rotation.x = _aim_rotation.x
 	elif event.is_action_pressed("move_crouch"):
 		crouch_stream.play()
 	elif event.is_action_released("move_crouch"):
@@ -405,8 +389,8 @@ func _do_crouching(is_crouching: bool, delta: float) -> void:
 		collision.shape.height -= delta * 8
 	elif not head_check.is_colliding():
 		collision.shape.height += delta * 8
-	collision.shape.height = clamp(collision.shape.height , height_in_crouch, _default_height)
-	# var crouch_factor = (_default_height - height_in_crouch) - (collision.shape.height - height_in_crouch)/ (_default_height - height_in_crouch)
+	collision.shape.height = clamp(collision.shape.height , height_in_crouch, _initial_capsule_height)
+	# var crouch_factor = (_initial_capsule_height - height_in_crouch) - (collision.shape.height - height_in_crouch)/ (_initial_capsule_height - height_in_crouch)
 
 
 func _do_swimming(input_direction: Vector3, is_floating: bool, depth_on_water: float) -> void:
@@ -428,32 +412,39 @@ func _do_flying(input_direction: Vector3) -> void:
 
 func _do_head_bobbing(
 	horizontal_velocity: Vector3,
-	input_horizontal:Vector2,
+	input_horizontal: Vector2,
 	is_sprinting: bool,
 	delta: float
 ):
-	var new_position = original_head_position
-	var new_rotation = original_head_rotation
+	var new_position := _initial_head_position
+	var new_rotation := _initial_head_rotation
 	if step_bob_enabled:
-		var x_pos = (head_bob_curve.sample(head_bob_cycle_position_x) * head_bob_curve_multiplier.x * head_bob_range.x)
-		var y_pos = (head_bob_curve.sample(head_bob_cycle_position_y) * head_bob_curve_multiplier.y * head_bob_range.y)
+		var x_pos := (
+			head_bob_curve.sample(_head_bob_cycle_position.x)
+			* head_bob_curve_multiplier.x
+			* head_bob_range.x
+		)
+		var y_pos := (
+			head_bob_curve.sample(_head_bob_cycle_position.y)
+			* head_bob_curve_multiplier.y
+			* head_bob_range.y
+		)
 
 		var head_bob_interval := 2.0 * step_interval
 		var tick_speed = (horizontal_velocity.length() * delta) / head_bob_interval
-		head_bob_cycle_position_x += tick_speed
-		head_bob_cycle_position_y += tick_speed * vertical_horizontal_ratio
+		_head_bob_cycle_position.x += tick_speed
+		_head_bob_cycle_position.y += tick_speed * vertical_horizontal_ratio
 
-		if(head_bob_cycle_position_x > 1):
-			head_bob_cycle_position_x -= 1
-		if(head_bob_cycle_position_y > 1):
-			head_bob_cycle_position_y -= 1
+		if _head_bob_cycle_position.x > 1.0:
+			_head_bob_cycle_position.x -= 1.0
+		if _head_bob_cycle_position.y > 1.0:
+			_head_bob_cycle_position.y -= 1.0
 
-		var headpos = Vector3(x_pos,y_pos,0)
 		if is_on_floor():
-			new_position += headpos
+			new_position += Vector3(x_pos, y_pos, 0.0)
 
 	if is_sprinting:
-		input_horizontal *= 2
+		input_horizontal *= 2.0
 	if rotation_to_move:
 		var target_rotation : Quaternion
 		# target_rotation.from_euler(Vector3(input_horizontal.y * angle_limit_for_rotation, 0.0, -input_horizontal.x * angle_limit_for_rotation))
