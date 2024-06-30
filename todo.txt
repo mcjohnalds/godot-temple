@@ -1,7 +1,6 @@
 - Better crouch/uncrouch sound
 - Started/stopped floating sounds
-- Disable crouch underwater
-- Disable crouch when flying
+- Disable crouch underwater, flying, jumping
 - Fix inconsistent jumping from water
 - Head check
 - FPS controller

@@ -22,9 +22,6 @@ signal crouched
 ## deactive.
 signal uncrouched
 
-## Emitted when a sprint started, is called when [SprintAbility3D] is active.
-signal sprinted
-
 ## Emitted when a fly mode is started, called when [FlyModeAbility3D] is active.
 signal fly_mode_actived
 
@@ -227,14 +224,6 @@ signal started_floating
 ## Speed multiplier when submerged water
 @export var submerged_speed_multiplier : float = 0.5
 
-
-@export_group("Abilities")
-## List of movement skills to be used in processing this class.
-@export var abilities_path: Array[NodePath]
-
-## List of movement skills to be used in processing this class.
-var _abilities: Array[MovementAbility3D]
- 
 ## Result direction of inputs sent to [b]move()[/b].
 var _direction := Vector3()
 
@@ -289,9 +278,6 @@ var _is_jumping := false
 ## Above head collision checker, used for crouching and jumping.
 @onready var head_check: RayCast3D = get_node(NodePath("Head Check"))
 
-## Ability that adds extra speed when actived.
-@onready var sprint_ability: SprintAbility3D = get_node(NodePath("Sprint Ability 3D"))
-
 ## Stores normal speed
 @onready var _normal_speed : float = speed
 
@@ -307,10 +293,7 @@ var _is_jumping := false
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_direction_base_node = self
-	_abilities = _load_nodes(abilities_path)
 	_default_height = collision.shape.height
-	_connect_signals()
-	_start_variables()
 	head.set_mouse_sensitivity(mouse_sensitivity)
 	head.set_vertical_angle_limit(vertical_angle_limit)
 	head_bob.step_bob_enabled = step_bob_enabled
@@ -427,21 +410,21 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 	_is_jumping = input_jump and is_on_floor() and not head_check.is_colliding()
 	var is_walking := not _is_flying and not _is_floating
 	var is_crouching := input_crouch and is_on_floor() and not _is_floating and not is_submerged and not _is_flying
-	sprint_ability.set_active(input_sprint and is_on_floor() and  input_axis.y >= 0.5 and !is_crouching and not _is_flying and not _is_floating and not is_submerged)
+	var is_sprinting := input_sprint and is_on_floor() and  input_axis.y >= 0.5 and !is_crouching and not _is_flying and not _is_floating and not is_submerged
 
 	var multiplier = 1.0
-	for ability in _abilities:
-		multiplier *= ability.get_speed_modifier()
 	if is_crouching:
 		multiplier *= crouch_speed_multiplier
+	if is_sprinting:
+		multiplier *= sprint_speed_multiplier
+
 	if is_submerged:
 		multiplier *= submerged_speed_multiplier
 	elif _is_floating:
 		multiplier *= on_water_speed_multiplier
+
 	speed = _normal_speed * multiplier
 
-	for ability in _abilities:
-		velocity = ability.apply(velocity, speed, is_on_floor(), direction, delta)
 	_do_walking(is_walking, direction, delta)
 	_do_crouching(is_crouching, delta)
 	_do_swimming(direction)
@@ -457,7 +440,7 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 #	if not _is_flying and not _is_floating and not is_submerged
 #		camera.set_fov(lerp(camera.fov, normal_fov, delta * fov_change_speed))
 
-	head_bob.head_bob_process(_horizontal_velocity, input_axis, is_sprinting(), is_on_floor(), delta)
+	head_bob.head_bob_process(_horizontal_velocity, input_axis, is_sprinting, is_on_floor(), delta)
 
 
 func _do_walking(is_walking: bool, direction: Vector3, delta: float):
@@ -516,11 +499,6 @@ func _do_jumping() -> void:
 		velocity.y = jump_height
 
 
-## Returns true if the character controller is sprinting
-func is_sprinting() -> bool:
-	return sprint_ability.is_actived()
-
-
 ## Returns the speed of character controller
 func get_speed() -> float:
 	return speed
@@ -528,24 +506,6 @@ func get_speed() -> float:
 
 func _reset_step():
 	_next_step = _step_cycle + step_interval
-
-
-func _load_nodes(nodePaths: Array) -> Array[MovementAbility3D]:
-	var nodes : Array[MovementAbility3D]
-	for nodePath in nodePaths:
-		var node := get_node(nodePath)
-		if node != null:
-			var ability = node as MovementAbility3D
-			nodes.append(ability)
-	return nodes
-
-
-func _connect_signals():
-	sprint_ability.actived.connect(_on_sprinted.bind())
-
-
-func _start_variables():
-	sprint_ability.speed_multiplier = sprint_speed_multiplier
 
 
 func _check_landed():
@@ -620,10 +580,6 @@ func _on_crouched():
 func _on_uncrouched():
 	emit_signal("uncrouched")
 	uncrouch_stream.play()
-
-
-func _on_sprinted():
-	emit_signal("sprinted")
 
 
 func _on_landed():
