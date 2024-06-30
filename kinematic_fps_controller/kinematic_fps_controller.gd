@@ -277,15 +277,15 @@ func _physics_process(delta: float) -> void:
 	elif is_floating:
 		multiplier *= on_water_speed_multiplier
 
-	var speed := base_speed * multiplier
+	var move_speed := base_speed * multiplier
 
 	var input_direction := _get_input_direction(
 		input_horizontal, input_vertical, is_floating
 	)
-	_do_walking(is_walking, input_direction, speed, delta)
+	_do_walking(is_walking, input_direction, move_speed, delta)
 	_do_crouching(is_crouching, delta)
-	_do_swimming(input_direction, is_floating, depth_on_water, speed)
-	_do_flying(input_direction, speed)
+	_do_swimming(input_direction, is_floating, depth_on_water, move_speed)
+	_do_flying(input_direction, move_speed)
 	if is_jumping:
 		velocity.y = jump_height
 		_play_jump_audio(is_on_water, is_landed_on_floor_this_frame)
@@ -294,7 +294,14 @@ func _physics_process(delta: float) -> void:
 	var horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
 
 	var is_shuffling_feet := absf(horizontal_velocity.length()) < 0.1
-	if not _is_flying and not is_floating and not is_submerged and not is_shuffling_feet:
+	var is_stepping := (
+		not _is_flying
+		and not is_floating
+		and not is_submerged
+		and not is_shuffling_feet
+	)
+
+	if is_stepping:
 		_step_cycle += (horizontal_velocity.length() + step_lengthen) * delta
 
 	var is_step_cycle_complete := _step_cycle > _next_step
@@ -318,8 +325,10 @@ func _physics_process(delta: float) -> void:
 	if quake_camera_tilt_enabled:
 		var target := input_horizontal.x
 		var direction := signf(target - _quake_camera_tilt_ratio)
-		var new_value := _quake_camera_tilt_ratio + quake_camera_tilt_speed * direction
-		var new_direction := signf(target - new_value)
+		var new_ratio := (
+			_quake_camera_tilt_ratio + quake_camera_tilt_speed * direction
+		)
+		var new_direction := signf(target - new_ratio)
 		if new_direction != direction:
 			_quake_camera_tilt_ratio = target
 		else:
@@ -330,9 +339,7 @@ func _physics_process(delta: float) -> void:
 			smoothstep(-1.0, 1.0, -_quake_camera_tilt_ratio)
 		)
 
-	_do_head_bobbing(
-		horizontal_velocity, input_horizontal, is_sprinting, delta
-	)
+	_do_head_bobbing(horizontal_velocity, delta)
 
 	_last_is_on_water = is_on_water
 	_last_is_floating = is_floating
@@ -360,7 +367,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _do_walking(
-	is_walking: bool, input_direction: Vector3, speed: float, delta: float
+	is_walking: bool, input_direction: Vector3, move_speed: float, delta: float
 ):
 	if not is_walking:
 		return
@@ -374,7 +381,7 @@ func _do_walking(
 	if not is_on_floor():
 		a *= air_control
 
-	var target := input_direction * speed
+	var target := input_direction * move_speed
 	var w := horizontal_velocity.lerp(target, a * delta)
 
 	velocity.x = w.x
@@ -396,30 +403,25 @@ func _do_swimming(
 	input_direction: Vector3,
 	is_floating: bool,
 	depth_on_water: float,
-	speed: float
+	move_speed: float
 ) -> void:
 	if not is_floating:
 		return
 	var depth := floating_height - depth_on_water
-	velocity = input_direction * speed
+	velocity = input_direction * move_speed
 #	if depth < 0.1: && !_is_flying:
 	if depth < 0.1:
 		# Prevent free sea movement from exceeding the water surface
 		velocity.y = min(velocity.y,0)
 
 
-func _do_flying(input_direction: Vector3, speed: float) -> void:
+func _do_flying(input_direction: Vector3, move_speed: float) -> void:
 	if not _is_flying:
 		return
-	velocity = input_direction * speed
+	velocity = input_direction * move_speed
 
 
-func _do_head_bobbing(
-	horizontal_velocity: Vector3,
-	input_horizontal: Vector2,
-	is_sprinting: bool,
-	delta: float
-):
+func _do_head_bobbing(horizontal_velocity: Vector3, delta: float):
 	var new_position := _initial_head_position
 	if step_bob_enabled:
 		var x_pos := (
