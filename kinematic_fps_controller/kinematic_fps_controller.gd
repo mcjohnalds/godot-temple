@@ -154,7 +154,6 @@ var _last_is_on_water := false
 var _last_is_floating := false
 var _last_is_submerged := false
 var _last_is_on_floor := false
-var _depth_on_water := 0.0
 
 var _is_flying := false
 
@@ -230,23 +229,21 @@ func _physics_process(delta):
 
 	var is_on_water := swim_ray_cast.is_colliding()
 
+	var depth_on_water := 2.1
 	if is_on_water:
-		_depth_on_water = -swim_ray_cast.to_local(
-			swim_ray_cast.get_collision_point()
-		).y
-	else:
-		_depth_on_water = 2.1
+		var point := swim_ray_cast.get_collision_point()
+		depth_on_water = -swim_ray_cast.to_local(point).y
 
 	var is_jumping := (
 		input_jump and is_on_floor() and not head_check.is_colliding()
 	)
 
 	var is_submerged := (
-		_depth_on_water < submerged_height and is_on_water and !_is_flying
+		depth_on_water < submerged_height and is_on_water and !_is_flying
 	)
 
 	var is_floating := (
-		_depth_on_water < floating_height and is_on_water and !_is_flying
+		depth_on_water < floating_height and is_on_water and !_is_flying
 	)
 
 	var is_gravity_applied := (
@@ -332,7 +329,7 @@ func _physics_process(delta):
 	)
 	_do_walking(is_walking, input_direction, delta)
 	_do_crouching(is_crouching, delta)
-	_do_swimming(input_direction, is_floating)
+	_do_swimming(input_direction, is_floating, depth_on_water)
 	_do_flying(input_direction)
 	if is_jumping:
 		velocity.y = jump_height
@@ -412,10 +409,10 @@ func _do_crouching(is_crouching: bool, delta: float) -> void:
 	# var crouch_factor = (_default_height - height_in_crouch) - (collision.shape.height - height_in_crouch)/ (_default_height - height_in_crouch)
 
 
-func _do_swimming(input_direction: Vector3, is_floating: bool) -> void:
+func _do_swimming(input_direction: Vector3, is_floating: bool, depth_on_water: float) -> void:
 	if not is_floating:
 		return
-	var depth = floating_height - _depth_on_water
+	var depth := floating_height - depth_on_water
 	velocity = input_direction * speed
 #	if depth < 0.1: && !_is_flying:
 	if depth < 0.1:
