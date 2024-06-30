@@ -121,8 +121,6 @@ signal started_floating
 
 @export var head_bob_curve : Curve
 
-@export var timed_bob_curve : TimedBobCurve
-
 @export var head_bob_curve_multiplier := Vector2(2,2)
 
 ## Maximum range value of headbob
@@ -406,8 +404,6 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 	if input_jump:
 		jump_stream.stream = audio_interact.jump_audio
 		jump_stream.play()
-		if timed_bob_curve:
-			timed_bob_curve.do_bob_cycle()
 		head_bob_cycle_position_x = 0
 		head_bob_cycle_position_y = 0
 
@@ -504,9 +500,6 @@ func _do_jumping() -> void:
 
 
 func _do_head_bobbing(horizontal_velocity:Vector3, input_axis:Vector2, is_sprinting:bool, delta:float):
-	if timed_bob_curve:
-		timed_bob_curve.bob_process(delta)
-
 	var new_position = original_head_position
 	var new_rotation = original_head_rotation
 	if step_bob_enabled:
@@ -526,10 +519,6 @@ func _do_head_bobbing(horizontal_velocity:Vector3, input_axis:Vector2, is_sprint
 		var headpos = Vector3(x_pos,y_pos,0)
 		if is_on_floor():
 			new_position += headpos
-
-	if timed_bob_curve:
-		timed_bob_curve.y -= timed_bob_curve.offset
-
 
 	if is_sprinting:
 		input_axis *= 2
