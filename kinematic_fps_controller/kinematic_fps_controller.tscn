@@ -1,16 +1,53 @@
-[gd_scene load_steps=13 format=3 uid="uid://2oxdgu03lnbk"]
+[gd_scene load_steps=26 format=3 uid="uid://2oxdgu03lnbk"]
 
 [ext_resource type="Script" path="res://kinematic_fps_controller/kinematic_fps_controller.gd" id="2_8r0nc"]
 [ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://kinematic_fps_controller/underwater.tres" id="2_owsda"]
-[ext_resource type="Resource" uid="uid://boafje76qrf27" path="res://kinematic_fps_controller/audio_interacts/grass_audio_interact.tres" id="3_8sa4u"]
 [ext_resource type="PhysicsMaterial" path="res://kinematic_fps_controller/physics/grass.tres" id="4_ulqss"]
 [ext_resource type="PhysicsMaterial" uid="uid://bklf2cx3fydt3" path="res://kinematic_fps_controller/physics/stone.tres" id="5_a0l7u"]
 [ext_resource type="PhysicsMaterial" path="res://kinematic_fps_controller/physics/wood.tres" id="6_ulh2i"]
-[ext_resource type="Resource" uid="uid://ci8kg40ae4vnl" path="res://kinematic_fps_controller/audio_interacts/stone_audio_interact.tres" id="7_q04jf"]
-[ext_resource type="Resource" uid="uid://dx5kojv0cn4yl" path="res://kinematic_fps_controller/audio_interacts/wood_audio_interact.tres" id="8_tlqv8"]
-[ext_resource type="Resource" uid="uid://clro80qf2tdqi" path="res://kinematic_fps_controller/audio_interacts/water_audio_interact.tres" id="9_pm0oi"]
+[ext_resource type="Script" path="res://kinematic_fps_controller/material_audio.gd" id="10_3id2w"]
 [ext_resource type="Curve" path="res://kinematic_fps_controller/bob_curve.tres" id="10_jwnxu"]
+[ext_resource type="AudioStream" uid="uid://c2cl56b4rns2u" path="res://kinematic_fps_controller/jute-dh-steps/stepdirt_2.wav" id="12_wuy6q"]
+[ext_resource type="AudioStream" uid="uid://7gjj4wse1p7s" path="res://kinematic_fps_controller/jute-dh-steps/stepdirt_3.wav" id="13_ydtah"]
+[ext_resource type="AudioStream" uid="uid://p8tdym4d3gwm" path="res://kinematic_fps_controller/jute-dh-steps/stepdirt_4.wav" id="14_78mnj"]
+[ext_resource type="AudioStream" uid="uid://ds7ryp7lrjkbk" path="res://kinematic_fps_controller/jute-dh-steps/stepstone_8.wav" id="15_oitce"]
+[ext_resource type="AudioStream" uid="uid://dygk2exfcwaxj" path="res://kinematic_fps_controller/jute-dh-steps/stepstone_7.wav" id="16_nb44q"]
+[ext_resource type="AudioStream" uid="uid://d1824xmt02a32" path="res://kinematic_fps_controller/jute-dh-steps/stepstone_1.wav" id="17_saan7"]
+[ext_resource type="AudioStream" uid="uid://cxycqe7hdav7o" path="res://kinematic_fps_controller/jute-dh-steps/stepstone_2.wav" id="18_ljqja"]
+[ext_resource type="AudioStream" uid="uid://bfsapqnlf7can" path="res://kinematic_fps_controller/jute-dh-steps/stepwood_1.wav" id="19_0psj7"]
+[ext_resource type="AudioStream" uid="uid://c7fdqytdjvcqe" path="res://kinematic_fps_controller/jute-dh-steps/stepwood_2.wav" id="20_kvx2h"]
 [ext_resource type="AudioStream" uid="uid://dyj8811150sq5" path="res://kinematic_fps_controller/jute-dh-steps/stepdirt_1.wav" id="20_qovk2"]
+[ext_resource type="AudioStream" uid="uid://btyn2jp6i5s8l" path="res://kinematic_fps_controller/jute-dh-steps/stepwater_1.wav" id="21_1rkt1"]
+[ext_resource type="AudioStream" uid="uid://b3me04d8q11xf" path="res://kinematic_fps_controller/jute-dh-steps/stepwater_2.wav" id="22_p60vq"]
+[ext_resource type="PhysicsMaterial" path="res://kinematic_fps_controller/physics/water.tres" id="23_kplyn"]
+
+[sub_resource type="Resource" id="Resource_ju83a"]
+script = ExtResource("10_3id2w")
+physics_material = ExtResource("4_ulqss")
+jump_audio_stream = ExtResource("20_qovk2")
+landed_audio_stream = ExtResource("12_wuy6q")
+step_audio_streams = Array[AudioStream]([ExtResource("20_qovk2"), ExtResource("12_wuy6q"), ExtResource("13_ydtah"), ExtResource("14_78mnj")])
+
+[sub_resource type="Resource" id="Resource_3rmwo"]
+script = ExtResource("10_3id2w")
+physics_material = ExtResource("5_a0l7u")
+jump_audio_stream = ExtResource("15_oitce")
+landed_audio_stream = ExtResource("16_nb44q")
+step_audio_streams = Array[AudioStream]([ExtResource("17_saan7"), ExtResource("18_ljqja")])
+
+[sub_resource type="Resource" id="Resource_rfw5k"]
+script = ExtResource("10_3id2w")
+physics_material = ExtResource("6_ulh2i")
+jump_audio_stream = ExtResource("19_0psj7")
+landed_audio_stream = ExtResource("20_kvx2h")
+step_audio_streams = Array[AudioStream]([ExtResource("19_0psj7"), ExtResource("20_kvx2h")])
+
+[sub_resource type="Resource" id="Resource_kvpuo"]
+script = ExtResource("10_3id2w")
+physics_material = ExtResource("23_kplyn")
+jump_audio_stream = ExtResource("21_1rkt1")
+landed_audio_stream = ExtResource("22_p60vq")
+step_audio_streams = Array[AudioStream]([ExtResource("21_1rkt1"), ExtResource("22_p60vq")])
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fn1rj"]
 
@@ -18,10 +55,8 @@
 floor_snap_length = 0.5
 script = ExtResource("2_8r0nc")
 underwater_env = ExtResource("2_owsda")
-audio_interact = ExtResource("3_8sa4u")
-physic_materials = Array[PhysicsMaterial]([ExtResource("4_ulqss"), ExtResource("5_a0l7u"), ExtResource("6_ulh2i")])
-audio_interacts = Array[Resource]([ExtResource("3_8sa4u"), ExtResource("7_q04jf"), ExtResource("8_tlqv8")])
-water_audio_interact = ExtResource("9_pm0oi")
+material_audios = Array[ExtResource("10_3id2w")]([SubResource("Resource_ju83a"), SubResource("Resource_3rmwo"), SubResource("Resource_rfw5k"), SubResource("Resource_kvpuo")])
+water_material_audio = SubResource("Resource_kvpuo")
 head_bob_curve = ExtResource("10_jwnxu")
 
 [node name="Collision" type="CollisionShape3D" parent="."]

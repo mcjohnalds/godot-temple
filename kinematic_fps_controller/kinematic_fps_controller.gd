@@ -5,17 +5,9 @@ class_name KinematicFpsController
 
 @export_group("Audio")
 
-## Default audio interact used
-@export var audio_interact : Resource
+@export var material_audios: Array[MaterialAudio]
 
-## List of [PhysicsMaterial] synchronized with the [AudioInteract] list
-@export var physic_materials : Array[PhysicsMaterial]
-
-## List of [AudioInteract] synchronized with the [PhysicsMaterial] list
-@export var audio_interacts : Array[Resource]
-
-## Specific case of audio interact that occurs when we are in the water
-@export var water_audio_interact : Resource
+@export var water_material_audio: MaterialAudio
 
 @export_group("FOV")
 
@@ -219,6 +211,7 @@ var actual_head_rotation := Vector3()
 @onready var uncrouch_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Uncrouch"))
 @onready var ground_ray_cast: RayCast3D = get_node(NodePath("Detect Ground"))
 @onready var swim_ray_cast: RayCast3D = $SwimRayCast
+@onready var current_material_audio: MaterialAudio = material_audios[0]
 
 
 func _ready():
@@ -265,11 +258,11 @@ func _physics_process(delta):
 	_is_floating = _depth_on_water < floating_height and _is_on_water and !_is_flying
 
 	if _is_on_water and !_was_is_on_water:
-		audio_interact = water_audio_interact
-		land_stream.stream = audio_interact.landed_audio
+		current_material_audio = water_material_audio
+		land_stream.stream = water_material_audio.landed_audio_stream
 		land_stream.play()
 	elif !_is_on_water and _was_is_on_water:
-		jump_stream.stream = audio_interact.jump_audio
+		jump_stream.stream = current_material_audio.jump_audio_stream
 		jump_stream.play()
 
 	if _is_floating and !_was_is_floating:
@@ -289,7 +282,7 @@ func _physics_process(delta):
 	_was_is_submerged = is_submerged
 
 	if input_jump:
-		jump_stream.stream = audio_interact.jump_audio
+		jump_stream.stream = current_material_audio.jump_audio_stream
 		jump_stream.play()
 		head_bob_cycle_position_x = 0
 		head_bob_cycle_position_y = 0
@@ -322,7 +315,17 @@ func _physics_process(delta):
 	_horizontal_velocity = Vector3(velocity.x, 0.0, velocity.z)
 
 	if not _is_flying and not _is_floating and not is_submerged:
-		_check_step(delta)
+		if _is_step(_horizontal_velocity.length(), delta):
+			_reset_step()
+			if(is_on_floor()):
+				var collider := ground_ray_cast.get_collider()
+				_on_stepped_on_object(collider)
+				step_stream.stream = (
+					current_material_audio.step_audio_streams.pick_random()
+				)
+				step_stream.play()
+				return true
+			return false
 #	TODO Make in exemple this
 #	if not _is_flying and not _is_floating and not is_submerged
 #		camera.set_fov(lerp(camera.fov, normal_fov, delta * fov_change_speed))
@@ -448,23 +451,11 @@ func _check_landed():
 	if is_on_floor() and not _last_is_on_floor:
 		var k_col = get_last_slide_collision()
 		var collider := k_col.get_collider(0)
-		_get_audio_interact_of_object(collider)
-		land_stream.stream = audio_interact.landed_audio
+		_on_stepped_on_object(collider)
+		land_stream.stream = current_material_audio.landed_audio_stream
 		land_stream.play()
 		_reset_step()
 	_last_is_on_floor = is_on_floor()
-
-
-func _check_step(delta):
-	if _is_step(_horizontal_velocity.length(), delta):
-		_reset_step()
-		if(is_on_floor()):
-			var collider = ground_ray_cast.get_collider()
-			_get_audio_interact_of_object(collider)
-			step_stream.stream = audio_interact.random_step()
-			step_stream.play()
-			return true
-		return false
 
 
 func _direction_input(input : Vector2, input_down : bool, input_up : bool) -> Vector3:
@@ -504,16 +495,22 @@ func _is_step(velocity:float, delta:float) -> bool:
 	return true
 
 
-func _get_audio_interact_of_object(collider):
+func _on_stepped_on_object(object: Object) -> void:
 	if _is_on_water:
-		audio_interact = water_audio_interact
+		current_material_audio = water_material_audio
 		return
-	if !collider:
+	if !object:
 		return
-	if not "physics_material_override" in collider:
+	if not "physics_material_override" in object:
 		return
-	var mat = collider.physics_material_override
-	if mat:
-		var i = physic_materials.rfind(mat)
-		if i != -1:
-			audio_interact = audio_interacts[i]
+	var mat = object.physics_material_override
+	current_material_audio = _get_material_audio_for_material(mat)
+
+
+func _get_material_audio_for_material(
+	material: PhysicsMaterial
+) -> MaterialAudio:
+	for m in material_audios:
+		if m.physics_material == material:
+			return m
+	return null

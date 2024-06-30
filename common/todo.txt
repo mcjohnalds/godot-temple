@@ -1,6 +1,7 @@
 - Better crouch/uncrouch sound
 - Started/stopped floating sounds
 - Disable crouch underwater, flying, jumping
+- Convert wavs to oggs
 - Fix inconsistent jumping from water
 - Head check
 - FPS controller
