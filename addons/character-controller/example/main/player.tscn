@@ -1,9 +1,8 @@
-[gd_scene load_steps=15 format=3 uid="uid://2oxdgu03lnbk"]
+[gd_scene load_steps=14 format=3 uid="uid://2oxdgu03lnbk"]
 
 [ext_resource type="Script" path="res://addons/character-controller/example/main/player.gd" id="2_8r0nc"]
 [ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://addons/character-controller/example/main/underwater.tres" id="3_dxksd"]
 [ext_resource type="Script" path="res://addons/character-controller/fps/head_movement_3d.gd" id="9_8sr0j"]
-[ext_resource type="Script" path="res://addons/character-controller/fps/bob/head_bob.gd" id="10_2nnp1"]
 [ext_resource type="Curve" path="res://addons/character-controller/fps/bob/bob_curve.tres" id="11_o5imr"]
 [ext_resource type="Resource" uid="uid://boafje76qrf27" path="res://addons/character-controller/example/main/audio_interacts/grass_audio_interact.tres" id="13_3a686"]
 [ext_resource type="PhysicsMaterial" path="res://addons/character-controller/example/main/physics/grass.tres" id="14_si4e4"]
@@ -19,11 +18,12 @@
 [node name="Player" type="CharacterBody3D"]
 floor_snap_length = 0.5
 script = ExtResource("2_8r0nc")
+underwater_env = ExtResource("3_dxksd")
 audio_interact = ExtResource("13_3a686")
 physic_materials = Array[PhysicsMaterial]([ExtResource("14_si4e4"), ExtResource("15_ogelp"), ExtResource("16_wga6f")])
 audio_interacts = Array[Resource]([ExtResource("13_3a686"), ExtResource("17_waqq3"), ExtResource("18_tv50m")])
 water_audio_interact = ExtResource("19_5825u")
-underwater_env = ExtResource("3_dxksd")
+head_bob_curve = ExtResource("11_o5imr")
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_fn1rj")
@@ -34,11 +34,6 @@ target_position = Vector3(0, 1, 0)
 [node name="Head" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
 script = ExtResource("9_8sr0j")
-
-[node name="Head Bob" type="Node" parent="Head"]
-script = ExtResource("10_2nnp1")
-head_path = NodePath("../FirstPersonCameraReference")
-bob_curve = ExtResource("11_o5imr")
 
 [node name="FirstPersonCameraReference" type="Marker3D" parent="Head"]
 

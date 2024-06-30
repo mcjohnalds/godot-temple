@@ -71,6 +71,8 @@ signal started_floating
 @export var input_crouch_action_name := "move_crouch"
 @export var input_fly_mode_action_name := "move_fly_mode"
 
+@export var underwater_env: Environment
+
 @export_group("Audio")
 
 ## Default audio interact used
@@ -115,39 +117,35 @@ signal started_floating
 @export_group("Head Bob - Steps")
 
 ## Enables bob for made steps
-@export var step_bob_enabled := true:
-	set(value):
-		if head_bob != null:
-			head_bob.step_bob_enabled = value
+@export var step_bob_enabled := true
 
 ## Difference of step bob movement between vertical and horizontal angle
 @export var vertical_horizontal_ratio = 2
 
+@export var head_bob_curve : Curve
+
+@export var timed_bob_curve : TimedBobCurve
+
+@export var head_bob_curve_multiplier := Vector2(2,2)
+
+## Maximum range value of headbob
+@export var head_bob_range = Vector2(0.07, 0.07)
 
 @export_group("Head Bob - Jump")
 
 ## Enables bob for made jumps
-@export var jump_bob_enabled := true:
-	set(value):
-		if head_bob != null:
-			head_bob.jump_bob_enabled = value
-
+@export var jump_bob_enabled := true
 
 @export_group("Head Bob - Rotation When Move (Quake Like)")
 
 ## Enables camera angle for the direction the character controller moves
-@export var rotation_to_move := true:
-	set(value):
-		if head_bob != null:
-			head_bob.rotation_to_move = value
+@export var rotation_to_move := true
 
 ## Speed at which the camera angle moves
 @export var speed_rotation := 4.0
 
 ## Rotation angle limit per move
 @export var angle_limit_for_rotation := 0.1
-
-@export var underwater_env: Environment
 
 
 @export_group("Movement")
@@ -257,6 +255,18 @@ var _is_flying := false
 
 var _is_jumping := false
 
+## Store original position of head for headbob reference
+var original_head_position : Vector3
+
+## Store original rotation of head for headbob reference
+var original_head_rotation : Quaternion
+
+## Actual cycle x of step headbob
+var head_bob_cycle_position_x: float = 0
+
+## Actual cycle x of step headbob
+var head_bob_cycle_position_y: float = 0
+
 ## [HeadMovement3D] reference, where the rotation of the camera sight is calculated
 @onready var head: HeadMovement3D = get_node(NodePath("Head"))
 
@@ -265,9 +275,6 @@ var _is_jumping := false
 
 ## Third Person Camera3D reference
 @onready var third_person_camera_reference : Marker3D = get_node(NodePath("Head/ThirdPersonCameraReference"))
-
-## HeadBob reference
-@onready var head_bob: HeadBob = get_node(NodePath("Head/Head Bob"))
 
 ## Get the gravity from the project settings to be synced with RigidDynamicBody nodes.
 @onready var gravity: float = (ProjectSettings.get_setting("physics/3d/default_gravity") * gravity_multiplier)
@@ -294,15 +301,10 @@ func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_direction_base_node = self
 	_default_height = collision.shape.height
+	original_head_position = first_person_camera_reference.position
+	original_head_rotation = first_person_camera_reference.quaternion
 	head.set_mouse_sensitivity(mouse_sensitivity)
 	head.set_vertical_angle_limit(vertical_angle_limit)
-	head_bob.step_bob_enabled = step_bob_enabled
-	head_bob.jump_bob_enabled = jump_bob_enabled
-	head_bob.rotation_to_move = rotation_to_move
-	head_bob.speed_rotation = speed_rotation
-	head_bob.angle_limit_for_rotation = angle_limit_for_rotation
-	head_bob.vertical_horizontal_ratio = vertical_horizontal_ratio
-	head_bob.setup_step_bob(step_interval * 2);
 	emerged.connect(_on_controller_emerged.bind())
 	submerged.connect(_on_controller_subemerged.bind())
 
@@ -404,8 +406,10 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 	if input_jump:
 		jump_stream.stream = audio_interact.jump_audio
 		jump_stream.play()
-		head_bob.do_bob_jump()
-		head_bob.reset_cycles()
+		if timed_bob_curve:
+			timed_bob_curve.do_bob_cycle()
+		head_bob_cycle_position_x = 0
+		head_bob_cycle_position_y = 0
 
 	_is_jumping = input_jump and is_on_floor() and not head_check.is_colliding()
 	var is_walking := not _is_flying and not _is_floating
@@ -440,7 +444,7 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 #	if not _is_flying and not _is_floating and not is_submerged
 #		camera.set_fov(lerp(camera.fov, normal_fov, delta * fov_change_speed))
 
-	head_bob.head_bob_process(_horizontal_velocity, input_axis, is_sprinting, is_on_floor(), delta)
+	_do_head_bobbing(_horizontal_velocity, input_axis, is_sprinting, delta)
 
 
 func _do_walking(is_walking: bool, direction: Vector3, delta: float):
@@ -499,6 +503,45 @@ func _do_jumping() -> void:
 		velocity.y = jump_height
 
 
+func _do_head_bobbing(horizontal_velocity:Vector3, input_axis:Vector2, is_sprinting:bool, delta:float):
+	if timed_bob_curve:
+		timed_bob_curve.bob_process(delta)
+
+	var new_position = original_head_position
+	var new_rotation = original_head_rotation
+	if step_bob_enabled:
+		var x_pos = (head_bob_curve.sample(head_bob_cycle_position_x) * head_bob_curve_multiplier.x * head_bob_range.x)
+		var y_pos = (head_bob_curve.sample(head_bob_cycle_position_y) * head_bob_curve_multiplier.y * head_bob_range.y)
+
+		var head_bob_interval := 2.0 * step_interval
+		var tick_speed = (horizontal_velocity.length() * delta) / head_bob_interval
+		head_bob_cycle_position_x += tick_speed
+		head_bob_cycle_position_y += tick_speed * vertical_horizontal_ratio
+
+		if(head_bob_cycle_position_x > 1):
+			head_bob_cycle_position_x -= 1
+		if(head_bob_cycle_position_y > 1):
+			head_bob_cycle_position_y -= 1
+
+		var headpos = Vector3(x_pos,y_pos,0)
+		if is_on_floor():
+			new_position += headpos
+
+	if timed_bob_curve:
+		timed_bob_curve.y -= timed_bob_curve.offset
+
+
+	if is_sprinting:
+		input_axis *= 2
+	if rotation_to_move:
+		var target_rotation : Quaternion
+		# target_rotation.from_euler(Vector3(input_axis.y * angle_limit_for_rotation, 0.0, -input_axis.x * angle_limit_for_rotation))
+		new_rotation += lerp(first_person_camera_reference.quaternion, target_rotation, speed_rotation * delta)
+
+	first_person_camera_reference.position = new_position
+	first_person_camera_reference.quaternion = new_rotation
+
+
 ## Returns the speed of character controller
 func get_speed() -> float:
 	return speed
@@ -515,9 +558,9 @@ func _check_landed():
 	_last_is_on_floor = is_on_floor()
 
 
-func _check_step(_delta):
-	if _is_step(_horizontal_velocity.length(), is_on_floor(), _delta):
-		_step(is_on_floor())
+func _check_step(delta):
+	if _is_step(_horizontal_velocity.length(), delta):
+		_step()
 
 
 func _direction_input(input : Vector2, input_down : bool, input_up : bool, aim_node : Node3D) -> Vector3:
@@ -542,9 +585,9 @@ func _direction_input(input : Vector2, input_down : bool, input_up : bool, aim_n
 	return _direction.normalized()
 
 
-func _step(is_on_floor:bool) -> bool:
+func _step() -> bool:
 	_reset_step()
-	if(is_on_floor):
+	if(is_on_floor()):
 		emit_signal("stepped")
 		var collision = ground_ray_cast.get_collider()
 		_get_audio_interact_of_object(collision)
@@ -554,10 +597,10 @@ func _step(is_on_floor:bool) -> bool:
 	return false
 
 
-func _is_step(velocity:float, is_on_floor:bool, _delta:float) -> bool:
+func _is_step(velocity:float, delta:float) -> bool:
 	if(abs(velocity) < 0.1):
 		return false
-	_step_cycle = _step_cycle + ((velocity + step_lengthen) * _delta)
+	_step_cycle = _step_cycle + ((velocity + step_lengthen) * delta)
 	if(_step_cycle <= _next_step):
 		return false
 	return true
