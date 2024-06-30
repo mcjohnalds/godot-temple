@@ -150,7 +150,6 @@ var _next_step : float = 0
 ## Default controller height, affects collider
 var _default_height : float
 
-var _is_floating := false
 var _last_is_on_water := false
 var _last_is_floating := false
 var _last_is_submerged := false
@@ -246,19 +245,21 @@ func _physics_process(delta):
 		_depth_on_water < submerged_height and is_on_water and !_is_flying
 	)
 
+	var is_floating := (
+		_depth_on_water < floating_height and is_on_water and !_is_flying
+	)
+
 	var is_gravity_applied := (
 		not is_jumping
 		and not _is_flying
 		and not is_submerged
-		and not _is_floating
+		and not is_floating
 	)
 	if is_gravity_applied:
 		velocity.y -= gravity * delta
 
-	_is_floating = _depth_on_water < floating_height and is_on_water and !_is_flying
-
 	var is_landed_on_floor_this_frame := (
-		not _is_floating and is_on_floor() and not _last_is_on_floor
+		not is_floating and is_on_floor() and not _last_is_on_floor
 	)
 
 	if is_landed_on_floor_this_frame:
@@ -275,10 +276,10 @@ func _physics_process(delta):
 		jump_stream.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).jump_audio_stream
 		jump_stream.play()
 
-	if _is_floating and !_last_is_floating:
+	if is_floating and !_last_is_floating:
 		# TODO: play started floating sound
 		pass
-	elif !_is_floating and _last_is_floating:
+	elif !is_floating and _last_is_floating:
 		# TODO: play stopped floating sound
 		pass
 
@@ -293,12 +294,12 @@ func _physics_process(delta):
 		head_bob_cycle_position_x = 0
 		head_bob_cycle_position_y = 0
 
-	var is_walking := not _is_flying and not _is_floating
+	var is_walking := not _is_flying and not is_floating
 
 	var is_crouching := (
 		input_crouch
 		and is_on_floor()
-		and not _is_floating
+		and not is_floating
 		and not is_submerged
 		and not _is_flying
 	)
@@ -309,7 +310,7 @@ func _physics_process(delta):
 		and  input_horizontal.y >= 0.5
 		and !is_crouching
 		and not _is_flying
-		and not _is_floating
+		and not is_floating
 		and not is_submerged
 	)
 
@@ -321,24 +322,24 @@ func _physics_process(delta):
 
 	if is_submerged:
 		multiplier *= submerged_speed_multiplier
-	elif _is_floating:
+	elif is_floating:
 		multiplier *= on_water_speed_multiplier
 
 	speed = _normal_speed * multiplier
 
 	var input_direction := _get_input_direction(
-		input_horizontal, input_vertical
+		input_horizontal, input_vertical, is_floating
 	)
 	_do_walking(is_walking, input_direction, delta)
 	_do_crouching(is_crouching, delta)
-	_do_swimming(input_direction)
+	_do_swimming(input_direction, is_floating)
 	_do_flying(input_direction)
 	if is_jumping:
 		velocity.y = jump_height
 
 	var horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
 
-	if not _is_flying and not _is_floating and not is_submerged:
+	if not _is_flying and not is_floating and not is_submerged:
 		if _is_step(horizontal_velocity.length(), delta):
 			_reset_step()
 			if(is_on_floor()):
@@ -348,13 +349,13 @@ func _physics_process(delta):
 				)
 				step_stream.play()
 #	TODO Make in exemple this
-#	if not _is_flying and not _is_floating and not is_submerged
+#	if not _is_flying and not is_floating and not is_submerged
 #		camera.set_fov(lerp(camera.fov, normal_fov, delta * fov_change_speed))
 
 	_do_head_bobbing(horizontal_velocity, input_horizontal, is_sprinting, delta)
 
 	_last_is_on_water = is_on_water
-	_last_is_floating = _is_floating
+	_last_is_floating = is_floating
 	_last_is_submerged = is_submerged
 	_last_is_on_floor = is_on_floor()
 	move_and_slide()
@@ -411,8 +412,8 @@ func _do_crouching(is_crouching: bool, delta: float) -> void:
 	# var crouch_factor = (_default_height - height_in_crouch) - (collision.shape.height - height_in_crouch)/ (_default_height - height_in_crouch)
 
 
-func _do_swimming(input_direction: Vector3) -> void:
-	if not _is_floating:
+func _do_swimming(input_direction: Vector3, is_floating: bool) -> void:
+	if not is_floating:
 		return
 	var depth = floating_height - _depth_on_water
 	velocity = input_direction * speed
@@ -475,9 +476,9 @@ func _reset_step():
 
 
 func _get_input_direction(
-	input_horizontal: Vector2, input_vertical: float
+	input_horizontal: Vector2, input_vertical: float, is_floating: bool
 ) -> Vector3:
-	var allow_vertical := _is_flying or _is_floating
+	var allow_vertical := _is_flying or is_floating
 	var aim := head if allow_vertical else self
 	var input_direction := Vector3.ZERO
 	if input_horizontal.y >= 0.5:
