@@ -32,7 +32,7 @@ class_name KinematicFpsController
 @export var mouse_sensitivity := 2.0
 
 ## Maximum vertical angle the head can aim
-@export var vertical_angle_limit := TAU / 4.0
+@export var vertical_angle_limit := TAU * 0.24
 
 
 @export_group("Head Bob - Steps")
@@ -195,7 +195,6 @@ func _ready():
 	_initial_capsule_height = _collision.shape.height
 	_initial_head_position = _first_person_camera_reference.position
 	_initial_head_rotation = _first_person_camera_reference.quaternion
-	_aim_rotation.y = rotation.y
 
 
 func _physics_process(delta):
@@ -349,16 +348,17 @@ func _physics_process(delta):
 
 
 func _input(event: InputEvent) -> void:
-	# Mouse look (only if the mouse is captured).
-	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		var mouse_axis: Vector2 = event.relative
-		# Horizontal mouse look.
-		_aim_rotation.y -= mouse_axis.x * (mouse_sensitivity/1000)
-		# Vertical mouse look.
-		_aim_rotation.x = clamp(_aim_rotation.x - mouse_axis.y * (mouse_sensitivity/1000), -vertical_angle_limit, vertical_angle_limit)
-		
-		rotation.y = _aim_rotation.y
-		_head.rotation.x = _aim_rotation.x
+	if not Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+		return
+	if event is InputEventMouseMotion:
+		var e: InputEventMouseMotion = event
+		var s := mouse_sensitivity / 1000.0
+		rotation.y -= e.relative.x * s
+		_head.rotation.x = clamp(
+			_head.rotation.x - e.relative.y * s,
+			-vertical_angle_limit,
+			vertical_angle_limit
+		)
 	elif event.is_action_pressed("move_crouch"):
 		_crouch_audio_stream_player.play()
 	elif event.is_action_released("move_crouch"):
