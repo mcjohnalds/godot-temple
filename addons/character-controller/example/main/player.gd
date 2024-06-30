@@ -266,6 +266,8 @@ var _depth_on_water := 0.0
 
 var _is_flying := false
 
+var _is_jumping := false
+
 ## [HeadMovement3D] reference, where the rotation of the camera sight is calculated
 @onready var head: HeadMovement3D = get_node(NodePath("Head"))
 
@@ -289,9 +291,6 @@ var _is_flying := false
 
 ## Ability that adds extra speed when actived.
 @onready var sprint_ability: SprintAbility3D = get_node(NodePath("Sprint Ability 3D"))
-
-## Simple ability that adds a vertical impulse when actived (Jump).
-@onready var jump_ability: JumpAbility3D = get_node(NodePath("Jump Ability 3D"))
 
 ## Stores normal speed
 @onready var _normal_speed : float = speed
@@ -392,7 +391,7 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 		_depth_on_water = 2.1
 
 	var is_submerged := _depth_on_water < submerged_height and _is_on_water and !_is_flying
-	if not jump_ability.is_actived() and not _is_flying and not is_submerged and not _is_floating:
+	if not _is_jumping and not _is_flying and not is_submerged and not _is_floating:
 		velocity.y -= gravity * delta
 
 	_is_floating = _depth_on_water < floating_height and _is_on_water and !_is_flying
@@ -419,7 +418,13 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 	_was_is_floating = _is_floating
 	_was_is_submerged = is_submerged
 
-	jump_ability.set_active(input_jump and is_on_floor() and not head_check.is_colliding())
+	if input_jump:
+		jump_stream.stream = audio_interact.jump_audio
+		jump_stream.play()
+		head_bob.do_bob_jump()
+		head_bob.reset_cycles()
+
+	_is_jumping = input_jump and is_on_floor() and not head_check.is_colliding()
 	var is_walking := not _is_flying and not _is_floating
 	var is_crouching := input_crouch and is_on_floor() and not _is_floating and not is_submerged and not _is_flying
 	sprint_ability.set_active(input_sprint and is_on_floor() and  input_axis.y >= 0.5 and !is_crouching and not _is_flying and not _is_floating and not is_submerged)
@@ -441,6 +446,7 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 	_do_crouching(is_crouching, delta)
 	_do_swimming(direction)
 	_do_flying(direction)
+	_do_jumping()
 
 	move_and_slide()
 	_horizontal_velocity = Vector3(velocity.x, 0.0, velocity.z)
@@ -505,12 +511,9 @@ func _do_flying(direction: Vector3) -> void:
 	velocity = direction * speed
 
 
-func _on_jumped():
-	emit_signal("jumped")
-	jump_stream.stream = audio_interact.jump_audio
-	jump_stream.play()
-	head_bob.do_bob_jump()
-	head_bob.reset_cycles()
+func _do_jumping() -> void:
+	if _is_jumping:
+		velocity.y = jump_height
 
 
 ## Returns true if the character controller is sprinting
@@ -539,12 +542,10 @@ func _load_nodes(nodePaths: Array) -> Array[MovementAbility3D]:
 
 func _connect_signals():
 	sprint_ability.actived.connect(_on_sprinted.bind())
-	jump_ability.actived.connect(_on_jumped.bind())
 
 
 func _start_variables():
 	sprint_ability.speed_multiplier = sprint_speed_multiplier
-	jump_ability.height = jump_height
 
 
 func _check_landed():

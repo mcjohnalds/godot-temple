@@ -2,6 +2,8 @@
 - Started/stopped floating sounds
 - Disable crouch underwater
 - Disable crouch when flying
+- Fix inconsistent jumping from water
+- Head check
 - FPS controller
   - Bonk assist
 - Interactive music

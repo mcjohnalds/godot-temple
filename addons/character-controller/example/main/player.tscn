@@ -1,10 +1,8 @@
-[gd_scene load_steps=18 format=3 uid="uid://2oxdgu03lnbk"]
+[gd_scene load_steps=16 format=3 uid="uid://2oxdgu03lnbk"]
 
 [ext_resource type="Script" path="res://addons/character-controller/example/main/player.gd" id="2_8r0nc"]
 [ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://addons/character-controller/example/main/underwater.tres" id="3_dxksd"]
 [ext_resource type="Script" path="res://addons/character-controller/abilities/sprint_ability_3d.gd" id="4_bps5d"]
-[ext_resource type="Script" path="res://addons/character-controller/abilities/jump_ability_3d.gd" id="6_3n7x3"]
-[ext_resource type="Script" path="res://addons/character-controller/abilities/fly_ability_3d.gd" id="7_v5hc8"]
 [ext_resource type="Script" path="res://addons/character-controller/fps/head_movement_3d.gd" id="9_8sr0j"]
 [ext_resource type="Script" path="res://addons/character-controller/fps/bob/head_bob.gd" id="10_2nnp1"]
 [ext_resource type="Curve" path="res://addons/character-controller/fps/bob/bob_curve.tres" id="11_o5imr"]
@@ -27,7 +25,7 @@ physic_materials = Array[PhysicsMaterial]([ExtResource("14_si4e4"), ExtResource(
 audio_interacts = Array[Resource]([ExtResource("13_3a686"), ExtResource("17_waqq3"), ExtResource("18_tv50m")])
 water_audio_interact = ExtResource("19_5825u")
 underwater_env = ExtResource("3_dxksd")
-abilities_path = Array[NodePath]([NodePath("Sprint Ability 3D"), NodePath("Jump Ability 3D"), NodePath("Fly Ability 3D")])
+abilities_path = Array[NodePath]([NodePath("Sprint Ability 3D")])
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_fn1rj")
@@ -37,12 +35,6 @@ target_position = Vector3(0, 1, 0)
 
 [node name="Sprint Ability 3D" type="Node3D" parent="."]
 script = ExtResource("4_bps5d")
-
-[node name="Jump Ability 3D" type="Node3D" parent="."]
-script = ExtResource("6_3n7x3")
-
-[node name="Fly Ability 3D" type="Node3D" parent="."]
-script = ExtResource("7_v5hc8")
 
 [node name="Head" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
