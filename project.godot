@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Godot Temple"
-run/main_scene="res://addons/temple/fps_controller/example.tscn"
+run/main_scene="res://rigid_body_fps_controller/example.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="res://common/icon.svg"
+
+[autoload]
+
+global="*res://global/global.tscn"
 
 [display]
 
