@@ -232,18 +232,13 @@ func _physics_process(delta: float) -> void:
 	)
 
 	if is_landed_on_floor_this_frame:
-		_land_audio_stream_player.stream = _get_current_material_audio(
-			is_on_water, is_landed_on_floor_this_frame
-		).landed_audio_stream
-		_land_audio_stream_player.play()
+		_play_land_audio(is_on_water, is_landed_on_floor_this_frame)
 		_reset_step()
 
 	if is_on_water and !_last_is_on_water:
-		_land_audio_stream_player.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).landed_audio_stream
-		_land_audio_stream_player.play()
+		_play_land_audio(is_on_water, is_landed_on_floor_this_frame)
 	elif !is_on_water and _last_is_on_water:
-		_jump_audio_stream_player.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).jump_audio_stream
-		_jump_audio_stream_player.play()
+		_play_jump_audio(is_on_water, is_landed_on_floor_this_frame)
 
 	if is_floating and !_last_is_floating:
 		# TODO: play started floating sound
@@ -300,8 +295,7 @@ func _physics_process(delta: float) -> void:
 	_do_flying(input_direction, speed)
 	if is_jumping:
 		velocity.y = jump_height
-		_jump_audio_stream_player.stream = _get_current_material_audio(is_on_water, is_landed_on_floor_this_frame).jump_audio_stream
-		_jump_audio_stream_player.play()
+		_play_jump_audio(is_on_water, is_landed_on_floor_this_frame)
 		_head_bob_cycle_position = Vector2.ZERO
 
 	var horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
@@ -309,13 +303,7 @@ func _physics_process(delta: float) -> void:
 	if not _is_flying and not is_floating and not is_submerged and _is_next_step(horizontal_velocity, delta):
 		_reset_step()
 		if is_on_floor():
-			var material_audio := _get_current_material_audio(
-				is_on_water, is_landed_on_floor_this_frame
-			)
-			_step_audio_stream_player.stream = (
-				material_audio .step_audio_streams.pick_random()
-			)
-			_step_audio_stream_player.play()
+			_play_step_audio(is_on_water, is_landed_on_floor_this_frame)
 
 	var max_locomotion_speed := (
 		base_speed * maxf(sprint_speed_multiplier, fly_mode_speed_modifier)
@@ -514,4 +502,45 @@ func _get_current_material_audio(
 		return _get_material_audio_for_object(k_col.get_collider(0))
 	if _ground_ray_cast.get_collider():
 		return _get_material_audio_for_object(_ground_ray_cast.get_collider())
-	return material_audios[0]
+	return null
+
+
+func _play_jump_audio(
+	is_on_water: bool,
+	is_landed_on_floor_this_frame: bool
+) -> void:
+	var material_audio: MaterialAudio = _get_current_material_audio(
+		is_on_water, is_landed_on_floor_this_frame
+	)
+	if not material_audio:
+		return
+	_jump_audio_stream_player.stream = material_audio.jump_audio_stream
+	_jump_audio_stream_player.play()
+
+
+func _play_land_audio(
+	is_on_water: bool,
+	is_landed_on_floor_this_frame: bool
+) -> void:
+	var material_audio: MaterialAudio = _get_current_material_audio(
+		is_on_water, is_landed_on_floor_this_frame
+	)
+	if not material_audio:
+		return
+	_land_audio_stream_player.stream = material_audio.landed_audio_stream
+	_land_audio_stream_player.play()
+
+
+func _play_step_audio(
+	is_on_water: bool,
+	is_landed_on_floor_this_frame: bool
+) -> void:
+	var material_audio: MaterialAudio = _get_current_material_audio(
+		is_on_water, is_landed_on_floor_this_frame
+	)
+	if not material_audio:
+		return
+	_step_audio_stream_player.stream = (
+		material_audio.step_audio_streams.pick_random()
+	)
+	_step_audio_stream_player.play()
