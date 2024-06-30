@@ -1,67 +1,6 @@
 extends CharacterBody3D
 class_name Player
 
-## Main class of the addon, contains abilities array for character movements.
-
-## Emitted when the character controller performs a step, called at the end of 
-## the [b]move()[/b] 
-## function when a move accumulator for a step has ended.
-signal stepped
-
-## Emitted when touching the ground after being airborne, called in the 
-## [b]move()[/b] function.
-signal landed
-
-## Emitted when a jump is processed, is called when [JumpAbility3D] is active.
-signal jumped
-
-## Emitted when a crouch is started, is called when [CrouchAbility3D] is active.
-signal crouched
-
-## Emitted when a crouch is finished, is called when [CrouchAbility3D] is 
-## deactive.
-signal uncrouched
-
-## Emitted when a fly mode is started, called when [FlyModeAbility3D] is active.
-signal fly_mode_actived
-
-## Emitted when a fly mode is finished, called when [FlyModeAbility3D] is 
-## deactive.
-signal fly_mode_deactived
-
-## Emitted when emerged in water.
-## Called when the height of the water depth returned from the 
-## [b]get_depth_on_water()[/b] function of [SwimAbility3D] is greater than the 
-## minimum height defined in [b]submerged_height[/b].
-signal emerged
-
-## Emitted when submerged in water.
-## Called when the water depth height returned from the 
-## [b]get_depth_on_water()[/b] function of [SwimAbility3D] is less than the 
-## minimum height defined in [b]submerged_height[/b].
-signal submerged
-
-## Emitted when water stops floating.
-## Called when the water depth height returned from the 
-## [b]get_depth_on_water()[/b] function of [SwimAbility3D] is less than the 
-## minimum height defined in [b]floating_height[/b].
-signal stopped_floating
-
-signal started_floating
-
-
-## Example script that extends [CharacterController3D] through 
-## [FPSController3D].
-## 
-## This is just an example, and should be used as a basis for creating your 
-## own version using the controller's [b]move()[/b] function.
-## 
-## This player contains the inputs that will be used in the function 
-## [b]move()[/b] in [b]_physics_process()[/b].
-## The input process only happens when mouse is in capture mode.
-## This script also adds submerged and emerged signals to change the 
-## [Environment] when we are in the water.
-
 @export var input_back_action_name := "move_backward"
 @export var input_forward_action_name := "move_forward"
 @export var input_left_action_name := "move_left"
@@ -302,8 +241,6 @@ func _ready():
 	original_head_position = first_person_camera_reference.position
 	original_head_rotation = first_person_camera_reference.quaternion
 	actual_head_rotation.y = rotation.y
-	emerged.connect(_on_controller_emerged.bind())
-	submerged.connect(_on_controller_subemerged.bind())
 
 
 func _physics_process(delta):
@@ -337,19 +274,9 @@ func _input(event: InputEvent) -> void:
 		rotation.y = actual_head_rotation.y
 		head.rotation.x = actual_head_rotation.x
 	elif event.is_action_pressed("move_crouch"):
-		_on_crouched()
+		crouch_stream.play()
 	elif event.is_action_released("move_crouch"):
-		_on_uncrouched()
-
-
-func _on_controller_emerged():
-	var camera := get_viewport().get_camera_3d()
-	camera.environment = null
-
-
-func _on_controller_subemerged():
-	var camera := get_viewport().get_camera_3d()
-	camera.environment = underwater_env
+		uncrouch_stream.play()
 
 
 ## Call to move the character.
@@ -388,14 +315,16 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 		jump_stream.play()
 
 	if _is_floating and !_was_is_floating:
-		emit_signal("started_floating")
+		# TODO: play started floating sound
+		pass
 	elif !_is_floating and _was_is_floating:
-		emit_signal("stopped_floating")
+		# TODO: play stopped floating sound
+		pass
 
 	if is_submerged and not _was_is_submerged:
-		emit_signal("submerged")
+		get_viewport().get_camera_3d().environment = underwater_env
 	if not is_submerged and _was_is_submerged:
-		emit_signal("emerged")
+		get_viewport().get_camera_3d().environment = null
 
 	_was_is_on_water = _is_on_water
 	_was_is_floating = _is_floating
@@ -542,7 +471,9 @@ func _reset_step():
 
 func _check_landed():
 	if is_on_floor() and not _last_is_on_floor:
-		_on_landed()
+		_get_audio_interact()
+		land_stream.stream = audio_interact.landed_audio
+		land_stream.play()
 		_reset_step()
 	_last_is_on_floor = is_on_floor()
 
@@ -577,7 +508,6 @@ func _direction_input(input : Vector2, input_down : bool, input_up : bool, aim_n
 func _step() -> bool:
 	_reset_step()
 	if(is_on_floor()):
-		emit_signal("stepped")
 		var collision = ground_ray_cast.get_collider()
 		_get_audio_interact_of_object(collision)
 		step_stream.stream = audio_interact.random_step()
@@ -593,32 +523,6 @@ func _is_step(velocity:float, delta:float) -> bool:
 	if(_step_cycle <= _next_step):
 		return false
 	return true
-
-
-# Bubbly signals 😒
-func _on_fly_mode_actived():
-	emit_signal("fly_mode_actived")
-
-
-func _on_fly_mode_deactived():
-	emit_signal("fly_mode_deactived")
-
-
-func _on_crouched():
-	emit_signal("crouched")
-	crouch_stream.play()
-
-
-func _on_uncrouched():
-	emit_signal("uncrouched")
-	uncrouch_stream.play()
-
-
-func _on_landed():
-	_get_audio_interact()
-	land_stream.stream = audio_interact.landed_audio
-	land_stream.play()
-	emit_signal("landed")
 
 
 func _get_audio_interact():
