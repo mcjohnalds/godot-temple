@@ -1,6 +1,7 @@
 - Better crouch/uncrouch sound
 - Started/stopped floating sounds
 - Disable crouch underwater
+- Disable crouch when flying
 - FPS controller
   - Bonk assist
 - Interactive music

@@ -264,6 +264,8 @@ var _was_is_floating := false
 var _was_is_submerged := false
 var _depth_on_water := 0.0
 
+var _is_flying := false
+
 ## [HeadMovement3D] reference, where the rotation of the camera sight is calculated
 @onready var head: HeadMovement3D = get_node(NodePath("Head"))
 
@@ -290,9 +292,6 @@ var _depth_on_water := 0.0
 
 ## Simple ability that adds a vertical impulse when actived (Jump).
 @onready var jump_ability: JumpAbility3D = get_node(NodePath("Jump Ability 3D"))
-
-## Ability that gives free movement completely ignoring gravity.
-@onready var fly_ability: FlyAbility3D = get_node(NodePath("Fly Ability 3D"))
 
 ## Stores normal speed
 @onready var _normal_speed : float = speed
@@ -331,7 +330,7 @@ func _physics_process(delta):
 
 	if is_valid_input:
 		if Input.is_action_just_pressed(input_fly_mode_action_name):
-			fly_ability.set_active(not fly_ability.is_actived())
+			_is_flying = not _is_flying
 		var input_axis = Input.get_vector(input_left_action_name, input_right_action_name, input_back_action_name, input_forward_action_name)
 		var input_jump = Input.is_action_just_pressed(input_jump_action_name)
 		var input_crouch = Input.is_action_pressed(input_crouch_action_name)
@@ -377,7 +376,7 @@ func rotate_head(mouse_axis : Vector2) -> void:
 ## Afterwards, the [b]move()[/b] of the base class [CharacterMovement3D] is called
 ## It is then called functions responsible for head bob if necessary.
 func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_crouch := false, input_sprint := false, input_swim_down := false, input_swim_up := false):
-	if is_fly_mode() or _is_floating:
+	if _is_flying or _is_floating:
 		_direction_base_node = head
 	else:
 		_direction_base_node = self
@@ -392,11 +391,11 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 	else:
 		_depth_on_water = 2.1
 
-	var is_submerged := _depth_on_water < submerged_height and _is_on_water and !fly_ability.is_actived()
-	if not jump_ability.is_actived() and not is_fly_mode() and not is_submerged and not _is_floating:
+	var is_submerged := _depth_on_water < submerged_height and _is_on_water and !_is_flying
+	if not jump_ability.is_actived() and not _is_flying and not is_submerged and not _is_floating:
 		velocity.y -= gravity * delta
 
-	_is_floating = _depth_on_water < floating_height and _is_on_water and !fly_ability.is_actived()
+	_is_floating = _depth_on_water < floating_height and _is_on_water and !_is_flying
 
 	if _is_on_water and !_was_is_on_water:
 		audio_interact = water_audio_interact
@@ -421,9 +420,9 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 	_was_is_submerged = is_submerged
 
 	jump_ability.set_active(input_jump and is_on_floor() and not head_check.is_colliding())
-	var is_walking := not is_fly_mode() and not _is_floating
-	var is_crouching := input_crouch and is_on_floor() and not _is_floating and not is_submerged and not is_fly_mode()
-	sprint_ability.set_active(input_sprint and is_on_floor() and  input_axis.y >= 0.5 and !is_crouching and not is_fly_mode() and not _is_floating and not is_submerged)
+	var is_walking := not _is_flying and not _is_floating
+	var is_crouching := input_crouch and is_on_floor() and not _is_floating and not is_submerged and not _is_flying
+	sprint_ability.set_active(input_sprint and is_on_floor() and  input_axis.y >= 0.5 and !is_crouching and not _is_flying and not _is_floating and not is_submerged)
 
 	var multiplier = 1.0
 	for ability in _abilities:
@@ -441,14 +440,15 @@ func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_c
 	_do_walking(is_walking, direction, delta)
 	_do_crouching(is_crouching, delta)
 	_do_swimming(direction)
+	_do_flying(direction)
 
 	move_and_slide()
 	_horizontal_velocity = Vector3(velocity.x, 0.0, velocity.z)
 
-	if not is_fly_mode() and not _is_floating and not is_submerged:
+	if not _is_flying and not _is_floating and not is_submerged:
 		_check_step(delta)
 #	TODO Make in exemple this
-#	if not is_fly_mode() and not _is_floating and not is_submerged
+#	if not _is_flying and not _is_floating and not is_submerged
 #		camera.set_fov(lerp(camera.fov, normal_fov, delta * fov_change_speed))
 
 	head_bob.head_bob_process(_horizontal_velocity, input_axis, is_sprinting(), is_on_floor(), delta)
@@ -493,10 +493,16 @@ func _do_swimming(direction: Vector3) -> void:
 		return
 	var depth = floating_height - _depth_on_water
 	velocity = direction * speed
-#	if depth < 0.1: && !is_fly_mode():
+#	if depth < 0.1: && !_is_flying:
 	if depth < 0.1:
 		# Prevent free sea movement from exceeding the water surface
 		velocity.y = min(velocity.y,0)
+
+
+func _do_flying(direction: Vector3) -> void:
+	if not _is_flying:
+		return
+	velocity = direction * speed
 
 
 func _on_jumped():
@@ -510,11 +516,6 @@ func _on_jumped():
 ## Returns true if the character controller is sprinting
 func is_sprinting() -> bool:
 	return sprint_ability.is_actived()
-
-
-## Returns true if the character controller is in fly mode active
-func is_fly_mode() -> bool:
-	return fly_ability.is_actived()
 
 
 ## Returns the speed of character controller
@@ -539,14 +540,11 @@ func _load_nodes(nodePaths: Array) -> Array[MovementAbility3D]:
 func _connect_signals():
 	sprint_ability.actived.connect(_on_sprinted.bind())
 	jump_ability.actived.connect(_on_jumped.bind())
-	fly_ability.actived.connect(_on_fly_mode_actived.bind())
-	fly_ability.deactived.connect(_on_fly_mode_deactived.bind())
 
 
 func _start_variables():
 	sprint_ability.speed_multiplier = sprint_speed_multiplier
 	jump_ability.height = jump_height
-	fly_ability.speed_modifier = fly_mode_speed_modifier
 
 
 func _check_landed():
@@ -573,7 +571,7 @@ func _direction_input(input : Vector2, input_down : bool, input_up : bool, aim_n
 	if input.x >= 0.5:
 		_direction += aim.x
 	# NOTE: For free-flying and swimming movements
-	if is_fly_mode() or _is_floating:
+	if _is_flying or _is_floating:
 		if input_up:
 			_direction.y += 1.0
 		elif input_down:
