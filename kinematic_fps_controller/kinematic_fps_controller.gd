@@ -278,7 +278,7 @@ func _physics_process(delta: float) -> void:
 		input_horizontal, input_vertical, is_floating
 	)
 	_do_walking(is_walking, input_direction, move_speed, delta)
-	_do_crouching(is_crouching, delta)
+
 	_do_swimming(input_direction, is_floating, depth_on_water, move_speed)
 	_do_flying(input_direction, move_speed)
 	if is_jumping:
@@ -347,6 +347,8 @@ func _physics_process(delta: float) -> void:
 	if is_step_completed:
 		_play_step_audio(is_on_water, is_landed_on_floor_this_frame)
 
+	_capsule.height = _get_new_capsule_height(is_crouching, delta)
+
 	_last_is_on_water = is_on_water
 	_last_is_floating = is_floating
 	_last_is_submerged = is_submerged
@@ -394,15 +396,13 @@ func _do_walking(
 	velocity.z = w.z
 
 
-func _do_crouching(is_crouching: bool, delta: float) -> void:
+func _get_new_capsule_height(is_crouching: bool, delta: float) -> float:
+	var h := _capsule.height
 	if is_crouching:
-		_capsule.height -= delta * 8
+		h -= delta * 8.0
 	elif not _head_ray_cast.is_colliding():
-		_capsule.height += delta * 8
-	_capsule.height = clamp(
-		_capsule.height , height_in_crouch, _initial_capsule_height
-	)
-	# var crouch_factor = (_initial_capsule_height - height_in_crouch) - (_capsule.height - height_in_crouch)/ (_initial_capsule_height - height_in_crouch)
+		h += delta * 8.0
+	return clampf(h, height_in_crouch, _initial_capsule_height)
 
 
 func _do_swimming(
