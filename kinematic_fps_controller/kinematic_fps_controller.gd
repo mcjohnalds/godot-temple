@@ -225,14 +225,6 @@ func _physics_process(delta: float) -> void:
 		not is_floating and is_on_floor() and not _last_is_on_floor
 	)
 
-	if is_landed_on_floor_this_frame:
-		_play_land_audio(is_on_water, is_landed_on_floor_this_frame)
-
-	if is_on_water and !_last_is_on_water:
-		_play_land_audio(is_on_water, is_landed_on_floor_this_frame)
-	elif !is_on_water and _last_is_on_water:
-		_play_jump_audio(is_on_water, is_landed_on_floor_this_frame)
-
 	if is_floating and !_last_is_floating:
 		# TODO: play started floating sound
 		pass
@@ -265,6 +257,9 @@ func _physics_process(delta: float) -> void:
 		and not is_submerged
 	)
 
+	var is_entered_water := is_on_water and not _last_is_on_water
+	var is_exited_water := not is_on_water and _last_is_on_water
+
 	var multiplier := 1.0
 	if is_crouching:
 		multiplier *= crouch_speed_multiplier
@@ -288,7 +283,6 @@ func _physics_process(delta: float) -> void:
 	_do_flying(input_direction, move_speed)
 	if is_jumping:
 		velocity.y = jump_height
-		_play_jump_audio(is_on_water, is_landed_on_floor_this_frame)
 		_head_bob_cycle_position = Vector2.ZERO
 
 	var horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
@@ -304,11 +298,14 @@ func _physics_process(delta: float) -> void:
 	if is_stepping:
 		_step_cycle += (horizontal_velocity.length() + step_lengthen) * delta
 
-	var is_step_cycle_complete := _step_cycle > _next_step
+	var is_step_completed := _step_cycle > _next_step
 
-	if is_landed_on_floor_this_frame or is_step_cycle_complete:
+	var is_step_cycle_reset := (
+		is_landed_on_floor_this_frame or is_step_completed
+	)
+
+	if is_step_cycle_reset:
 		_next_step = _step_cycle + step_interval
-		_play_step_audio(is_on_water, is_landed_on_floor_this_frame)
 
 	var max_locomotion_speed := (
 		base_speed * maxf(sprint_speed_multiplier, fly_mode_speed_modifier)
@@ -340,6 +337,15 @@ func _physics_process(delta: float) -> void:
 		)
 
 	_do_head_bobbing(horizontal_velocity, delta)
+
+	if is_jumping:
+		_play_jump_audio(is_on_water, is_landed_on_floor_this_frame)
+	if is_landed_on_floor_this_frame or is_entered_water:
+		_play_land_audio(is_on_water, is_landed_on_floor_this_frame)
+	elif is_exited_water:
+		_play_jump_audio(is_on_water, is_landed_on_floor_this_frame)
+	if is_step_completed:
+		_play_step_audio(is_on_water, is_landed_on_floor_this_frame)
 
 	_last_is_on_water = is_on_water
 	_last_is_floating = is_floating
