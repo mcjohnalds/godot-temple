@@ -44,23 +44,13 @@ signal emerged
 ## minimum height defined in [b]submerged_height[/b].
 signal submerged
 
-## Emitted when it starts to touch the water.
-signal entered_the_water
-
-## Emitted when it stops touching the water.
-signal exit_the_water
-
-## Emitted when water starts to float.
-## Called when the height of the water depth returned from the 
-## [b]get_depth_on_water()[/b] function of [SwimAbility3D] is greater than the 
-## minimum height defined in [b]floating_height[/b].
-signal started_floating
-
 ## Emitted when water stops floating.
 ## Called when the water depth height returned from the 
 ## [b]get_depth_on_water()[/b] function of [SwimAbility3D] is less than the 
 ## minimum height defined in [b]floating_height[/b].
 signal stopped_floating
+
+signal started_floating
 
 
 ## Example script that extends [CharacterController3D] through 
@@ -267,6 +257,13 @@ var _last_is_on_floor := false
 ## Default controller height, affects collider
 var _default_height : float
 
+var _is_on_water := false
+var _is_floating := false
+var _was_is_on_water := false
+var _was_is_floating := false
+var _was_is_submerged := false
+var _depth_on_water := 0.0
+
 ## [HeadMovement3D] reference, where the rotation of the camera sight is calculated
 @onready var head: HeadMovement3D = get_node(NodePath("Head"))
 
@@ -297,9 +294,6 @@ var _default_height : float
 ## Ability that gives free movement completely ignoring gravity.
 @onready var fly_ability: FlyAbility3D = get_node(NodePath("Fly Ability 3D"))
 
-## Swimming ability.
-@onready var swim_ability: SwimAbility3D = get_node(NodePath("Swim Ability 3D"))
-
 ## Stores normal speed
 @onready var _normal_speed : float = speed
 
@@ -308,7 +302,9 @@ var _default_height : float
 @onready var jump_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Jump"))
 @onready var crouch_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Crouch"))
 @onready var uncrouch_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Uncrouch"))
-@onready var raycast: RayCast3D = get_node(NodePath("Player Audios/Detect Ground"))
+@onready var ground_ray_cast: RayCast3D = get_node(NodePath("Player Audios/Detect Ground"))
+@onready var swim_ray_cast: RayCast3D = $SwimRayCast
+
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -328,7 +324,6 @@ func _ready():
 	head_bob.setup_step_bob(step_interval * 2);
 	emerged.connect(_on_controller_emerged.bind())
 	submerged.connect(_on_controller_subemerged.bind())
-	print(abilities_path)
 
 
 func _physics_process(delta):
@@ -382,48 +377,84 @@ func rotate_head(mouse_axis : Vector2) -> void:
 ## Afterwards, the [b]move()[/b] of the base class [CharacterMovement3D] is called
 ## It is then called functions responsible for head bob if necessary.
 func move(delta: float, input_axis := Vector2.ZERO, input_jump := false, input_crouch := false, input_sprint := false, input_swim_down := false, input_swim_up := false):
-	if is_fly_mode() or is_floating():
+	if is_fly_mode() or _is_floating:
 		_direction_base_node = head
 	else:
 		_direction_base_node = self
 
 	var direction = _direction_input(input_axis, input_swim_down, input_swim_up, _direction_base_node)
-	if not swim_ability.is_floating():
+	if not _is_floating:
 		_check_landed()
-	if not jump_ability.is_actived() and not is_fly_mode() and not is_submerged() and not is_floating():
+	_is_on_water = swim_ray_cast.is_colliding()
+
+	if _is_on_water:
+		_depth_on_water = -swim_ray_cast.to_local(swim_ray_cast.get_collision_point()).y
+	else:
+		_depth_on_water = 2.1
+
+	var is_submerged := _depth_on_water < submerged_height and _is_on_water and !fly_ability.is_actived()
+	if not jump_ability.is_actived() and not is_fly_mode() and not is_submerged and not _is_floating:
 		velocity.y -= gravity * delta
 
-	swim_ability.set_active(!fly_ability.is_actived())
+	_is_floating = _depth_on_water < floating_height and _is_on_water and !fly_ability.is_actived()
+
+	if _is_on_water and !_was_is_on_water:
+		audio_interact = water_audio_interact
+		land_stream.stream = audio_interact.landed_audio
+		land_stream.play()
+	elif !_is_on_water and _was_is_on_water:
+		jump_stream.stream = audio_interact.jump_audio
+		jump_stream.play()
+
+	if _is_floating and !_was_is_floating:
+		emit_signal("started_floating")
+	elif !_is_floating and _was_is_floating:
+		emit_signal("stopped_floating")
+
+	if is_submerged and not _was_is_submerged:
+		emit_signal("submerged")
+	if not is_submerged and _was_is_submerged:
+		emit_signal("emerged")
+
+	_was_is_on_water = _is_on_water
+	_was_is_floating = _is_floating
+	_was_is_submerged = is_submerged
+
 	jump_ability.set_active(input_jump and is_on_floor() and not head_check.is_colliding())
-	var is_walking := not is_fly_mode() and not swim_ability.is_floating()
-	var is_crouching := input_crouch and is_on_floor() and not is_floating() and not is_submerged() and not is_fly_mode()
-	sprint_ability.set_active(input_sprint and is_on_floor() and  input_axis.y >= 0.5 and !is_crouching and not is_fly_mode() and not swim_ability.is_floating() and not swim_ability.is_submerged())
+	var is_walking := not is_fly_mode() and not _is_floating
+	var is_crouching := input_crouch and is_on_floor() and not _is_floating and not is_submerged and not is_fly_mode()
+	sprint_ability.set_active(input_sprint and is_on_floor() and  input_axis.y >= 0.5 and !is_crouching and not is_fly_mode() and not _is_floating and not is_submerged)
 
 	var multiplier = 1.0
 	for ability in _abilities:
 		multiplier *= ability.get_speed_modifier()
 	if is_crouching:
 		multiplier *= crouch_speed_multiplier
+	if is_submerged:
+		multiplier *= submerged_speed_multiplier
+	elif _is_floating:
+		multiplier *= on_water_speed_multiplier
 	speed = _normal_speed * multiplier
 
 	for ability in _abilities:
 		velocity = ability.apply(velocity, speed, is_on_floor(), direction, delta)
-	_physics_process_walk(is_walking, direction, delta)
-	_physics_process_crouch(is_crouching, delta)
+	_do_walking(is_walking, direction, delta)
+	_do_crouching(is_crouching, delta)
+	_do_swimming(direction)
 
 	move_and_slide()
 	_horizontal_velocity = Vector3(velocity.x, 0.0, velocity.z)
 
-	if not is_fly_mode() and not swim_ability.is_floating() and not swim_ability.is_submerged():
+	if not is_fly_mode() and not _is_floating and not is_submerged:
 		_check_step(delta)
 #	TODO Make in exemple this
-#	if not is_fly_mode() and not swim_ability.is_floating() and not swim_ability.is_submerged()
+#	if not is_fly_mode() and not _is_floating and not is_submerged
 #		camera.set_fov(lerp(camera.fov, normal_fov, delta * fov_change_speed))
 
 	head_bob.head_bob_process(_horizontal_velocity, input_axis, is_sprinting(), is_on_floor(), delta)
 
 
-func _physics_process_walk(is_walking: bool, direction: Vector3, delta: float):
+func _do_walking(is_walking: bool, direction: Vector3, delta: float):
 	if not is_walking:
 		return
 
@@ -448,13 +479,24 @@ func _physics_process_walk(is_walking: bool, direction: Vector3, delta: float):
 	velocity.z = temp_vel.z
 
 
-func _physics_process_crouch(is_crouching: bool, delta: float) -> void:
+func _do_crouching(is_crouching: bool, delta: float) -> void:
 	if is_crouching:
 		collision.shape.height -= delta * 8
 	elif not head_check.is_colliding():
 		collision.shape.height += delta * 8
 	collision.shape.height = clamp(collision.shape.height , height_in_crouch, _default_height)
-	var crouch_factor = (_default_height - height_in_crouch) - (collision.shape.height - height_in_crouch)/ (_default_height - height_in_crouch)
+	# var crouch_factor = (_default_height - height_in_crouch) - (collision.shape.height - height_in_crouch)/ (_default_height - height_in_crouch)
+
+
+func _do_swimming(direction: Vector3) -> void:
+	if not _is_floating:
+		return
+	var depth = floating_height - _depth_on_water
+	velocity = direction * speed
+#	if depth < 0.1: && !is_fly_mode():
+	if depth < 0.1:
+		# Prevent free sea movement from exceeding the water surface
+		velocity.y = min(velocity.y,0)
 
 
 func _on_jumped():
@@ -480,21 +522,6 @@ func get_speed() -> float:
 	return speed
 
 
-## Returns true if the character controller is in water
-func is_on_water() -> bool:
-	return swim_ability.is_on_water()
-
-
-## Returns true if the character controller is floating in water
-func is_floating() -> bool:
-	return swim_ability.is_floating()
-
-
-## Returns true if the character controller is submerged in water
-func is_submerged() -> bool:
-	return swim_ability.is_submerged()
-
-
 func _reset_step():
 	_next_step = _step_cycle + step_interval
 
@@ -514,22 +541,12 @@ func _connect_signals():
 	jump_ability.actived.connect(_on_jumped.bind())
 	fly_ability.actived.connect(_on_fly_mode_actived.bind())
 	fly_ability.deactived.connect(_on_fly_mode_deactived.bind())
-	swim_ability.actived.connect(_on_swim_ability_submerged.bind())
-	swim_ability.deactived.connect(_on_swim_ability_emerged.bind())
-	swim_ability.started_floating.connect(_on_swim_ability_started_floating.bind())
-	swim_ability.stopped_floating.connect(_on_swim_ability_stopped_floating.bind())
-	swim_ability.entered_the_water.connect(_on_swim_ability_entered_the_water.bind())
-	swim_ability.exit_the_water.connect(_on_swim_ability_exit_the_water.bind())
 
 
 func _start_variables():
 	sprint_ability.speed_multiplier = sprint_speed_multiplier
 	jump_ability.height = jump_height
 	fly_ability.speed_modifier = fly_mode_speed_modifier
-	swim_ability.submerged_height = submerged_height
-	swim_ability.floating_height = floating_height
-	swim_ability.on_water_speed_multiplier = on_water_speed_multiplier
-	swim_ability.submerged_speed_multiplier = submerged_speed_multiplier
 
 
 func _check_landed():
@@ -556,7 +573,7 @@ func _direction_input(input : Vector2, input_down : bool, input_up : bool, aim_n
 	if input.x >= 0.5:
 		_direction += aim.x
 	# NOTE: For free-flying and swimming movements
-	if is_fly_mode() or is_floating():
+	if is_fly_mode() or _is_floating:
 		if input_up:
 			_direction.y += 1.0
 		elif input_down:
@@ -570,7 +587,7 @@ func _step(is_on_floor:bool) -> bool:
 	_reset_step()
 	if(is_on_floor):
 		emit_signal("stepped")
-		var collision = raycast.get_collider()
+		var collision = ground_ray_cast.get_collider()
 		_get_audio_interact_of_object(collision)
 		step_stream.stream = audio_interact.random_step()
 		step_stream.play()
@@ -617,35 +634,6 @@ func _on_landed():
 	emit_signal("landed")
 
 
-func _on_swim_ability_emerged():
-	emit_signal("emerged")
-
-
-func _on_swim_ability_submerged():
-	emit_signal("submerged")
-
-
-func _on_swim_ability_entered_the_water():
-	emit_signal("entered_the_water")
-	audio_interact = water_audio_interact
-	land_stream.stream = audio_interact.landed_audio
-	land_stream.play()
-
-
-func _on_swim_ability_exit_the_water():
-	emit_signal("exit_the_water")
-	jump_stream.stream = audio_interact.jump_audio
-	jump_stream.play()
-
-
-func _on_swim_ability_started_floating():
-	emit_signal("started_floating")
-
-
-func _on_swim_ability_stopped_floating():
-	emit_signal("stopped_floating")
-
-
 func _get_audio_interact():
 	var k_col = get_last_slide_collision()
 	var collision = k_col.get_collider(0)
@@ -653,7 +641,7 @@ func _get_audio_interact():
 
 
 func _get_audio_interact_of_object(collision):
-	if is_on_water():
+	if _is_on_water:
 		audio_interact = water_audio_interact
 		return
 	if !collision:
