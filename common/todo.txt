@@ -4,6 +4,8 @@
   something floating.
 - Started/stopped floating sounds
 - Disable crouch underwater, flying, jumping
+- Add weapon
+- Make weapon bob with player breathing
 - Convert wavs to oggs
 - Create material audio with null material to represent air
 - Fix inconsistent jumping from water
@@ -19,6 +21,8 @@
 - Maximized when not in debug mode
 - Screen space shaders
 - Settings menu
+  - Dynamic fov should be toggleable
+  - Head bob toggle
 - Boot screen
 - Preload step
 - Exports and scripts

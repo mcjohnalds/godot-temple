@@ -5,26 +5,24 @@ class_name KinematicFpsController
 
 @export var underwater_env: Environment
 
+
 @export_group("Audio")
 
 @export var material_audios: Array[MaterialAudio]
 
 @export var water_material_audio: MaterialAudio
 
+
 @export_group("FOV")
 
 ## Speed at which the FOV changes
-@export var fov_change_speed := 4
-
-## FOV to be multiplied when active the sprint
-@export var sprint_fov_multiplier := 1.1
+@export var fov_change_speed := 20.0
 
 ## FOV to be multiplied when active the crouch
-@export var crouch_fov_multiplier := 0.95
+@export var crouch_fov_multiplier := 0.99
 
-## FOV to be multiplied when active the swim
-@export var swim_fov_multiplier := 1.0
-
+## FOV multiplier applied at max speed
+@export var max_speed_fov_multiplier := 1.01
 
 @export_group("Mouse")
 
@@ -174,6 +172,7 @@ var _head_bob_cycle_position := Vector2.ZERO
 )
 @onready var _ground_ray_cast: RayCast3D = $GroundRayCast
 @onready var _swim_ray_cast: RayCast3D = $SwimRayCast
+@onready var _initial_fov := _camera.fov
 
 
 func _ready():
@@ -282,7 +281,8 @@ func _physics_process(delta):
 		multiplier *= crouch_speed_multiplier
 	if is_sprinting:
 		multiplier *= sprint_speed_multiplier
-
+	if _is_flying:
+		multiplier *= fly_mode_speed_modifier
 	if is_submerged:
 		multiplier *= submerged_speed_multiplier
 	elif is_floating:
@@ -315,9 +315,17 @@ func _physics_process(delta):
 				material_audio .step_audio_streams.pick_random()
 			)
 			_step_audio_stream_player.play()
-#	TODO Make in exemple this
-#	if not _is_flying and not is_floating and not is_submerged
-#		camera.set_fov(lerp(camera.fov, normal_fov, delta * fov_change_speed))
+
+	var max_locomotion_speed := (
+		base_speed * maxf(sprint_speed_multiplier, fly_mode_speed_modifier)
+	)
+
+	var a := velocity.length() / max_locomotion_speed
+	var b := max_speed_fov_multiplier - 1.0
+	var target_fov := _initial_fov * (1.0 + a * b)
+	if is_crouching:
+		target_fov *= crouch_fov_multiplier
+	_camera.set_fov(lerp(_camera.fov, target_fov, delta * fov_change_speed))
 
 	_do_head_bobbing(
 		horizontal_velocity, input_horizontal, is_sprinting, delta
