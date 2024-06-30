@@ -2,6 +2,10 @@ class_name Global
 extends Node3D
 
 
+func _ready() -> void:
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+
 func _input(event: InputEvent) -> void:
 	if OS.is_debug_build() and event.is_action_pressed("ui_cancel"):
 		get_tree().quit()

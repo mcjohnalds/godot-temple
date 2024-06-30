@@ -81,10 +81,10 @@ class_name KinematicFpsController
 @export var speed := 10.0
 
 ## Time for the character to reach full speed
-@export var acceleration := 8.0
+@export var walk_acceleration := 8.0
 
 ## Time for the character to stop walking
-@export var deceleration := 10.0
+@export var walk_deceleration := 10.0
 
 ## Sets control in the air
 @export var air_control := 0.3
@@ -152,25 +152,14 @@ var _last_is_on_floor := false
 var _initial_head_position: Vector3
 var _initial_head_rotation: Quaternion
 var _head_bob_cycle_position := Vector2.ZERO
-var _aim_rotation := Vector3()
 
-## [HeadMovement3D] reference, where the rotation of the camera sight is calculated
 @onready var _head: Node3D = $Head
-
-## First Person Camera3D reference
 @onready var _first_person_camera_reference: Node3D = (
 	$Head/FirstPersonCameraReference
 )
-
-## _collision of character controller.
 @onready var _collision: CollisionShape3D = $CollisionShape3D
-
-## Above head _collision checker, used for crouching and jumping.
 @onready var _head_ray_cast: RayCast3D = $HeadRayCast
-
-## Stores normal speed
 @onready var _normal_speed := speed
-
 @onready var _step_audio_stream_player: AudioStreamPlayer3D = (
 	$StepAudioStreamPlayer
 )
@@ -191,7 +180,6 @@ var _aim_rotation := Vector3()
 
 
 func _ready():
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_initial_capsule_height = _collision.shape.height
 	_initial_head_position = _first_person_camera_reference.position
 	_initial_head_rotation = _first_person_camera_reference.quaternion
@@ -369,25 +357,20 @@ func _do_walking(is_walking: bool, input_direction: Vector3, delta: float):
 	if not is_walking:
 		return
 
-	# Using only the horizontal velocity, interpolate towards the input.
-	var temp_vel := velocity
-	temp_vel.y = 0
+	var horizontal_velocity := velocity
+	horizontal_velocity.y = 0.0
 
-	var temp_accel: float
-	var target: Vector3 = input_direction * speed
+	var is_accelerating := input_direction.dot(horizontal_velocity) > 0.0
 
-	if input_direction.dot(temp_vel) > 0:
-		temp_accel = acceleration
-	else:
-		temp_accel = deceleration
-
+	var a := walk_acceleration if is_accelerating else walk_deceleration
 	if not is_on_floor():
-		temp_accel *= air_control
+		a *= air_control
 
-	temp_vel = temp_vel.lerp(target, temp_accel * delta)
+	var target := input_direction * speed
+	var w := horizontal_velocity.lerp(target, a * delta)
 
-	velocity.x = temp_vel.x
-	velocity.z = temp_vel.z
+	velocity.x = w.x
+	velocity.z = w.z
 
 
 func _do_crouching(is_crouching: bool, delta: float) -> void:
