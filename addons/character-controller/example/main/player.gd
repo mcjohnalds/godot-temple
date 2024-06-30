@@ -105,13 +105,10 @@ signal started_floating
 @export_group("Mouse")
 
 ## Mouse Sensitivity
-@export var mouse_sensitivity := 2.0:
-	set(value):
-			if head != null:
-				head.mouse_sensitivity = value
+@export var mouse_sensitivity := 2.0
 
 ## Maximum vertical angle the head can aim
-@export var vertical_angle_limit := 90.0
+@export var vertical_angle_limit := TAU / 4.0
 
 
 @export_group("Head Bob - Steps")
@@ -267,8 +264,11 @@ var head_bob_cycle_position_x: float = 0
 ## Actual cycle x of step headbob
 var head_bob_cycle_position_y: float = 0
 
+## Actual rotation of movement
+var actual_head_rotation := Vector3()
+
 ## [HeadMovement3D] reference, where the rotation of the camera sight is calculated
-@onready var head: HeadMovement3D = get_node(NodePath("Head"))
+@onready var head: Node3D = get_node(NodePath("Head"))
 
 ## First Person Camera3D reference
 @onready var first_person_camera_reference : Marker3D = get_node(NodePath("Head/FirstPersonCameraReference"))
@@ -303,8 +303,7 @@ func _ready():
 	_default_height = collision.shape.height
 	original_head_position = first_person_camera_reference.position
 	original_head_rotation = first_person_camera_reference.quaternion
-	head.set_mouse_sensitivity(mouse_sensitivity)
-	head.set_vertical_angle_limit(vertical_angle_limit)
+	actual_head_rotation.y = rotation.y
 	emerged.connect(_on_controller_emerged.bind())
 	submerged.connect(_on_controller_subemerged.bind())
 
@@ -331,7 +330,14 @@ func _physics_process(delta):
 func _input(event: InputEvent) -> void:
 	# Mouse look (only if the mouse is captured).
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		rotate_head(event.relative)
+		var mouse_axis: Vector2 = event.relative
+		# Horizontal mouse look.
+		actual_head_rotation.y -= mouse_axis.x * (mouse_sensitivity/1000)
+		# Vertical mouse look.
+		actual_head_rotation.x = clamp(actual_head_rotation.x - mouse_axis.y * (mouse_sensitivity/1000), -vertical_angle_limit, vertical_angle_limit)
+		
+		rotation.y = actual_head_rotation.y
+		head.rotation.x = actual_head_rotation.x
 	elif event.is_action_pressed("move_crouch"):
 		_on_crouched()
 	elif event.is_action_released("move_crouch"):
@@ -346,12 +352,6 @@ func _on_controller_emerged():
 func _on_controller_subemerged():
 	var camera := get_viewport().get_camera_3d()
 	camera.environment = underwater_env
-
-
-## Rotate head based on mouse axis parameter.
-## This function call [b]head.rotate_camera()[/b].
-func rotate_head(mouse_axis : Vector2) -> void:
-	head.rotate_camera(mouse_axis)
 
 
 ## Call to move the character.
