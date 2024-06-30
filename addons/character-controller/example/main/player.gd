@@ -159,10 +159,6 @@ var _next_step : float = 0
 ## Character controller horizontal speed.
 var _horizontal_velocity : Vector3
 
-## Base transform node to direct player movement
-## Used to differentiate fly mode/swim moves from regular character movement.
-var _direction_base_node : Node3D
-
 ## True if in the last frame it was on the ground
 var _last_is_on_floor := false
 
@@ -227,7 +223,6 @@ var actual_head_rotation := Vector3()
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	_direction_base_node = self
 	_default_height = collision.shape.height
 	original_head_position = first_person_camera_reference.position
 	original_head_rotation = first_person_camera_reference.quaternion
@@ -253,12 +248,7 @@ func _physics_process(delta):
 		input_swim_down = Input.is_action_pressed("move_crouch")
 		input_swim_up = Input.is_action_pressed("move_jump")
 
-	if _is_flying or _is_floating:
-		_direction_base_node = head
-	else:
-		_direction_base_node = self
-
-	var direction = _direction_input(input_axis, input_swim_down, input_swim_up, _direction_base_node)
+	var direction = _direction_input(input_axis, input_swim_down, input_swim_up)
 	if not _is_floating:
 		_check_landed()
 	_is_on_water = swim_ray_cast.is_colliding()
@@ -468,7 +458,13 @@ func _check_step(delta):
 		_step()
 
 
-func _direction_input(input : Vector2, input_down : bool, input_up : bool, aim_node : Node3D) -> Vector3:
+func _direction_input(input : Vector2, input_down : bool, input_up : bool) -> Vector3:
+	var aim_node: Node3D
+	if _is_flying or _is_floating:
+		aim_node = head
+	else:
+		aim_node = self
+
 	_direction = Vector3()
 	var aim = aim_node.get_global_transform().basis
 	if input.y >= 0.5:
