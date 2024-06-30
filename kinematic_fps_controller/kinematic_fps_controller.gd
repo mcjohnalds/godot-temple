@@ -251,19 +251,19 @@ func _physics_process(delta: float) -> void:
 	var is_entered_water := is_on_water and not _last_is_on_water
 	var is_exited_water := not is_on_water and _last_is_on_water
 
-	var multiplier := 1.0
+	var speed_multiplier := 1.0
 	if is_crouching:
-		multiplier *= crouch_speed_multiplier
+		speed_multiplier *= crouch_speed_multiplier
 	if is_sprinting:
-		multiplier *= sprint_speed_multiplier
+		speed_multiplier *= sprint_speed_multiplier
 	if _is_flying:
-		multiplier *= fly_mode_speed_modifier
+		speed_multiplier *= fly_mode_speed_modifier
 	if is_submerged:
-		multiplier *= submerged_speed_multiplier
+		speed_multiplier *= submerged_speed_multiplier
 	elif is_floating:
-		multiplier *= on_water_speed_multiplier
+		speed_multiplier *= on_water_speed_multiplier
 
-	var move_speed := base_speed * multiplier
+	var move_speed := base_speed * speed_multiplier
 
 	var input_direction := _get_input_direction(
 		input_horizontal, input_vertical, is_floating
@@ -290,17 +290,15 @@ func _physics_process(delta: float) -> void:
 		and not is_shuffling_feet
 	)
 
+	var next_step_cycle := _step_cycle
 	if is_stepping:
-		_step_cycle += (horizontal_velocity.length() + step_lengthen) * delta
+		next_step_cycle += (horizontal_velocity.length() + step_lengthen) * delta
 
-	var is_step_completed := _step_cycle > _next_step
+	var is_step_completed := next_step_cycle > _next_step
 
 	var is_step_cycle_reset := (
 		is_landed_on_floor_this_frame or is_step_completed
 	)
-
-	if is_step_cycle_reset:
-		_next_step = _step_cycle + step_interval
 
 	if quake_camera_tilt_enabled:
 		var target := input_horizontal.x
@@ -323,15 +321,20 @@ func _physics_process(delta: float) -> void:
 		_head_bob_cycle_position = Vector2.ZERO
 	_do_head_bobbing(horizontal_velocity, delta)
 
+	if is_step_cycle_reset:
+		_next_step = _step_cycle + step_interval
+
 	if is_jumping:
 		_play_jump_audio(is_on_water, is_landed_on_floor_this_frame)
 	if is_landed_on_floor_this_frame or is_entered_water:
 		_play_land_audio(is_on_water, is_landed_on_floor_this_frame)
 	elif is_exited_water:
+		# TODO: this doesn't play
 		_play_jump_audio(is_on_water, is_landed_on_floor_this_frame)
 	if is_step_completed:
 		_play_step_audio(is_on_water, is_landed_on_floor_this_frame)
 
+	_step_cycle = next_step_cycle
 	_capsule.height = _get_next_capsule_height(is_crouching, delta)
 	_camera.fov = _get_next_camera_fov(new_velocity, is_crouching, delta)
 
