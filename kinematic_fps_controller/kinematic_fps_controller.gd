@@ -163,8 +163,6 @@ var _depth_on_water := 0.0
 
 var _is_flying := false
 
-var _is_jumping := false
-
 ## Store original position of head for headbob reference
 var original_head_position : Vector3
 
@@ -238,12 +236,21 @@ func _physics_process(delta):
 	_is_on_water = swim_ray_cast.is_colliding()
 
 	if _is_on_water:
-		_depth_on_water = -swim_ray_cast.to_local(swim_ray_cast.get_collision_point()).y
+		_depth_on_water = -swim_ray_cast.to_local(
+			swim_ray_cast.get_collision_point()
+		).y
 	else:
 		_depth_on_water = 2.1
 
-	var is_submerged := _depth_on_water < submerged_height and _is_on_water and !_is_flying
-	if not _is_jumping and not _is_flying and not is_submerged and not _is_floating:
+	var is_jumping := (
+		input_jump and is_on_floor() and not head_check.is_colliding()
+	)
+
+	var is_submerged := (
+		_depth_on_water < submerged_height and _is_on_water and !_is_flying
+	)
+
+	if not is_jumping and not _is_flying and not is_submerged and not _is_floating:
 		velocity.y -= gravity * delta
 
 	_is_floating = _depth_on_water < floating_height and _is_on_water and !_is_flying
@@ -277,12 +284,27 @@ func _physics_process(delta):
 		head_bob_cycle_position_x = 0
 		head_bob_cycle_position_y = 0
 
-	_is_jumping = input_jump and is_on_floor() and not head_check.is_colliding()
 	var is_walking := not _is_flying and not _is_floating
-	var is_crouching := input_crouch and is_on_floor() and not _is_floating and not is_submerged and not _is_flying
-	var is_sprinting := input_sprint and is_on_floor() and  input_horizontal.y >= 0.5 and !is_crouching and not _is_flying and not _is_floating and not is_submerged
 
-	var multiplier = 1.0
+	var is_crouching := (
+		input_crouch
+		and is_on_floor()
+		and not _is_floating
+		and not is_submerged
+		and not _is_flying
+	)
+
+	var is_sprinting := (
+		input_sprint
+		and is_on_floor()
+		and  input_horizontal.y >= 0.5
+		and !is_crouching
+		and not _is_flying
+		and not _is_floating
+		and not is_submerged
+	)
+
+	var multiplier := 1.0
 	if is_crouching:
 		multiplier *= crouch_speed_multiplier
 	if is_sprinting:
@@ -302,7 +324,8 @@ func _physics_process(delta):
 	_do_crouching(is_crouching, delta)
 	_do_swimming(input_direction)
 	_do_flying(input_direction)
-	_do_jumping()
+	if is_jumping:
+		velocity.y = jump_height
 
 	move_and_slide()
 	_horizontal_velocity = Vector3(velocity.x, 0.0, velocity.z)
@@ -391,11 +414,6 @@ func _do_flying(input_direction: Vector3) -> void:
 	if not _is_flying:
 		return
 	velocity = input_direction * speed
-
-
-func _do_jumping() -> void:
-	if _is_jumping:
-		velocity.y = jump_height
 
 
 func _do_head_bobbing(horizontal_velocity:Vector3, input_horizontal:Vector2, is_sprinting:bool, delta:float):
