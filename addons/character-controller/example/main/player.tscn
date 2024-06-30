@@ -1,8 +1,7 @@
-[gd_scene load_steps=14 format=3 uid="uid://2oxdgu03lnbk"]
+[gd_scene load_steps=13 format=3 uid="uid://2oxdgu03lnbk"]
 
 [ext_resource type="Script" path="res://addons/character-controller/example/main/player.gd" id="2_8r0nc"]
 [ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://addons/character-controller/example/main/underwater.tres" id="3_dxksd"]
-[ext_resource type="Script" path="res://addons/character-controller/fps/head_movement_3d.gd" id="9_8sr0j"]
 [ext_resource type="Curve" path="res://addons/character-controller/fps/bob/bob_curve.tres" id="11_o5imr"]
 [ext_resource type="Resource" uid="uid://boafje76qrf27" path="res://addons/character-controller/example/main/audio_interacts/grass_audio_interact.tres" id="13_3a686"]
 [ext_resource type="PhysicsMaterial" path="res://addons/character-controller/example/main/physics/grass.tres" id="14_si4e4"]
@@ -33,7 +32,6 @@ target_position = Vector3(0, 1, 0)
 
 [node name="Head" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
-script = ExtResource("9_8sr0j")
 
 [node name="FirstPersonCameraReference" type="Marker3D" parent="Head"]
 
