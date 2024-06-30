@@ -2,6 +2,7 @@
 - Started/stopped floating sounds
 - Disable crouch underwater, flying, jumping
 - Convert wavs to oggs
+- Create material audio with null material to represent air
 - Fix inconsistent jumping from water
 - Head check
 - FPS controller

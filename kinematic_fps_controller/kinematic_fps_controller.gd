@@ -211,7 +211,6 @@ var actual_head_rotation := Vector3()
 @onready var uncrouch_stream: AudioStreamPlayer3D = get_node(NodePath("Player Audios/Uncrouch"))
 @onready var ground_ray_cast: RayCast3D = get_node(NodePath("Detect Ground"))
 @onready var swim_ray_cast: RayCast3D = $SwimRayCast
-@onready var current_material_audio: MaterialAudio = material_audios[0]
 
 
 func _ready():
@@ -258,11 +257,10 @@ func _physics_process(delta):
 	_is_floating = _depth_on_water < floating_height and _is_on_water and !_is_flying
 
 	if _is_on_water and !_was_is_on_water:
-		current_material_audio = water_material_audio
-		land_stream.stream = water_material_audio.landed_audio_stream
+		land_stream.stream = _get_current_material_audio().landed_audio_stream
 		land_stream.play()
 	elif !_is_on_water and _was_is_on_water:
-		jump_stream.stream = current_material_audio.jump_audio_stream
+		jump_stream.stream = _get_current_material_audio().jump_audio_stream
 		jump_stream.play()
 
 	if _is_floating and !_was_is_floating:
@@ -282,7 +280,7 @@ func _physics_process(delta):
 	_was_is_submerged = is_submerged
 
 	if input_jump:
-		jump_stream.stream = current_material_audio.jump_audio_stream
+		jump_stream.stream = _get_current_material_audio().jump_audio_stream
 		jump_stream.play()
 		head_bob_cycle_position_x = 0
 		head_bob_cycle_position_y = 0
@@ -318,10 +316,9 @@ func _physics_process(delta):
 		if _is_step(_horizontal_velocity.length(), delta):
 			_reset_step()
 			if(is_on_floor()):
-				var collider := ground_ray_cast.get_collider()
-				_on_stepped_on_object(collider)
 				step_stream.stream = (
-					current_material_audio.step_audio_streams.pick_random()
+					_get_current_material_audio()
+						.step_audio_streams.pick_random()
 				)
 				step_stream.play()
 				return true
@@ -449,10 +446,7 @@ func _reset_step():
 
 func _check_landed():
 	if is_on_floor() and not _last_is_on_floor:
-		var k_col = get_last_slide_collision()
-		var collider := k_col.get_collider(0)
-		_on_stepped_on_object(collider)
-		land_stream.stream = current_material_audio.landed_audio_stream
+		land_stream.stream = _get_current_material_audio().landed_audio_stream
 		land_stream.play()
 		_reset_step()
 	_last_is_on_floor = is_on_floor()
@@ -495,18 +489,6 @@ func _is_step(velocity:float, delta:float) -> bool:
 	return true
 
 
-func _on_stepped_on_object(object: Object) -> void:
-	if _is_on_water:
-		current_material_audio = water_material_audio
-		return
-	if !object:
-		return
-	if not "physics_material_override" in object:
-		return
-	var mat = object.physics_material_override
-	current_material_audio = _get_material_audio_for_material(mat)
-
-
 func _get_material_audio_for_material(
 	material: PhysicsMaterial
 ) -> MaterialAudio:
@@ -514,3 +496,21 @@ func _get_material_audio_for_material(
 		if m.physics_material == material:
 			return m
 	return null
+
+
+func _get_material_audio_for_object(object: Object) -> MaterialAudio:
+	if object.get("physics_material_override") is PhysicsMaterial:
+		var mat: PhysicsMaterial = object.physics_material_override
+		return _get_material_audio_for_material(mat)
+	return null
+
+
+func _get_current_material_audio() -> MaterialAudio:
+	if _is_on_water:
+		return water_material_audio
+	if is_on_floor() and not _last_is_on_floor:
+		var k_col = get_last_slide_collision()
+		return _get_material_audio_for_object(k_col.get_collider(0))
+	if ground_ray_cast.get_collider():
+		return _get_material_audio_for_object(ground_ray_cast.get_collider())
+	return material_audios[0]
