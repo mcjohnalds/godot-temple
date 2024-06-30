@@ -268,8 +268,7 @@ func _physics_process(delta: float) -> void:
 	var input_direction := _get_input_direction(
 		input_horizontal, input_vertical, is_floating
 	)
-
-	var new_velocity := _get_next_velocity(
+	velocity = _get_next_velocity(
 		is_jumping,
 		is_submerged,
 		is_floating,
@@ -280,7 +279,7 @@ func _physics_process(delta: float) -> void:
 		delta
 	)
 
-	var horizontal_velocity := Vector3(new_velocity.x, 0.0, new_velocity.z)
+	var horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
 
 	var is_shuffling_feet := absf(horizontal_velocity.length()) < 0.1
 	var is_stepping := (
@@ -333,9 +332,8 @@ func _physics_process(delta: float) -> void:
 		_play_step_audio(is_on_water, is_landed_on_floor_this_frame)
 
 	_capsule.height = _get_next_capsule_height(is_crouching, delta)
-	_camera.fov = _get_next_camera_fov(new_velocity, is_crouching, delta)
+	_camera.fov = _get_next_camera_fov(is_crouching, delta)
 
-	velocity = new_velocity
 	_last_is_on_water = is_on_water
 	_last_is_floating = is_floating
 	_last_is_submerged = is_submerged
@@ -483,11 +481,11 @@ func _play_step_audio(
 	_step_audio_stream_player.play()
 
 
-func _get_next_camera_fov(vel: Vector3, is_crouching: bool, delta: float) -> float:
+func _get_next_camera_fov(is_crouching: bool, delta: float) -> float:
 	var max_locomotion_speed := (
 		base_speed * maxf(sprint_speed_multiplier, fly_mode_speed_modifier)
 	)
-	var a := vel.length() / max_locomotion_speed
+	var a := velocity.length() / max_locomotion_speed
 	var b := max_speed_fov_multiplier - 1.0
 	var target_fov := _initial_fov * (1.0 + a * b)
 	if is_crouching:
@@ -546,4 +544,5 @@ func _get_next_velocity(
 
 	if is_jumping:
 		vel.y = jump_height
+
 	return vel

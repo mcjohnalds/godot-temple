@@ -1,4 +1,5 @@
 - Better crouch/uncrouch sound
+- Change FOV and crouch height with smoothstep
 - Swimming should make more noise
 - Use shape cast or something instead of ray cast so that a bug doesn't happen
   where the player gets the wrong step sound when walking along the edge of
