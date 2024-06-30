@@ -56,13 +56,13 @@ class_name KinematicFpsController
 @export_group("Head Bob - Rotation When Move (Quake Like)")
 
 ## Enables camera angle for the direction the character controller moves
-@export var rotation_to_move := true
+@export var quake_camera_tilt_enabled := true
 
 ## Speed at which the camera angle moves
-@export var speed_rotation := 4.0
+@export var quake_camera_tilt_speed := 4.0
 
 ## Rotation angle limit per move
-@export var angle_limit_for_rotation := 0.1
+@export var quake_camera_tilt_angle_limit := 0.1
 
 
 @export_group("Movement")
@@ -150,6 +150,7 @@ var _last_is_on_floor := false
 var _initial_head_position: Vector3
 var _initial_head_rotation: Quaternion
 var _head_bob_cycle_position := Vector2.ZERO
+var _quake_camera_tilt_ratio := 0.0
 
 @onready var _head: Node3D = $Head
 @onready var _camera: Camera3D =  $Head/Camera3D
@@ -181,7 +182,7 @@ func _ready():
 	_initial_head_rotation = _head.quaternion
 
 
-func _physics_process(delta):
+func _physics_process(delta: float) -> void:
 	var input_horizontal := Vector2.ZERO
 	var input_vertical := 0.0
 	var input_jump := false
@@ -320,12 +321,28 @@ func _physics_process(delta):
 		base_speed * maxf(sprint_speed_multiplier, fly_mode_speed_modifier)
 	)
 
+	# FOV adjust
 	var a := velocity.length() / max_locomotion_speed
 	var b := max_speed_fov_multiplier - 1.0
 	var target_fov := _initial_fov * (1.0 + a * b)
 	if is_crouching:
 		target_fov *= crouch_fov_multiplier
 	_camera.set_fov(lerp(_camera.fov, target_fov, delta * fov_change_speed))
+
+	if quake_camera_tilt_enabled:
+		var target := input_horizontal.x
+		var direction := signf(target - _quake_camera_tilt_ratio)
+		var new_value := _quake_camera_tilt_ratio + quake_camera_tilt_speed * direction
+		var new_direction := signf(target - new_value)
+		if new_direction != direction:
+			_quake_camera_tilt_ratio = target
+		else:
+			_quake_camera_tilt_ratio += quake_camera_tilt_speed * direction
+		_camera.rotation.z = lerp(
+			-quake_camera_tilt_angle_limit,
+			quake_camera_tilt_angle_limit,
+			smoothstep(-1.0, 1.0, -_quake_camera_tilt_ratio)
+		)
 
 	_do_head_bobbing(
 		horizontal_velocity, input_horizontal, is_sprinting, delta
@@ -416,7 +433,6 @@ func _do_head_bobbing(
 	delta: float
 ):
 	var new_position := _initial_head_position
-	var new_rotation := _initial_head_rotation
 	if step_bob_enabled:
 		var x_pos := (
 			head_bob_curve.sample(_head_bob_cycle_position.x)
@@ -442,22 +458,7 @@ func _do_head_bobbing(
 		if is_on_floor():
 			new_position += Vector3(x_pos, y_pos, 0.0)
 
-	if is_sprinting:
-		input_horizontal *= 2.0
-	if rotation_to_move:
-		var target_rotation := Quaternion.from_euler(
-			Vector3(
-				input_horizontal.y * angle_limit_for_rotation,
-				0.0,
-				-input_horizontal.x * angle_limit_for_rotation
-			)
-		)
-		new_rotation += lerp(
-			_camera.quaternion, target_rotation, speed_rotation * delta
-		)
-
 	_camera.position = new_position
-	_camera.quaternion = new_rotation
 
 
 func _reset_step():

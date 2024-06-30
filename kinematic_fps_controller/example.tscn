@@ -123,6 +123,8 @@ material_override = ExtResource("3_7vb8p")
 
 [node name="KinematicFpsController" parent="." instance=ExtResource("2_nvo2f")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.62268e-06, 6, 13)
+quake_camera_tilt_speed = 0.1
+quake_camera_tilt_angle_limit = 0.007
 
 [node name="Area3D" type="Area3D" parent="."]
 transform = Transform3D(0.491574, 0, 0, 0, 1, 0, 0, 0, 0.555284, 0, -3, 5.93584)
