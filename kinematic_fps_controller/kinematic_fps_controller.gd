@@ -78,7 +78,7 @@ class_name KinematicFpsController
 ## Note: this speed is used as a basis for abilities to multiply their 
 ## respective values, changing it will have consequences on [b]all abilities[/b]
 ## that use velocity.
-@export var speed := 10.0
+@export var base_speed := 10.0
 
 ## Time for the character to reach full speed
 @export var walk_acceleration := 8.0
@@ -159,7 +159,6 @@ var _head_bob_cycle_position := Vector2.ZERO
 )
 @onready var _collision: CollisionShape3D = $CollisionShape3D
 @onready var _head_ray_cast: RayCast3D = $HeadRayCast
-@onready var _normal_speed := speed
 @onready var _step_audio_stream_player: AudioStreamPlayer3D = (
 	$StepAudioStreamPlayer
 )
@@ -296,15 +295,15 @@ func _physics_process(delta):
 	elif is_floating:
 		multiplier *= on_water_speed_multiplier
 
-	speed = _normal_speed * multiplier
+	var speed := base_speed * multiplier
 
 	var input_direction := _get_input_direction(
 		input_horizontal, input_vertical, is_floating
 	)
-	_do_walking(is_walking, input_direction, delta)
+	_do_walking(is_walking, input_direction, speed, delta)
 	_do_crouching(is_crouching, delta)
-	_do_swimming(input_direction, is_floating, depth_on_water)
-	_do_flying(input_direction)
+	_do_swimming(input_direction, is_floating, depth_on_water, speed)
+	_do_flying(input_direction, speed)
 	if is_jumping:
 		velocity.y = jump_height
 
@@ -353,7 +352,9 @@ func _input(event: InputEvent) -> void:
 		_uncrouch_audio_stream_player.play()
 
 
-func _do_walking(is_walking: bool, input_direction: Vector3, delta: float):
+func _do_walking(
+	is_walking: bool, input_direction: Vector3, speed: float, delta: float
+):
 	if not is_walking:
 		return
 
@@ -382,7 +383,12 @@ func _do_crouching(is_crouching: bool, delta: float) -> void:
 	# var crouch_factor = (_initial_capsule_height - height_in_crouch) - (_collision.shape.height - height_in_crouch)/ (_initial_capsule_height - height_in_crouch)
 
 
-func _do_swimming(input_direction: Vector3, is_floating: bool, depth_on_water: float) -> void:
+func _do_swimming(
+	input_direction: Vector3,
+	is_floating: bool,
+	depth_on_water: float,
+	speed: float
+) -> void:
 	if not is_floating:
 		return
 	var depth := floating_height - depth_on_water
@@ -393,7 +399,7 @@ func _do_swimming(input_direction: Vector3, is_floating: bool, depth_on_water: f
 		velocity.y = min(velocity.y,0)
 
 
-func _do_flying(input_direction: Vector3) -> void:
+func _do_flying(input_direction: Vector3, speed: float) -> void:
 	if not _is_flying:
 		return
 	velocity = input_direction * speed
@@ -441,11 +447,6 @@ func _do_head_bobbing(
 
 	_first_person_camera_reference.position = new_position
 	_first_person_camera_reference.quaternion = new_rotation
-
-
-## Returns the speed of character controller
-func get_speed() -> float:
-	return speed
 
 
 func _reset_step():
