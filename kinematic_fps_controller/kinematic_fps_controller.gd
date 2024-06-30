@@ -139,9 +139,6 @@ class_name KinematicFpsController
 ## Speed multiplier when submerged water
 @export var submerged_speed_multiplier : float = 0.5
 
-## Result direction of inputs sent to [b]move()[/b].
-var _direction := Vector3()
-
 ## Current counter used to calculate next step.
 var _step_cycle : float = 0
 
@@ -222,25 +219,20 @@ func _ready():
 
 
 func _physics_process(delta):
-	var is_valid_input := Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
-
-	var input_axis := Vector2.ZERO
+	var input_horizontal := Vector2.ZERO
+	var input_vertical := 0.0
 	var input_jump := false
 	var input_crouch := false
 	var input_sprint := false
-	var input_swim_down := false
-	var input_swim_up := false
-	if is_valid_input:
+	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		if Input.is_action_just_pressed("move_fly_mode"):
 			_is_flying = not _is_flying
-		input_axis = Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
+		input_horizontal = Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
+		input_vertical = Input.get_axis("move_crouch", "move_jump")
 		input_jump = Input.is_action_just_pressed("move_jump")
 		input_crouch = Input.is_action_pressed("move_crouch")
 		input_sprint = Input.is_action_pressed("move_sprint")
-		input_swim_down = Input.is_action_pressed("move_crouch")
-		input_swim_up = Input.is_action_pressed("move_jump")
 
-	var direction = _direction_input(input_axis, input_swim_down, input_swim_up)
 	if not _is_floating:
 		_check_landed()
 	_is_on_water = swim_ray_cast.is_colliding()
@@ -288,7 +280,7 @@ func _physics_process(delta):
 	_is_jumping = input_jump and is_on_floor() and not head_check.is_colliding()
 	var is_walking := not _is_flying and not _is_floating
 	var is_crouching := input_crouch and is_on_floor() and not _is_floating and not is_submerged and not _is_flying
-	var is_sprinting := input_sprint and is_on_floor() and  input_axis.y >= 0.5 and !is_crouching and not _is_flying and not _is_floating and not is_submerged
+	var is_sprinting := input_sprint and is_on_floor() and  input_horizontal.y >= 0.5 and !is_crouching and not _is_flying and not _is_floating and not is_submerged
 
 	var multiplier = 1.0
 	if is_crouching:
@@ -303,10 +295,13 @@ func _physics_process(delta):
 
 	speed = _normal_speed * multiplier
 
-	_do_walking(is_walking, direction, delta)
+	var input_direction := _get_input_direction(
+		input_horizontal, input_vertical
+	)
+	_do_walking(is_walking, input_direction, delta)
 	_do_crouching(is_crouching, delta)
-	_do_swimming(direction)
-	_do_flying(direction)
+	_do_swimming(input_direction)
+	_do_flying(input_direction)
 	_do_jumping()
 
 	move_and_slide()
@@ -327,7 +322,7 @@ func _physics_process(delta):
 #	if not _is_flying and not _is_floating and not is_submerged
 #		camera.set_fov(lerp(camera.fov, normal_fov, delta * fov_change_speed))
 
-	_do_head_bobbing(_horizontal_velocity, input_axis, is_sprinting, delta)
+	_do_head_bobbing(_horizontal_velocity, input_horizontal, is_sprinting, delta)
 
 
 func _input(event: InputEvent) -> void:
@@ -347,7 +342,7 @@ func _input(event: InputEvent) -> void:
 		uncrouch_stream.play()
 
 
-func _do_walking(is_walking: bool, direction: Vector3, delta: float):
+func _do_walking(is_walking: bool, input_direction: Vector3, delta: float):
 	if not is_walking:
 		return
 
@@ -356,9 +351,9 @@ func _do_walking(is_walking: bool, direction: Vector3, delta: float):
 	temp_vel.y = 0
 
 	var temp_accel: float
-	var target: Vector3 = direction * speed
+	var target: Vector3 = input_direction * speed
 
-	if direction.dot(temp_vel) > 0:
+	if input_direction.dot(temp_vel) > 0:
 		temp_accel = acceleration
 	else:
 		temp_accel = deceleration
@@ -381,21 +376,21 @@ func _do_crouching(is_crouching: bool, delta: float) -> void:
 	# var crouch_factor = (_default_height - height_in_crouch) - (collision.shape.height - height_in_crouch)/ (_default_height - height_in_crouch)
 
 
-func _do_swimming(direction: Vector3) -> void:
+func _do_swimming(input_direction: Vector3) -> void:
 	if not _is_floating:
 		return
 	var depth = floating_height - _depth_on_water
-	velocity = direction * speed
+	velocity = input_direction * speed
 #	if depth < 0.1: && !_is_flying:
 	if depth < 0.1:
 		# Prevent free sea movement from exceeding the water surface
 		velocity.y = min(velocity.y,0)
 
 
-func _do_flying(direction: Vector3) -> void:
+func _do_flying(input_direction: Vector3) -> void:
 	if not _is_flying:
 		return
-	velocity = direction * speed
+	velocity = input_direction * speed
 
 
 func _do_jumping() -> void:
@@ -403,7 +398,7 @@ func _do_jumping() -> void:
 		velocity.y = jump_height
 
 
-func _do_head_bobbing(horizontal_velocity:Vector3, input_axis:Vector2, is_sprinting:bool, delta:float):
+func _do_head_bobbing(horizontal_velocity:Vector3, input_horizontal:Vector2, is_sprinting:bool, delta:float):
 	var new_position = original_head_position
 	var new_rotation = original_head_rotation
 	if step_bob_enabled:
@@ -425,10 +420,10 @@ func _do_head_bobbing(horizontal_velocity:Vector3, input_axis:Vector2, is_sprint
 			new_position += headpos
 
 	if is_sprinting:
-		input_axis *= 2
+		input_horizontal *= 2
 	if rotation_to_move:
 		var target_rotation : Quaternion
-		# target_rotation.from_euler(Vector3(input_axis.y * angle_limit_for_rotation, 0.0, -input_axis.x * angle_limit_for_rotation))
+		# target_rotation.from_euler(Vector3(input_horizontal.y * angle_limit_for_rotation, 0.0, -input_horizontal.x * angle_limit_for_rotation))
 		new_rotation += lerp(first_person_camera_reference.quaternion, target_rotation, speed_rotation * delta)
 
 	first_person_camera_reference.position = new_position
@@ -452,32 +447,23 @@ func _check_landed():
 	_last_is_on_floor = is_on_floor()
 
 
-func _direction_input(input : Vector2, input_down : bool, input_up : bool) -> Vector3:
-	var aim_node: Node3D
-	if _is_flying or _is_floating:
-		aim_node = head
-	else:
-		aim_node = self
-
-	_direction = Vector3()
-	var aim = aim_node.get_global_transform().basis
-	if input.y >= 0.5:
-		_direction -= aim.z
-	if input.y <= -0.5:
-		_direction += aim.z
-	if input.x <= -0.5:
-		_direction -= aim.x
-	if input.x >= 0.5:
-		_direction += aim.x
-	# NOTE: For free-flying and swimming movements
-	if _is_flying or _is_floating:
-		if input_up:
-			_direction.y += 1.0
-		elif input_down:
-			_direction.y -= 1.0
-	else:
-		_direction.y = 0
-	return _direction.normalized()
+func _get_input_direction(
+	input_horizontal: Vector2, input_vertical: float
+) -> Vector3:
+	var allow_vertical := _is_flying or _is_floating
+	var aim := head if allow_vertical else self
+	var input_direction := Vector3.ZERO
+	if input_horizontal.y >= 0.5:
+		input_direction -= aim.global_basis.z
+	if input_horizontal.y <= -0.5:
+		input_direction += aim.global_basis.z
+	if input_horizontal.x <= -0.5:
+		input_direction -= aim.global_basis.x
+	if input_horizontal.x >= 0.5:
+		input_direction += aim.global_basis.x
+	if allow_vertical:
+		input_direction.y += input_vertical
+	return input_direction.normalized()
 
 
 func _is_step(velocity:float, delta:float) -> bool:
