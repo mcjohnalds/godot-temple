@@ -141,20 +141,18 @@ class_name KinematicFpsController
 
 var _step_cycle := 0.0
 var _next_step := 0.0
-var _initial_capsule_height: float
 var _is_flying := false
 var _last_is_on_water := false
 var _last_is_floating := false
 var _last_is_submerged := false
 var _last_is_on_floor := false
-var _initial_head_position: Vector3
-var _initial_head_rotation: Quaternion
 var _head_bob_cycle_position := Vector2.ZERO
 var _quake_camera_tilt_ratio := 0.0
 
 @onready var _head: Node3D = $Head
 @onready var _camera: Camera3D =  $Head/Camera3D
 @onready var _collision: CollisionShape3D = $CollisionShape3D
+@onready var _capsule: CapsuleShape3D = _collision.shape
 @onready var _head_ray_cast: RayCast3D = $HeadRayCast
 @onready var _step_audio_stream_player: AudioStreamPlayer3D = (
 	$StepAudioStreamPlayer
@@ -174,12 +172,8 @@ var _quake_camera_tilt_ratio := 0.0
 @onready var _ground_ray_cast: RayCast3D = $GroundRayCast
 @onready var _swim_ray_cast: RayCast3D = $SwimRayCast
 @onready var _initial_fov := _camera.fov
-
-
-func _ready():
-	_initial_capsule_height = _collision.shape.height
-	_initial_head_position = _head.position
-	_initial_head_rotation = _head.quaternion
+@onready var _initial_head_position := _head.position
+@onready var _initial_capsule_height = _capsule.height
 
 
 func _physics_process(delta: float) -> void:
@@ -385,11 +379,13 @@ func _do_walking(
 
 func _do_crouching(is_crouching: bool, delta: float) -> void:
 	if is_crouching:
-		_collision.shape.height -= delta * 8
+		_capsule.height -= delta * 8
 	elif not _head_ray_cast.is_colliding():
-		_collision.shape.height += delta * 8
-	_collision.shape.height = clamp(_collision.shape.height , height_in_crouch, _initial_capsule_height)
-	# var crouch_factor = (_initial_capsule_height - height_in_crouch) - (_collision.shape.height - height_in_crouch)/ (_initial_capsule_height - height_in_crouch)
+		_capsule.height += delta * 8
+	_capsule.height = clamp(
+		_capsule.height , height_in_crouch, _initial_capsule_height
+	)
+	# var crouch_factor = (_initial_capsule_height - height_in_crouch) - (_capsule.height - height_in_crouch)/ (_initial_capsule_height - height_in_crouch)
 
 
 func _do_swimming(
