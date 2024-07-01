@@ -1,5 +1,6 @@
-[gd_scene load_steps=33 format=3 uid="uid://c2t6smyr8xtty"]
+[gd_scene load_steps=34 format=3 uid="uid://c2t6smyr8xtty"]
 
+[ext_resource type="Script" path="res://kinematic_fps_controller/example.gd" id="1_4lthp"]
 [ext_resource type="PackedScene" uid="uid://2oxdgu03lnbk" path="res://kinematic_fps_controller/kinematic_fps_controller.tscn" id="2_nvo2f"]
 [ext_resource type="Material" uid="uid://2ciy11rdndma" path="res://kinematic_fps_controller/materials/grass.tres" id="3_7vb8p"]
 [ext_resource type="PackedScene" uid="uid://b3wdcta6c4k4t" path="res://kinematic_fps_controller/geometry/floor.tscn" id="3_80rlo"]
@@ -84,6 +85,7 @@ tonemap_mode = 2
 glow_enabled = true
 
 [node name="Example" type="Node3D"]
+script = ExtResource("1_4lthp")
 
 [node name="Floor2" parent="." instance=ExtResource("3_80rlo")]
 transform = Transform3D(15, 0, 0, 0, 1, 0, 0, 0, 40, 12, -0.5, 0)

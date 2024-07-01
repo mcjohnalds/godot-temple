@@ -1,7 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://r2qgkt8jfxd8"]
+[gd_scene load_steps=3 format=3 uid="uid://r2qgkt8jfxd8"]
 
+[ext_resource type="Script" path="res://misc/start.gd" id="1_e6t8m"]
 [ext_resource type="PackedScene" uid="uid://4xgl4drja75q" path="res://misc/menu.tscn" id="1_t3jnr"]
 
 [node name="Start" type="Node"]
+script = ExtResource("1_e6t8m")
 
 [node name="Menu" parent="." instance=ExtResource("1_t3jnr")]
+resume_button_visible = false
+restart_button_visible = false

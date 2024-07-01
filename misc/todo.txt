@@ -1,5 +1,6 @@
 - Settings
   - Cache preload step
+  - Confirm quit
 - Character controller
   - Overwatch like bob curve
   - Special head bob when jumping
