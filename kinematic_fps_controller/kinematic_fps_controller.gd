@@ -1,17 +1,11 @@
 extends CharacterBody3D
 class_name KinematicFpsController
 
-# TODO: combine all audio code into one bit
-
-@export var underwater_env: Environment
-
-
 @export_group("Audio")
 
 @export var material_audios: Array[MaterialAudio]
 
 @export var water_material_audio: MaterialAudio
-
 
 @export_group("FOV")
 
@@ -32,8 +26,7 @@ class_name KinematicFpsController
 ## Maximum vertical angle the head can aim
 @export var vertical_angle_limit := TAU * 0.24
 
-
-@export_group("Head Bob - Steps")
+@export_group("Head Bob")
 
 ## Enables bob for made steps
 @export var step_bob_enabled := true
@@ -48,12 +41,7 @@ class_name KinematicFpsController
 ## Maximum range value of headbob
 @export var head_bob_range := Vector2(0.07, 0.07)
 
-@export_group("Head Bob - Jump")
-
-## Enables bob for made jumps
-@export var jump_bob_enabled := true
-
-@export_group("Head Bob - Rotation When Move (Quake Like)")
+@export_group("Quake Camera Tilt")
 
 ## Enables camera angle for the direction the character controller moves
 @export var quake_camera_tilt_enabled := true
@@ -64,7 +52,6 @@ class_name KinematicFpsController
 ## Rotation angle limit per move
 @export var quake_camera_tilt_angle_limit := 0.007
 
-
 @export_group("Movement")
 
 ## Controller Gravity Multiplier
@@ -74,9 +61,11 @@ class_name KinematicFpsController
 
 ## Controller base speed
 ## Note: this speed is used as a basis for abilities to multiply their 
-## respective values, changing it will have consequences on [b]all abilities[/b]
-## that use velocity.
+## respective values, changing it will have consequences on [b]all
+## abilities[/b] that use velocity.
 @export var base_speed := 10.0
+
+@export_group("Walk")
 
 ## Time for the character to reach full speed
 @export var walk_acceleration := 8.0
@@ -87,22 +76,19 @@ class_name KinematicFpsController
 ## Sets control in the air
 @export var air_control := 0.3
 
-
 @export_group("Sprint")
 
 ## Speed to be multiplied when active the ability
 @export var sprint_speed_multiplier := 1.6
-
 
 @export_group("Footsteps")
 
 ## Maximum counter value to be computed one step
 @export var step_lengthen := 0.7
 
-## Value to be added to compute a step, each frame that the character is walking this value 
-## is added to a counter
+## Value to be added to compute a step, each frame that the character is
+## walking this value is added to a counter
 @export var step_interval := 6.0
-
 
 @export_group("Crouch")
 
@@ -112,22 +98,20 @@ class_name KinematicFpsController
 ## Speed multiplier when crouch is actived
 @export var crouch_speed_multiplier := 0.7
 
-
 @export_group("Jump")
 
 ## Jump/Impulse height
 @export var jump_height := 10.0
-
 
 @export_group("Fly")
 
 ## Speed multiplier when fly mode is actived
 @export var fly_mode_speed_modifier := 2.0
 
-
 @export_group("Swim")
 
-## Minimum height for [CharacterController3D] to be completely submerged in water.
+## Minimum height for [CharacterController3D] to be completely submerged in
+## water.
 @export var submerged_height := 0.36
 
 ## Minimum height for [CharacterController3D] to be float in water.
@@ -139,8 +123,9 @@ class_name KinematicFpsController
 ## Speed multiplier when submerged water
 @export var submerged_speed_multiplier := 0.5
 
+@export var underwater_env: Environment
+
 var _step_cycle := 0.0
-var _next_step := 0.0
 var _is_flying := false
 var _last_is_on_water := false
 var _last_is_floating := false
@@ -291,14 +276,18 @@ func _physics_process(delta: float) -> void:
 	)
 
 	var next_step_cycle := _step_cycle
+	var is_step_completed := false
 	if is_stepping:
-		next_step_cycle += (horizontal_velocity.length() + step_lengthen) * delta
+		next_step_cycle += (
+			(horizontal_velocity.length() + step_lengthen) * delta
+		)
+		is_step_completed = next_step_cycle > step_interval
+		if is_step_completed:
+			next_step_cycle -= step_interval
+		if is_landed_on_floor_this_frame:
+			next_step_cycle = 0.0
 
-	var is_step_completed := next_step_cycle > _next_step
-
-	var is_step_cycle_reset := (
-		is_landed_on_floor_this_frame or is_step_completed
-	)
+	# Calculations happen above, side-effects happen below
 
 	if quake_camera_tilt_enabled:
 		var target := input_horizontal.x
@@ -318,13 +307,6 @@ func _physics_process(delta: float) -> void:
 		)
 
 	if is_jumping:
-		_head_bob_cycle_position = Vector2.ZERO
-	_do_head_bobbing(horizontal_velocity, delta)
-
-	if is_step_cycle_reset:
-		_next_step = _step_cycle + step_interval
-
-	if is_jumping:
 		_play_jump_audio(is_on_water, is_landed_on_floor_this_frame)
 	if is_landed_on_floor_this_frame or is_entered_water:
 		_play_land_audio(is_on_water, is_landed_on_floor_this_frame)
@@ -337,6 +319,10 @@ func _physics_process(delta: float) -> void:
 	_step_cycle = next_step_cycle
 	_capsule.height = _get_next_capsule_height(is_crouching, delta)
 	_camera.fov = _get_next_camera_fov(new_velocity, is_crouching, delta)
+	_head_bob_cycle_position = _get_next_head_bob_cycle_position(
+		horizontal_velocity, is_jumping, delta
+	)
+	_camera.position = _get_next_camera_position()
 
 	velocity = new_velocity
 	_last_is_on_water = is_on_water
@@ -373,8 +359,7 @@ func _get_next_capsule_height(is_crouching: bool, delta: float) -> float:
 	return clampf(h, height_in_crouch, _initial_capsule_height)
 
 
-func _do_head_bobbing(horizontal_velocity: Vector3, delta: float):
-	var new_position := _initial_head_position
+func _get_next_camera_position() -> Vector3:
 	if step_bob_enabled:
 		var x_pos := (
 			head_bob_curve.sample(_head_bob_cycle_position.x)
@@ -386,21 +371,29 @@ func _do_head_bobbing(horizontal_velocity: Vector3, delta: float):
 			* head_bob_curve_multiplier.y
 			* head_bob_range.y
 		)
-
-		var head_bob_interval := 2.0 * step_interval
-		var tick_speed = (horizontal_velocity.length() * delta) / head_bob_interval
-		_head_bob_cycle_position.x += tick_speed
-		_head_bob_cycle_position.y += tick_speed * vertical_horizontal_ratio
-
-		if _head_bob_cycle_position.x > 1.0:
-			_head_bob_cycle_position.x -= 1.0
-		if _head_bob_cycle_position.y > 1.0:
-			_head_bob_cycle_position.y -= 1.0
-
 		if is_on_floor():
-			new_position += Vector3(x_pos, y_pos, 0.0)
+			return _initial_head_position + Vector3(x_pos, y_pos, 0.0)
+	return _initial_head_position
 
-	_camera.position = new_position
+
+func _get_next_head_bob_cycle_position(
+	horizontal_velocity: Vector3, is_jumping: bool, delta: float
+) -> Vector2:
+	if is_jumping:
+		return Vector2.ZERO
+
+	var new_pos := _head_bob_cycle_position
+
+	var head_bob_interval := 2.0 * step_interval
+	var tick_speed = (horizontal_velocity.length() * delta) / head_bob_interval
+	new_pos.x += tick_speed
+	new_pos.y += tick_speed * vertical_horizontal_ratio
+
+	if new_pos.x > 1.0:
+		new_pos.x -= 1.0
+	if new_pos.y > 1.0:
+		new_pos.y -= 1.0
+	return new_pos
 
 
 func _get_input_direction(

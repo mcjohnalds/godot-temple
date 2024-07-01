@@ -1,38 +1,39 @@
-- Better crouch/uncrouch sound
-- Change FOV and crouch height with smoothstep
-- Swimming should make more noise
-- Use shape cast or something instead of ray cast so that a bug doesn't happen
-  where the player gets the wrong step sound when walking along the edge of
-  something floating.
-- Started/stopped floating sounds
-- Disable crouch underwater, flying, jumping
-- Add weapon
-  - Make weapon bob with player breathing
-  - https://www.youtube.com/watch?v=7Dga-UqdBR8
-- Convert wavs to oggs
-- Create material audio with null material to represent air
-- Fix inconsistent jumping from water
-- Head check
-- FPS controller
+- Character controller
+  - Overwatch like bob curve
+  - Special head bob when jumping
+  - Better crouch/uncrouch sound
+  - Change FOV and crouch height with smoothstep
+  - Swimming should make more noise
+  - Use shape cast or something instead of ray cast so that a bug doesn't
+    happen where the player gets the wrong step sound when walking along the
+    edge of something floating.
+  - Started/stopped floating sounds
+  - Disable crouch underwater, flying, jumping
+  - Weapon
+    - Make weapon bob with player breathing
+    - Overwatch-like weapon bobhttps://www.youtube.com/watch?v=7Dga-UqdBR8
+  - Fix inconsistent jumping from water
+  - Head check
   - Bonk assist
-- Interactive music
-- Skinnable UI
-- Mouse capture
-- Global scene
-- Global utils
-  - get intertia
-- Maximized when not in debug mode
-- Screen space shaders
-- Settings menu
-  - Dynamic fov should be toggleable
-  - Head bob toggle
-- Boot screen
-- Preload step
-- Exports and scripts
-- Texture exporter
-- Heightmap
-- Vehicle controller
-- Guns
-- Tracers
-- Night vision
-- Icon
+- Misc
+  - Convert wavs to oggs
+  - Interactive music
+  - Skinnable UI
+  - Mouse capture
+  - Global scene
+  - Global utils
+    - get intertia
+  - Maximized when not in debug mode
+  - Screen space shaders
+  - Settings menu
+    - Dynamic fov should be toggleable
+    - Head bob toggle
+  - Boot screen
+  - Preload step
+  - Exports and scripts
+  - Texture exporter
+  - Heightmap
+  - Vehicle controller
+  - Tracers
+  - Night vision
+  - Icon
