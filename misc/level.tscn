@@ -1,9 +1,0 @@
-[gd_scene load_steps=3 format=3 uid="uid://d1y8jdicca0ja"]
-
-[ext_resource type="PackedScene" uid="uid://c2t6smyr8xtty" path="res://kinematic_fps_controller/example.tscn" id="1_2ehdu"]
-[ext_resource type="Script" path="res://misc/level.gd" id="1_v8ng0"]
-
-[node name="Level" type="Node3D"]
-script = ExtResource("1_v8ng0")
-
-[node name="Example" parent="." instance=ExtResource("1_2ehdu")]

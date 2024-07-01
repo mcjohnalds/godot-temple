@@ -1,100 +1,121 @@
-[gd_scene load_steps=2 format=3 uid="uid://4xgl4drja75q"]
+[gd_scene load_steps=3 format=3 uid="uid://4xgl4drja75q"]
 
 [ext_resource type="Script" path="res://misc/menu.gd" id="1_7s8hv"]
 
-[node name="Menu" type="CenterContainer"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3p651"]
+bg_color = Color(0.3, 0.3, 0.3, 0.74902)
+
+[node name="Menu" type="PanelContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_3p651")
 script = ExtResource("1_7s8hv")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="VBoxContainer1" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(400, 2.08165e-12)
 layout_mode = 2
 
-[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer1"]
 layout_mode = 2
 theme_type_variation = &"HeaderLarge"
 text = "Godot Temple"
 
-[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+[node name="HSeparator1" type="HSeparator" parent="CenterContainer/VBoxContainer/VBoxContainer1"]
 layout_mode = 2
 
-[node name="StartButton" type="Button" parent="VBoxContainer"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="CenterContainer/VBoxContainer/VBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Start"
 
-[node name="ResumeButton" type="Button" parent="VBoxContainer"]
+[node name="ResumeButton" type="Button" parent="CenterContainer/VBoxContainer/VBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Resume"
 
-[node name="RestartButton" type="Button" parent="VBoxContainer"]
+[node name="RestartButton" type="Button" parent="CenterContainer/VBoxContainer/VBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Restart Level"
+text = "Restart"
 
-[node name="QuitButton" type="Button" parent="VBoxContainer"]
+[node name="QuitButton" type="Button" parent="CenterContainer/VBoxContainer/VBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Quit"
 
-[node name="SettingsLabel" type="Label" parent="VBoxContainer"]
+[node name="VBoxContainer3" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="SettingsLabel" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
 layout_mode = 2
 theme_type_variation = &"HeaderMedium"
 text = "Settings"
 
-[node name="MouseSensitivity" type="HBoxContainer" parent="VBoxContainer"]
+[node name="MouseSensitivity" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/MouseSensitivity"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/MouseSensitivity"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Mouse sensitivity"
 
-[node name="MouseSensitivitySlider" type="HSlider" parent="VBoxContainer/MouseSensitivity"]
+[node name="MouseSensitivitySlider" type="HSlider" parent="CenterContainer/VBoxContainer/VBoxContainer3/MouseSensitivity"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 
-[node name="SoundVolume" type="HBoxContainer" parent="VBoxContainer"]
+[node name="SoundVolume" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/SoundVolume"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/SoundVolume"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Sound volume"
 
-[node name="SoundVolumeSlider" type="HSlider" parent="VBoxContainer/SoundVolume"]
+[node name="SoundVolumeSlider" type="HSlider" parent="CenterContainer/VBoxContainer/VBoxContainer3/SoundVolume"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 
-[node name="MusicVolume" type="HBoxContainer" parent="VBoxContainer"]
+[node name="MusicVolume" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/MusicVolume"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/MusicVolume"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Music	 volume"
 
-[node name="MusicVolumeSlider" type="HSlider" parent="VBoxContainer/MusicVolume"]
+[node name="MusicVolumeSlider" type="HSlider" parent="CenterContainer/VBoxContainer/VBoxContainer3/MusicVolume"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 
-[node name="InvertMouse" type="HBoxContainer" parent="VBoxContainer"]
+[node name="InvertMouse" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/InvertMouse"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/InvertMouse"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Invert mouse"
 
-[node name="InvertMouseOptionButton" type="OptionButton" parent="VBoxContainer/InvertMouse"]
+[node name="InvertMouseOptionButton" type="OptionButton" parent="CenterContainer/VBoxContainer/VBoxContainer3/InvertMouse"]
 layout_mode = 2
 size_flags_horizontal = 3
 selected = 0
@@ -104,15 +125,16 @@ popup/item_0/id = 6
 popup/item_1/text = "Enabled"
 popup/item_1/id = 7
 
-[node name="Vsync" type="HBoxContainer" parent="VBoxContainer"]
+[node name="Vsync" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/Vsync"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/Vsync"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Vsync"
 
-[node name="VsyncOptionButton" type="OptionButton" parent="VBoxContainer/Vsync"]
+[node name="VsyncOptionButton" type="OptionButton" parent="CenterContainer/VBoxContainer/VBoxContainer3/Vsync"]
 layout_mode = 2
 size_flags_horizontal = 3
 selected = 0
@@ -125,15 +147,16 @@ popup/item_2/id = 2
 popup/item_3/text = "Mailbox"
 popup/item_3/id = 3
 
-[node name="PerformancePreset" type="HBoxContainer" parent="VBoxContainer"]
+[node name="PerformancePreset" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/PerformancePreset"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/PerformancePreset"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Graphics	"
 
-[node name="PerformancePresetOptionButton" type="OptionButton" parent="VBoxContainer/PerformancePreset"]
+[node name="PerformancePresetOptionButton" type="OptionButton" parent="CenterContainer/VBoxContainer/VBoxContainer3/PerformancePreset"]
 layout_mode = 2
 size_flags_horizontal = 3
 selected = 0

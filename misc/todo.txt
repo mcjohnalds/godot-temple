@@ -1,6 +1,8 @@
 - Settings
+  - Hide settings behind menu
   - Cache preload step
   - Confirm quit
+  - Blur background on pause
 - Character controller
   - Overwatch like bob curve
   - Special head bob when jumping
