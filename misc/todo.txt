@@ -37,3 +37,4 @@
   - Tracers
   - Night vision
   - Icon
+  - Make sure use of noise textures is efficient, render to webp if necessary.
