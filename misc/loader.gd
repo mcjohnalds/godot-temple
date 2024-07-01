@@ -50,8 +50,15 @@ func _ready() -> void:
 				node.one_shot = true
 				node.emitting = true
 				node.process_mode = Node.PROCESS_MODE_ALWAYS
+			if node is CanvasItem:
+				var canvas_item: CanvasItem = node
+				canvas_item.z_index = 0
+			if node is ScrollContainer:
+				# The ScrollContainer associated with OptionButtons draw on top
+				# of everything else and I don't know why so I just hide them
+				node.visible = false
 			if node is CanvasLayer:
-				var canvas_layer := node as CanvasLayer
+				var canvas_layer: CanvasLayer = node
 				# Don't want the scene's layer to clash with our layer
 				canvas_layer.layer = 1
 		container.add_child(scene)

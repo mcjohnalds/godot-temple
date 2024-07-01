@@ -1,3 +1,5 @@
+- Settings
+  - Cache preload step
 - Character controller
   - Overwatch like bob curve
   - Special head bob when jumping

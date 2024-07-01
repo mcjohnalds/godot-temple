@@ -2,7 +2,9 @@ extends Node3D
 
 @onready var light: DirectionalLight3D = $DirectionalLight3D
 @onready var camera: Camera3D = $Camera3D
-@onready var rigid_body_fps_controller: RigidBodyFpsController = $RigidBodyFpsController
+@onready var rigid_body_fps_controller: RigidBodyFpsController = (
+	$RigidBodyFpsController
+)
 
 
 func _ready() -> void:
@@ -29,3 +31,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		rigid_body_fps_controller.apply_torque_impulse(
 			(Vector3.UP * 0.1 + Vector3.RIGHT * 0.1) * 1.0
 		)
+	if event is InputEventMouseButton:
+		var e := event as InputEventMouseButton
+		if e.button_index == MOUSE_BUTTON_LEFT && e.pressed:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)

@@ -1,0 +1,147 @@
+[gd_scene load_steps=2 format=3 uid="uid://4xgl4drja75q"]
+
+[ext_resource type="Script" path="res://misc/menu.gd" id="1_7s8hv"]
+
+[node name="Menu" type="CenterContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7s8hv")
+
+[node name="MaginContainer" type="MarginContainer" parent="."]
+custom_minimum_size = Vector2(400, 2.08165e-12)
+layout_mode = 2
+
+[node name="BoxContainer" type="VBoxContainer" parent="MaginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MaginContainer/BoxContainer"]
+layout_mode = 2
+text = "Godot Temple"
+
+[node name="HSeparator" type="HSeparator" parent="MaginContainer/BoxContainer"]
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="MaginContainer/BoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Start"
+
+[node name="ResumeButton" type="Button" parent="MaginContainer/BoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Resume"
+
+[node name="RestartButton" type="Button" parent="MaginContainer/BoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Restart Level"
+
+[node name="QuitButton" type="Button" parent="MaginContainer/BoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Quit"
+
+[node name="GridContainer" type="VBoxContainer" parent="MaginContainer/BoxContainer"]
+layout_mode = 2
+
+[node name="MouseSensitivity" type="HBoxContainer" parent="MaginContainer/BoxContainer/GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MaginContainer/BoxContainer/GridContainer/MouseSensitivity"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Mouse sensitivity"
+
+[node name="MouseSensitivitySlider" type="HSlider" parent="MaginContainer/BoxContainer/GridContainer/MouseSensitivity"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="SoundVolume" type="HBoxContainer" parent="MaginContainer/BoxContainer/GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MaginContainer/BoxContainer/GridContainer/SoundVolume"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Sound volume"
+
+[node name="SoundVolumeSlider" type="HSlider" parent="MaginContainer/BoxContainer/GridContainer/SoundVolume"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="MusicVolume" type="HBoxContainer" parent="MaginContainer/BoxContainer/GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MaginContainer/BoxContainer/GridContainer/MusicVolume"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Music	 volume"
+
+[node name="MusicVolumeSlider" type="HSlider" parent="MaginContainer/BoxContainer/GridContainer/MusicVolume"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="InvertMouse" type="HBoxContainer" parent="MaginContainer/BoxContainer/GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MaginContainer/BoxContainer/GridContainer/InvertMouse"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Invert mouse"
+
+[node name="InvertMouseOptionButton" type="OptionButton" parent="MaginContainer/BoxContainer/GridContainer/InvertMouse"]
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 0
+item_count = 2
+popup/item_0/text = "Disabled"
+popup/item_0/id = 6
+popup/item_1/text = "Enabled"
+popup/item_1/id = 7
+
+[node name="Vsync" type="HBoxContainer" parent="MaginContainer/BoxContainer/GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MaginContainer/BoxContainer/GridContainer/Vsync"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Vsync"
+
+[node name="VsyncOptionButton" type="OptionButton" parent="MaginContainer/BoxContainer/GridContainer/Vsync"]
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 0
+item_count = 4
+popup/item_0/text = "Disabled"
+popup/item_1/text = "Enabled"
+popup/item_1/id = 1
+popup/item_2/text = "Adaptive"
+popup/item_2/id = 2
+popup/item_3/text = "Mailbox"
+popup/item_3/id = 3
+
+[node name="PerformancePreset" type="HBoxContainer" parent="MaginContainer/BoxContainer/GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MaginContainer/BoxContainer/GridContainer/PerformancePreset"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Graphics	"
+
+[node name="PerformancePresetOptionButton" type="OptionButton" parent="MaginContainer/BoxContainer/GridContainer/PerformancePreset"]
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 0
+item_count = 4
+popup/item_0/text = "Low"
+popup/item_1/text = "Medium"
+popup/item_1/id = 1
+popup/item_2/text = "High"
+popup/item_2/id = 2
+popup/item_3/text = "Insane"
+popup/item_3/id = 3
