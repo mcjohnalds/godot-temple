@@ -18,62 +18,82 @@ script = ExtResource("1_7s8hv")
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(2.08165e-12, 300)
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="VBoxContainer1" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
+[node name="TitleContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(400, 2.08165e-12)
 layout_mode = 2
 
-[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer1"]
+[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer/TitleContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"HeaderLarge"
 text = "Godot Temple"
 
-[node name="HSeparator1" type="HSeparator" parent="CenterContainer/VBoxContainer/VBoxContainer1"]
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/VBoxContainer/TitleContainer"]
 layout_mode = 2
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
+[node name="ButtonsContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="StartButton" type="Button" parent="CenterContainer/VBoxContainer/VBoxContainer2"]
+[node name="StartButton" type="Button" parent="CenterContainer/VBoxContainer/ButtonsContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Start"
 
-[node name="ResumeButton" type="Button" parent="CenterContainer/VBoxContainer/VBoxContainer2"]
+[node name="ResumeButton" type="Button" parent="CenterContainer/VBoxContainer/ButtonsContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 text = "Resume"
 
-[node name="RestartButton" type="Button" parent="CenterContainer/VBoxContainer/VBoxContainer2"]
+[node name="RestartButton" type="Button" parent="CenterContainer/VBoxContainer/ButtonsContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 text = "Restart"
 
-[node name="QuitButton" type="Button" parent="CenterContainer/VBoxContainer/VBoxContainer2"]
+[node name="SettingsButton" type="Button" parent="CenterContainer/VBoxContainer/ButtonsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Settings"
+
+[node name="QuitButton" type="Button" parent="CenterContainer/VBoxContainer/ButtonsContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Quit"
 
-[node name="VBoxContainer3" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
+[node name="SettingsContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
-[node name="SettingsLabel" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 layout_mode = 2
-theme_type_variation = &"HeaderMedium"
+
+[node name="BackButton" type="Button" parent="CenterContainer/VBoxContainer/SettingsContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " < "
+
+[node name="SettingsLabel" type="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/HBoxContainer"]
+layout_mode = 2
+theme_type_variation = &"HeaderSmall"
 text = "Settings"
 
-[node name="MouseSensitivity" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+[node name="MouseSensitivity" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/MouseSensitivity"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/MouseSensitivity"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Mouse sensitivity"
 
-[node name="MouseSensitivitySlider" type="HSlider" parent="CenterContainer/VBoxContainer/VBoxContainer3/MouseSensitivity"]
+[node name="MouseSensitivitySlider" type="HSlider" parent="CenterContainer/VBoxContainer/SettingsContainer/MouseSensitivity"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -83,16 +103,16 @@ max_value = 1.0
 step = 0.001
 value = 0.01
 
-[node name="EffectsVolume" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+[node name="EffectsVolume" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/EffectsVolume"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/EffectsVolume"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Effects volume"
 
-[node name="EffectsVolumeSlider" type="HSlider" parent="CenterContainer/VBoxContainer/VBoxContainer3/EffectsVolume"]
+[node name="EffectsVolumeSlider" type="HSlider" parent="CenterContainer/VBoxContainer/SettingsContainer/EffectsVolume"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -100,16 +120,16 @@ size_flags_vertical = 4
 max_value = 1.0
 step = 0.001
 
-[node name="MusicVolume" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+[node name="MusicVolume" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/MusicVolume"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/MusicVolume"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Music	 volume"
 
-[node name="MusicVolumeSlider" type="HSlider" parent="CenterContainer/VBoxContainer/VBoxContainer3/MusicVolume"]
+[node name="MusicVolumeSlider" type="HSlider" parent="CenterContainer/VBoxContainer/SettingsContainer/MusicVolume"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -117,16 +137,16 @@ size_flags_vertical = 4
 max_value = 1.0
 step = 0.001
 
-[node name="InvertMouse" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+[node name="InvertMouse" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/InvertMouse"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/InvertMouse"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Invert mouse"
 
-[node name="InvertMouseOptionButton" type="OptionButton" parent="CenterContainer/VBoxContainer/VBoxContainer3/InvertMouse"]
+[node name="InvertMouseOptionButton" type="OptionButton" parent="CenterContainer/VBoxContainer/SettingsContainer/InvertMouse"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -137,16 +157,16 @@ popup/item_0/id = 6
 popup/item_1/text = "Enabled"
 popup/item_1/id = 7
 
-[node name="Vsync" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+[node name="Vsync" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/Vsync"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/Vsync"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Vsync"
 
-[node name="VsyncOptionButton" type="OptionButton" parent="CenterContainer/VBoxContainer/VBoxContainer3/Vsync"]
+[node name="VsyncOptionButton" type="OptionButton" parent="CenterContainer/VBoxContainer/SettingsContainer/Vsync"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -160,16 +180,16 @@ popup/item_2/id = 2
 popup/item_3/text = "Mailbox"
 popup/item_3/id = 3
 
-[node name="PerformancePreset" type="HBoxContainer" parent="CenterContainer/VBoxContainer/VBoxContainer3"]
+[node name="PerformancePreset" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/VBoxContainer3/PerformancePreset"]
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/PerformancePreset"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Graphics	"
 
-[node name="PerformancePresetOptionButton" type="OptionButton" parent="CenterContainer/VBoxContainer/VBoxContainer3/PerformancePreset"]
+[node name="PerformancePresetOptionButton" type="OptionButton" parent="CenterContainer/VBoxContainer/SettingsContainer/PerformancePreset"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3

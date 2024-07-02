@@ -1,9 +1,11 @@
 - Settings
   - Performance test various other rendering settings like filtering
-  - Hide settings behind menu
   - Cache preload step
   - Confirm quit
   - Blur background on pause
+- UI skinning
+  - Primary button
+  - Shader
 - Character controller
   - Fix underwater env being displayed too early
   - Overwatch like bob curve

@@ -7,34 +7,25 @@ signal resumed
 signal restarted
 
 
-@export var start_button_visible := true:
+@export var pause_menu := false:
 	set(value):
-		start_button_visible = value
-		if not is_node_ready():
-			await ready
-		_start_button.visible = value
+		pause_menu = value
+		_update_controls()
 
 
-@export var resume_button_visible := true:
+@export var settings_open := false:
 	set(value):
-		resume_button_visible = value
-		if not is_node_ready():
-			await ready
-		_resume_button.visible = value
+		settings_open = value
+		_update_controls()
 
 
-@export var restart_button_visible := true:
-	set(value):
-		restart_button_visible = value
-		if not is_node_ready():
-			await ready
-		_restart_button.visible = value
-
-
+@onready var _title_label: Label = %TitleLabel
 @onready var _start_button: Button = %StartButton
 @onready var _resume_button: Button = %ResumeButton
 @onready var _restart_button: Button = %RestartButton
+@onready var _settings_button: Button = %SettingsButton
 @onready var _quit_button: Button = %QuitButton
+@onready var _back_button: Button = %BackButton
 @onready var _mouse_sensitivity_slider: Slider = %MouseSensitivitySlider
 @onready var _effects_slider: Slider = %EffectsVolumeSlider
 @onready var _music_slider: Slider = %MusicVolumeSlider
@@ -45,9 +36,12 @@ signal restarted
 @onready var _performance_preset_option_button: OptionButton = (
 	%PerformancePresetOptionButton
 )
+@onready var _buttons_container: Control = %ButtonsContainer
+@onready var _settings_container: Control = %SettingsContainer
 
 
 func _ready() -> void:
+	_update_controls()
 	if Engine.is_editor_hint():
 		return
 	_start_button.button_down.connect(started.emit)
@@ -55,6 +49,8 @@ func _ready() -> void:
 	_restart_button.button_down.connect(restarted.emit)
 	_quit_button.button_down.connect(get_tree().quit)
 	_quit_button.visible = not Util.is_web_browser()
+	_settings_button.button_down.connect(_on_settings_button_down)
+	_back_button.button_down.connect(_on_back_button_down)
 	_performance_preset_option_button.clear()
 	_performance_preset_option_button.add_item("Low")
 	_performance_preset_option_button.add_item("Medium")
@@ -141,3 +137,30 @@ func _slider_value_to_db(slider_value: float) -> float:
 
 func _db_to_slider_value(db: float) -> float:
 	return pow(db / 80.0 + 1.0, 4.0)
+
+
+func _on_settings_button_down() -> void:
+	settings_open = true
+
+
+func _on_back_button_down() -> void:
+	settings_open = false
+
+
+func _update_controls() -> void:
+	if not is_node_ready():
+		await ready
+	_buttons_container.visible = not settings_open
+	_settings_container.visible = settings_open
+	if pause_menu:
+		_title_label.text = "Paused"
+		_title_label.theme_type_variation = "HeaderMedium"
+		_start_button.visible = false
+		_resume_button.visible = true
+		_restart_button.visible = true
+	else:
+		_title_label.text = "Godot Temple"
+		_title_label.theme_type_variation = "HeaderLarge"
+		_start_button.visible = true
+		_resume_button.visible = false
+		_restart_button.visible = false
