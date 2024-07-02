@@ -1,7 +1,7 @@
 [gd_scene load_steps=26 format=3 uid="uid://2oxdgu03lnbk"]
 
 [ext_resource type="Script" path="res://kinematic_fps_controller/kinematic_fps_controller.gd" id="2_8r0nc"]
-[ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://kinematic_fps_controller/underwater.tres" id="2_owsda"]
+[ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://common/underwater_environment.tres" id="2_owsda"]
 [ext_resource type="PhysicsMaterial" path="res://kinematic_fps_controller/physics/grass.tres" id="4_ulqss"]
 [ext_resource type="PhysicsMaterial" uid="uid://bklf2cx3fydt3" path="res://kinematic_fps_controller/physics/stone.tres" id="5_a0l7u"]
 [ext_resource type="PhysicsMaterial" path="res://kinematic_fps_controller/physics/wood.tres" id="6_ulh2i"]
@@ -54,10 +54,10 @@ step_audio_streams = Array[AudioStream]([ExtResource("21_1rkt1"), ExtResource("2
 [node name="KinematicFpsController" type="CharacterBody3D"]
 floor_snap_length = 0.5
 script = ExtResource("2_8r0nc")
-underwater_env = ExtResource("2_owsda")
 material_audios = Array[ExtResource("10_3id2w")]([SubResource("Resource_ju83a"), SubResource("Resource_3rmwo"), SubResource("Resource_rfw5k"), SubResource("Resource_kvpuo")])
 water_material_audio = SubResource("Resource_kvpuo")
 head_bob_curve = ExtResource("10_jwnxu")
+underwater_env = ExtResource("2_owsda")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_fn1rj")

@@ -21,7 +21,7 @@ class_name KinematicFpsController
 @export_group("Mouse")
 
 ## Mouse Sensitivity
-@export var mouse_sensitivity := 2.0
+@export var mouse_sensitivity := 8.0
 
 ## Maximum vertical angle the head can aim
 @export var vertical_angle_limit := TAU * 0.24
@@ -337,10 +337,11 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseMotion:
 		var e: InputEventMouseMotion = event
-		var s := mouse_sensitivity / 1000.0
+		var s := mouse_sensitivity / 1000.0 * global.mouse_sensitivity
+		var i := -1.0 if global.invert_mouse else 1.0
 		rotation.y -= e.relative.x * s
 		_head.rotation.x = clamp(
-			_head.rotation.x - e.relative.y * s,
+			_head.rotation.x - e.relative.y * s * i,
 			-vertical_angle_limit,
 			vertical_angle_limit
 		)
@@ -360,7 +361,7 @@ func _get_next_capsule_height(is_crouching: bool, delta: float) -> float:
 
 
 func _get_next_camera_position() -> Vector3:
-	if step_bob_enabled:
+	if step_bob_enabled and head_bob_curve:
 		var x_pos := (
 			head_bob_curve.sample(_head_bob_cycle_position.x)
 			* head_bob_curve_multiplier.x

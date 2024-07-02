@@ -20,6 +20,10 @@ static func get_inertia(body: RigidBody3D) -> Vector3:
 	return state.inverse_inertia.inverse()
 
 
+static func is_web_browser() -> bool:
+	return OS.get_name() == "Web"
+
+
 static func get_default_gravity() -> float:
 	return ProjectSettings.get_setting("physics/3d/default_gravity")
 
