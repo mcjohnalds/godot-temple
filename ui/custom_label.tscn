@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://ff3oqsj7dv02"]
+
+[ext_resource type="Material" uid="uid://iboom6g2fuca" path="res://ui/label_material.tres" id="1_e5ypg"]
+
+[node name="Label" type="Label"]
+material = ExtResource("1_e5ypg")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Label"

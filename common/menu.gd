@@ -20,12 +20,12 @@ signal restarted
 
 
 @onready var _title_label: Label = %TitleLabel
-@onready var _start_button: Button = %StartButton
-@onready var _resume_button: Button = %ResumeButton
-@onready var _restart_button: Button = %RestartButton
-@onready var _settings_button: Button = %SettingsButton
-@onready var _quit_button: Button = %QuitButton
-@onready var _back_button: Button = %BackButton
+@onready var _start_button: CustomButton = %StartButton
+@onready var _resume_button: CustomButton = %ResumeButton
+@onready var _restart_button: CustomButton = %RestartButton
+@onready var _settings_button: CustomButton = %SettingsButton
+@onready var _quit_button: CustomButton = %QuitButton
+@onready var _back_button: CustomButton = %BackButton
 @onready var _mouse_sensitivity_slider: Slider = %MouseSensitivitySlider
 @onready var _effects_slider: Slider = %EffectsVolumeSlider
 @onready var _music_slider: Slider = %MusicVolumeSlider
@@ -48,7 +48,6 @@ func _ready() -> void:
 	_resume_button.button_down.connect(resumed.emit)
 	_restart_button.button_down.connect(restarted.emit)
 	_quit_button.button_down.connect(get_tree().quit)
-	_quit_button.visible = not Util.is_web_browser()
 	_settings_button.button_down.connect(_on_settings_button_down)
 	_back_button.button_down.connect(_on_back_button_down)
 	_performance_preset_option_button.clear()
@@ -152,6 +151,7 @@ func _update_controls() -> void:
 		await ready
 	_buttons_container.visible = not settings_open
 	_settings_container.visible = settings_open
+	_quit_button.visible = not Util.is_web_browser()
 	if pause_menu:
 		_title_label.text = "Paused"
 		_title_label.theme_type_variation = "HeaderMedium"

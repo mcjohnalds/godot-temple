@@ -1,0 +1,30 @@
+[gd_scene load_steps=4 format=3 uid="uid://7vdx2q26wpr2"]
+
+[ext_resource type="Material" uid="uid://csawxourd0ta3" path="res://ui/panel_material.tres" id="1_8lepr"]
+[ext_resource type="Script" path="res://ui/custom_button.gd" id="1_ltvm2"]
+[ext_resource type="PackedScene" uid="uid://ff3oqsj7dv02" path="res://ui/custom_label.tscn" id="3_sa45u"]
+
+[node name="Button" type="MarginContainer"]
+material = ExtResource("1_8lepr")
+offset_right = 1.0
+offset_bottom = 23.0
+script = ExtResource("1_ltvm2")
+text = "Button"
+
+[node name="Panel" type="Panel" parent="."]
+material = ExtResource("1_8lepr")
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_type_variation = &"MarginContainerMedium"
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
+
+[node name="Label" parent="MarginContainer" instance=ExtResource("3_sa45u")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Button"
+horizontal_alignment = 1

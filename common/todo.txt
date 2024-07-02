@@ -1,11 +1,14 @@
-- Settings
-  - Performance test various other rendering settings like filtering
-  - Cache preload step
-  - Confirm quit
-  - Blur background on pause
 - UI skinning
   - Primary button
   - Shader
+- Settings
+  - Make esc go back from settings
+  - Performance test various other rendering settings like filtering
+  - Confirm quit popup
+  - Blur background on pause
+- Preload
+  - Make preload step iterate over all environments
+  - Cache preload step
 - Character controller
   - Fix underwater env being displayed too early
   - Overwatch like bob curve

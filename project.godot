@@ -33,6 +33,10 @@ window/stretch/aspect="expand"
 
 import/blender/enabled=false
 
+[gui]
+
+theme/custom="res://ui/theme.tres"
+
 [input]
 
 move_forward={

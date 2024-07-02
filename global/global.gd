@@ -17,7 +17,6 @@ func _ready() -> void:
 	if OS.is_debug_build():
 		get_window().mode = Window.MODE_WINDOWED
 		get_window().size *= 2
-		_music_audio_stream_player.play()
 	else:
 		_music_audio_stream_player.play()
 
