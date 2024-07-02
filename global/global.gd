@@ -47,8 +47,8 @@ func set_graphics_preset(graphics_preset: GraphicsPreset) -> void:
 
 	match graphics_preset:
 		GraphicsPreset.LOW:
-			physics_ticks_per_second = 30
-			max_physics_steps_per_frame = 4
+			physics_ticks_per_second = 60
+			max_physics_steps_per_frame = 8
 			scaling_3d_scale = 0.5
 			msaa_3d = Viewport.MSAA_DISABLED
 			environment_volumetric_fog_enabled = false
