@@ -35,14 +35,14 @@ signal restarted
 @onready var _resume_button: Button = %ResumeButton
 @onready var _restart_button: Button = %RestartButton
 @onready var _quit_button: Button = %QuitButton
-@onready var mouse_sensitivity_slider: Slider = %MouseSensitivitySlider
-@onready var sound_slider: Slider = %SoundVolumeSlider
-@onready var music_slider: Slider = %MusicVolumeSlider
-@onready var invert_mouse_option_button: OptionButton = (
+@onready var _mouse_sensitivity_slider: Slider = %MouseSensitivitySlider
+@onready var _effects_slider: Slider = %EffectsVolumeSlider
+@onready var _music_slider: Slider = %MusicVolumeSlider
+@onready var _invert_mouse_option_button: OptionButton = (
 	%InvertMouseOptionButton
 )
-@onready var vsync_option_button: OptionButton = %VsyncOptionButton
-@onready var performance_preset_option_button: OptionButton = (
+@onready var _vsync_option_button: OptionButton = %VsyncOptionButton
+@onready var _performance_preset_option_button: OptionButton = (
 	%PerformancePresetOptionButton
 )
 
@@ -55,62 +55,62 @@ func _ready() -> void:
 	_restart_button.button_down.connect(restarted.emit)
 	_quit_button.button_down.connect(get_tree().quit)
 	_quit_button.visible = not Util.is_web_browser()
-	performance_preset_option_button.clear()
-	performance_preset_option_button.add_item("Low")
-	performance_preset_option_button.add_item("Medium")
-	performance_preset_option_button.add_item("High")
+	_performance_preset_option_button.clear()
+	_performance_preset_option_button.add_item("Low")
+	_performance_preset_option_button.add_item("Medium")
+	_performance_preset_option_button.add_item("High")
 	if Util.is_compatibility_renderer():
-		vsync_option_button.get_parent().visible = false
+		_vsync_option_button.get_parent().visible = false
 	else:
-		performance_preset_option_button.add_item("Insane")
-	mouse_sensitivity_slider.drag_ended.connect(
+		_performance_preset_option_button.add_item("Insane")
+	_mouse_sensitivity_slider.drag_ended.connect(
 		_on_mouse_sensitivity_slider_drag_ended
 	)
-	sound_slider.drag_ended.connect(
-		_on_sound_slider_drag_ended
+	_effects_slider.drag_ended.connect(
+		_on_effects_slider_drag_ended
 	)
-	music_slider.drag_ended.connect(
+	_music_slider.drag_ended.connect(
 		_on_music_slider_drag_ended
 	)
-	invert_mouse_option_button.item_selected.connect(
+	_invert_mouse_option_button.item_selected.connect(
 		_on_invert_mouse_item_selected
 	)
-	vsync_option_button.item_selected.connect(
+	_vsync_option_button.item_selected.connect(
 		_on_vsync_item_selected
 	)
-	performance_preset_option_button.item_selected.connect(
+	_performance_preset_option_button.item_selected.connect(
 		_on_performance_preset_item_selected
 	)
 	_read_settings_from_environment()
 
 
 func _read_settings_from_environment() -> void:
-	mouse_sensitivity_slider.value = global.mouse_sensitivity
-	sound_slider.value = _db_to_slider_value(
-		AudioServer.get_bus_volume_db(AudioServer.get_bus_index("World"))
+	_mouse_sensitivity_slider.value = global.mouse_sensitivity
+	_effects_slider.value = _db_to_slider_value(
+		AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Effects"))
 	)
-	music_slider.value = _db_to_slider_value(
+	_music_slider.value = _db_to_slider_value(
 		AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music"))
 	)
-	invert_mouse_option_button.selected = int(global.invert_mouse)
-	vsync_option_button.selected = (
+	_invert_mouse_option_button.selected = int(global.invert_mouse)
+	_vsync_option_button.selected = (
 		DisplayServer.window_get_vsync_mode()
 	)
-	performance_preset_option_button.selected = global.get_graphics_preset()
+	_performance_preset_option_button.selected = global.get_graphics_preset()
 
 
 func _on_mouse_sensitivity_slider_drag_ended(
 	_value_changed: bool
 ) -> void:
-	global.mouse_sensitivity = mouse_sensitivity_slider.value
+	global.mouse_sensitivity = _mouse_sensitivity_slider.value
 
 
-func _on_sound_slider_drag_ended(
+func _on_effects_slider_drag_ended(
 	_value_changed: bool
 ) -> void:
 	AudioServer.set_bus_volume_db(
-		AudioServer.get_bus_index("World"),
-		_slider_value_to_db(sound_slider.value)
+		AudioServer.get_bus_index("Effects"),
+		_slider_value_to_db(_effects_slider.value)
 	)
 
 
@@ -119,7 +119,7 @@ func _on_music_slider_drag_ended(
 ) -> void:
 	AudioServer.set_bus_volume_db(
 		AudioServer.get_bus_index("Music"),
-		_slider_value_to_db(music_slider.value)
+		_slider_value_to_db(_music_slider.value)
 	)
 
 

@@ -1,6 +1,5 @@
 - Settings
   - Fix bug where low graphics are laggy
-  - Fix audio settings
   - Performance test various other rendering settings like filtering
   - Hide settings behind menu
   - Cache preload step

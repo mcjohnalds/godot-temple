@@ -1,9 +1,14 @@
-[gd_scene load_steps=4 format=3 uid="uid://idnj4bqpji60"]
+[gd_scene load_steps=5 format=3 uid="uid://idnj4bqpji60"]
 
 [ext_resource type="Script" path="res://global/global.gd" id="1_32b4u"]
 [ext_resource type="Environment" uid="uid://cj5a4clofvpeq" path="res://common/main_environment.tres" id="2_mbtoh"]
 [ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://common/underwater_environment.tres" id="3_wkdx8"]
+[ext_resource type="AudioStream" uid="uid://dh2owhvphvakd" path="res://common/lets_rock.ogg" id="4_02urj"]
 
 [node name="Global" type="Node3D"]
 script = ExtResource("1_32b4u")
 environments = Array[Environment]([ExtResource("2_mbtoh"), ExtResource("3_wkdx8")])
+
+[node name="MusicAudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_02urj")
+bus = &"Music"

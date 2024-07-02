@@ -7,6 +7,9 @@ enum GraphicsPreset { LOW, MEDIUM, HIGH, INSANE }
 var mouse_sensitivity := 0.25
 var invert_mouse := false
 var _graphics_preset: GraphicsPreset = GraphicsPreset.MEDIUM
+@onready var _music_audio_stream_player: AudioStreamPlayer = (
+	$MusicAudioStreamPlayer
+)
 
 
 func _ready() -> void:
@@ -14,6 +17,9 @@ func _ready() -> void:
 	if OS.is_debug_build():
 		get_window().mode = Window.MODE_WINDOWED
 		get_window().size *= 2
+		_music_audio_stream_player.play()
+	else:
+		_music_audio_stream_player.play()
 
 
 func _input(event: InputEvent) -> void:

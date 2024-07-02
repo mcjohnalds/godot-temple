@@ -83,20 +83,25 @@ collide_with_bodies = false
 
 [node name="JumpAudioStreamPlayer" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("20_qovk2")
+bus = &"Effects"
 attenuation_filter_db = -65.4
 
 [node name="StepAudioStreamPlayer" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("20_qovk2")
+bus = &"Effects"
 attenuation_filter_db = -65.4
 
 [node name="LandAudioStreamPlayer" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("20_qovk2")
+bus = &"Effects"
 attenuation_filter_db = -65.4
 
 [node name="CrouchAudioStreamPlayer" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("20_qovk2")
+bus = &"Effects"
 attenuation_filter_db = -65.4
 
 [node name="UncrouchAudioStreamPlayer" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("20_qovk2")
+bus = &"Effects"
 attenuation_filter_db = -65.4
