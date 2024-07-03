@@ -93,6 +93,7 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Start"
 primary = true
+sound_on_up = false
 
 [node name="ResumeButton" parent="CenterContainer/VBoxContainer/ButtonsContainer" instance=ExtResource("2_ov1kc")]
 unique_name_in_owner = true
@@ -100,22 +101,26 @@ visible = false
 layout_mode = 2
 text = "Resume"
 primary = true
+sound_on_up = false
 
 [node name="RestartButton" parent="CenterContainer/VBoxContainer/ButtonsContainer" instance=ExtResource("2_ov1kc")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 text = "Restart"
+sound_on_up = false
 
 [node name="SettingsButton" parent="CenterContainer/VBoxContainer/ButtonsContainer" instance=ExtResource("2_ov1kc")]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Settings"
+sound_on_up = false
 
 [node name="QuitButton" parent="CenterContainer/VBoxContainer/ButtonsContainer" instance=ExtResource("2_ov1kc")]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Quit"
+sound_on_up = false
 
 [node name="SettingsContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
 unique_name_in_owner = true
@@ -129,6 +134,7 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 text = "Back"
+sound_on_up = false
 
 [node name="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/HBoxContainer" instance=ExtResource("2_0emkm")]
 layout_mode = 2

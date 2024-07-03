@@ -41,6 +41,7 @@ script = ExtResource("1_ltvm2")
 text = "Button"
 _default_material = ExtResource("1_8lepr")
 _primary_material = ExtResource("3_5gh4g")
+sound_on_up = false
 
 [node name="Background" type="Panel" parent="."]
 unique_name_in_owner = true

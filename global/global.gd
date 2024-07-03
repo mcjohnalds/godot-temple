@@ -10,6 +10,15 @@ var _graphics_preset: GraphicsPreset = GraphicsPreset.MEDIUM
 @onready var _music_audio_stream_player: AudioStreamPlayer = (
 	$MusicAudioStreamPlayer
 )
+@onready var _click_audio_stream_player: AudioStreamPlayer = (
+	$ClickAudioStreamPlayer
+)
+@onready var _click_small_audio_stream_player: AudioStreamPlayer = (
+	$ClickSmallAudioStreamPlayer
+)
+@onready var _hover_audio_stream_player: AudioStreamPlayer = (
+	$HoverAudioStreamPlayer
+)
 
 
 func _ready() -> void:
@@ -105,3 +114,15 @@ func set_graphics_preset(graphics_preset: GraphicsPreset) -> void:
 		environment.sdfgi_enabled = environment_sdfgi_enabled
 
 	graphics_preset_changed.emit()
+
+
+func play_click_sound() -> void:
+	_click_audio_stream_player.play()
+
+
+func play_click_small_sound() -> void:
+	_click_small_audio_stream_player.play()
+
+
+func play_hover_sound() -> void:
+	_hover_audio_stream_player.play()

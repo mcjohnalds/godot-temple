@@ -37,6 +37,7 @@ signal button_down
 
 @export var _default_material: Material
 @export var _primary_material: Material
+@export var click_small_sound := false
 @onready var _background: Panel = %Background
 @onready var _label: Label = %Label
 @onready var _checkbox: Control = %Checkbox
@@ -57,6 +58,10 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var e: InputEventMouseButton = event
 		if e.pressed:
+			if click_small_sound:
+				global.play_click_small_sound()
+			else:
+				global.play_click_sound()
 			button_down.emit()
 			accept_event()
 
@@ -75,6 +80,7 @@ func _update() -> void:
 
 func _on_mouse_entered() -> void:
 	_hover.visible = true
+	global.play_hover_sound()
 
 
 func _on_mouse_exited() -> void:

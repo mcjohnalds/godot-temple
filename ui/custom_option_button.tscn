@@ -9,10 +9,12 @@ offset_bottom = 31.0
 script = ExtResource("1_2dgda")
 custom_button_scene = ExtResource("1_52fyj")
 
-[node name="Button" parent="." instance=ExtResource("1_52fyj")]
+[node name="MainButton" parent="." instance=ExtResource("1_52fyj")]
 layout_mode = 2
 text = " "
 chevron = true
+click_small_sound = true
+sound_on_up = true
 
 [node name="Dropdown" type="VBoxContainer" parent="."]
 visible = false

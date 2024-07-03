@@ -1,7 +1,7 @@
 - UI skinning
-  - Custom font
-  - Sounds
   - Animations
+  - Allow user to select option in option button by clicking, holding,
+    dragging, then releasing
 - Settings
   - Make esc go back from settings
   - Performance test various other rendering settings like filtering
