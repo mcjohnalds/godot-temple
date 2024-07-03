@@ -1,8 +1,9 @@
-[gd_scene load_steps=17 format=3 uid="uid://4xgl4drja75q"]
+[gd_scene load_steps=18 format=3 uid="uid://4xgl4drja75q"]
 
 [ext_resource type="Script" path="res://common/menu.gd" id="1_7s8hv"]
 [ext_resource type="PackedScene" uid="uid://ff3oqsj7dv02" path="res://ui/custom_label.tscn" id="2_0emkm"]
 [ext_resource type="PackedScene" uid="uid://7vdx2q26wpr2" path="res://ui/custom_button.tscn" id="2_ov1kc"]
+[ext_resource type="PackedScene" uid="uid://b55xr8elvsr3e" path="res://ui/custom_h_slider.tscn" id="3_0d4lc"]
 [ext_resource type="PackedScene" uid="uid://bt1qqr8mqu70i" path="res://ui/custom_option_button.tscn" id="3_smgye"]
 [ext_resource type="Script" path="res://ui/custom_option_item.gd" id="4_akuoj"]
 
@@ -125,7 +126,7 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Back"
 
-[node name="CustomLabel" parent="CenterContainer/VBoxContainer/SettingsContainer/HBoxContainer" instance=ExtResource("2_0emkm")]
+[node name="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/HBoxContainer" instance=ExtResource("2_0emkm")]
 layout_mode = 2
 theme_type_variation = &"HeaderSmall"
 text = "Settings"
@@ -139,15 +140,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Mouse sensitivity"
 
-[node name="MouseSensitivitySlider" type="HSlider" parent="CenterContainer/VBoxContainer/SettingsContainer/MouseSensitivity"]
+[node name="MouseSensitivitySlider" parent="CenterContainer/VBoxContainer/SettingsContainer/MouseSensitivity" instance=ExtResource("3_0d4lc")]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 4
-min_value = 0.01
-max_value = 1.0
-step = 0.001
-value = 0.01
 
 [node name="EffectsVolume" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 custom_minimum_size = Vector2(0, 31)
@@ -158,13 +154,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Effects volume"
 
-[node name="EffectsVolumeSlider" type="HSlider" parent="CenterContainer/VBoxContainer/SettingsContainer/EffectsVolume"]
+[node name="EffectsVolumeSlider" parent="CenterContainer/VBoxContainer/SettingsContainer/EffectsVolume" instance=ExtResource("3_0d4lc")]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 4
-max_value = 1.0
-step = 0.001
 
 [node name="MusicVolume" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 custom_minimum_size = Vector2(0, 31)
@@ -175,13 +168,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Music	 volume"
 
-[node name="MusicVolumeSlider" type="HSlider" parent="CenterContainer/VBoxContainer/SettingsContainer/MusicVolume"]
+[node name="MusicVolumeSlider" parent="CenterContainer/VBoxContainer/SettingsContainer/MusicVolume" instance=ExtResource("3_0d4lc")]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 4
-max_value = 1.0
-step = 0.001
 
 [node name="InvertMouse" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 custom_minimum_size = Vector2(0, 31)

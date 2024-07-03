@@ -32,4 +32,5 @@ func _unpause() -> void:
 	_paused = false
 	_container.process_mode = Node.PROCESS_MODE_INHERIT
 	_menu.visible = false
+	_menu.settings_open = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

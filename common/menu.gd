@@ -26,7 +26,7 @@ signal restarted
 @onready var _settings_button: CustomButton = %SettingsButton
 @onready var _quit_button: CustomButton = %QuitButton
 @onready var _back_button: CustomButton = %BackButton
-@onready var _mouse_sensitivity_slider: Slider = %MouseSensitivitySlider
+@onready var _mouse_sensitivity_slider: CustomHSlider = %MouseSensitivitySlider
 @onready var _effects_slider: Slider = %EffectsVolumeSlider
 @onready var _music_slider: Slider = %MusicVolumeSlider
 @onready var _invert_mouse_option_button: CustomOptionButton = (
@@ -98,9 +98,7 @@ func _read_settings_from_environment() -> void:
 	)
 
 
-func _on_mouse_sensitivity_slider_drag_ended(
-	_value_changed: bool
-) -> void:
+func _on_mouse_sensitivity_slider_drag_ended() -> void:
 	global.mouse_sensitivity = _mouse_sensitivity_slider.value
 
 
