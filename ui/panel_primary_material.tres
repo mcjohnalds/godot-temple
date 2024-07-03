@@ -8,6 +8,7 @@ offsets = PackedFloat32Array(0.218579, 1)
 colors = PackedColorArray(0.1, 0.1, 0.1, 1, 0.2, 0.2, 0.2, 1)
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_alco4"]
+seamless = true
 color_ramp = SubResource("Gradient_2m6o1")
 noise = ExtResource("2_iirjt")
 

@@ -45,3 +45,4 @@ enum Type { BODY_MEDIUM, HEADER_SMALL, HEADER_MEDIUM, HEADER_LARGE, TITLE }
 
 func _ready() -> void:
 	_outline.text = text
+	type = type

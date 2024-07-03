@@ -1,5 +1,4 @@
 - UI skinning
-  - Animate the control shader
   - Handle browser ESC key bs
   - Animations
   - Allow user to select option in option button by clicking, holding,
