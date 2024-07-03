@@ -13,8 +13,9 @@ func _ready() -> void:
 
 	var scene_file_paths: Array[String] = []
 	for file_path in file_paths:
+		file_path = file_path.rstrip(".remap")
 		# In the web build, files in the exported package have a .remap suffix
-		if file_path.ends_with(".tscn") or file_path.ends_with(".tscn.remap"):
+		if file_path.ends_with(".tscn"):
 			scene_file_paths.append(file_path)
 
 	for i in scene_file_paths.size():

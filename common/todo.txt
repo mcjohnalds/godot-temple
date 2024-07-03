@@ -1,6 +1,9 @@
 - UI skinning
+  - Fix audio buses in browser
   - Handle browser ESC key bs
   - Animations
+  - FPS counter
+  - Fade to black level transitions
   - Allow user to select option in option button by clicking, holding,
     dragging, then releasing
 - Settings

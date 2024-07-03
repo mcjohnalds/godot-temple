@@ -98,14 +98,22 @@ func set_graphics_preset(graphics_preset: GraphicsPreset) -> void:
 	Engine.max_physics_steps_per_frame = max_physics_steps_per_frame
 	get_viewport().scaling_3d_scale = scaling_3d_scale
 	get_viewport().msaa_3d = msaa_3d
-	for environment in environments:
-		environment.volumetric_fog_enabled = (
-			environment_volumetric_fog_enabled
-		)
-		environment.glow_enabled = environment_glow_enabled
-		environment.ssao_enabled = environment_ssao_enabled
-		environment.ssil_enabled = environment_ssil_enabled
-		environment.sdfgi_enabled = environment_sdfgi_enabled
+	if OS.get_name() == "Web":
+		for environment in environments:
+			environment.volumetric_fog_enabled = false
+			environment.glow_enabled = false
+			environment.ssao_enabled = false
+			environment.ssil_enabled = false
+			environment.sdfgi_enabled = false
+	else:
+		for environment in environments:
+			environment.volumetric_fog_enabled = (
+				environment_volumetric_fog_enabled
+			)
+			environment.glow_enabled = environment_glow_enabled
+			environment.ssao_enabled = environment_ssao_enabled
+			environment.ssil_enabled = environment_ssil_enabled
+			environment.sdfgi_enabled = environment_sdfgi_enabled
 
 	graphics_preset_changed.emit()
 
