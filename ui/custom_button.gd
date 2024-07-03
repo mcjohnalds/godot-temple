@@ -35,6 +35,12 @@ signal button_down
 		_update()
 
 
+@export var back_icon := false:
+	set(value):
+		back_icon = value
+		_update()
+
+
 @export var _default_material: Material
 @export var _primary_material: Material
 @export var click_small_sound := false
@@ -44,10 +50,13 @@ signal button_down
 @onready var _check: Control = %Check
 @onready var _chevron: Control = %Chevron
 @onready var _hover: Control = %Hover
+@onready var _back_icon: Control = %BackIcon
 
 
 func _ready() -> void:
 	_update()
+	if Engine.is_editor_hint():
+		return
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 
@@ -73,6 +82,7 @@ func _update() -> void:
 	_checkbox.visible = checkbox
 	_check.visible = checked
 	_chevron.visible = chevron
+	_back_icon.visible = back_icon
 	_background.material = (
 		_primary_material if primary else _default_material
 	)

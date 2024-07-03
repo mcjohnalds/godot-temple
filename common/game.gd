@@ -5,7 +5,8 @@ signal restarted
 
 var _paused := false
 @onready var _container: Node3D = $Container
-@onready var _menu: Menu = $Menu
+@onready var _menu: Menu = %Menu
+@onready var _menu_container = %MenuContainer
 
 
 func _ready() -> void:
@@ -24,13 +25,13 @@ func _input(event: InputEvent) -> void:
 func _pause() -> void:
 	_paused = true
 	_container.process_mode = Node.PROCESS_MODE_DISABLED
-	_menu.visible = true
+	_menu_container.visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _unpause() -> void:
 	_paused = false
 	_container.process_mode = Node.PROCESS_MODE_INHERIT
-	_menu.visible = false
+	_menu_container.visible = false
 	_menu.settings_open = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

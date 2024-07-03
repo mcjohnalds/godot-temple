@@ -1,6 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://d3vcucvpvb3um"]
+[gd_scene load_steps=6 format=3 uid="uid://d3vcucvpvb3um"]
 
 [ext_resource type="Script" path="res://common/loader.gd" id="1_e8l04"]
+[ext_resource type="PackedScene" uid="uid://ff3oqsj7dv02" path="res://ui/custom_label.tscn" id="2_1cgju"]
+[ext_resource type="Material" uid="uid://csawxourd0ta3" path="res://ui/panel_material.tres" id="2_ctets"]
+[ext_resource type="FontFile" uid="uid://bvi0lhpwxksn" path="res://ui/turret_road_bold.ttf" id="3_prba2"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sflvo"]
 bg_color = Color(0.301961, 0.301961, 0.301961, 1)
@@ -16,6 +19,7 @@ script = ExtResource("1_e8l04")
 layer = 128
 
 [node name="PanelContainer" type="PanelContainer" parent="CanvasLayer"]
+material = ExtResource("2_ctets")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -30,17 +34,23 @@ layout_mode = 2
 custom_minimum_size = Vector2(400, 2.08165e-12)
 layout_mode = 2
 
-[node name="ProgressLabel" type="Label" parent="CanvasLayer/PanelContainer/CenterContainer/HBoxContainer"]
+[node name="ProgressLabel" parent="CanvasLayer/PanelContainer/CenterContainer/HBoxContainer" instance=ExtResource("2_1cgju")]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_prba2")
+theme_override_font_sizes/font_size = 24
 text = "Loading assets (0%)..."
+type = 2
 
-[node name="TherapyLabel" type="Label" parent="CanvasLayer/PanelContainer/CenterContainer/HBoxContainer"]
+[node name="TherapyLabel" parent="CanvasLayer/PanelContainer/CenterContainer/HBoxContainer" instance=ExtResource("2_1cgju")]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_prba2")
+theme_override_font_sizes/font_size = 20
 text = "This will take a while"
+type = 1
 
-[node name="FileLabel" type="Label" parent="CanvasLayer/PanelContainer/CenterContainer/HBoxContainer"]
+[node name="FileLabel" parent="CanvasLayer/PanelContainer/CenterContainer/HBoxContainer" instance=ExtResource("2_1cgju")]
 unique_name_in_owner = true
 layout_mode = 2
 text = "foo/foo.tscn"
-text_overrun_behavior = 3
+text_overrun_behavior = 1

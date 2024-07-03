@@ -24,8 +24,10 @@ var _button_down_event_received := false
 
 
 func _ready() -> void:
-	_main_button.button_down.connect(_on_main_button_down)
 	_update_ui()
+	if Engine.is_editor_hint():
+		return
+	_main_button.button_down.connect(_on_main_button_down)
 
 
 func _input(event: InputEvent) -> void:

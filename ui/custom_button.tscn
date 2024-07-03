@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://7vdx2q26wpr2"]
+[gd_scene load_steps=14 format=3 uid="uid://7vdx2q26wpr2"]
 
 [ext_resource type="Material" uid="uid://csawxourd0ta3" path="res://ui/panel_material.tres" id="1_8lepr"]
 [ext_resource type="Script" path="res://ui/custom_button.gd" id="1_ltvm2"]
@@ -7,7 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://ff3oqsj7dv02" path="res://ui/custom_label.tscn" id="3_sa45u"]
 [ext_resource type="Texture2D" uid="uid://n6rfrhsw5pe0" path="res://ui/unchecked.svg" id="4_v0hda"]
 [ext_resource type="Texture2D" uid="uid://i52q8vkqdqo" path="res://ui/check.svg" id="5_1yx7s"]
-[ext_resource type="Texture2D" uid="uid://bo2r3bl1sjdgs" path="res://ui/chevron_down.svg" id="7_sd7oc"]
+[ext_resource type="Texture2D" uid="uid://b5wmfn8yb4e16" path="res://ui/back_icon.svg" id="7_728cj"]
+[ext_resource type="Texture2D" uid="uid://bo2r3bl1sjdgs" path="res://ui/dropdown_icon.svg" id="7_sd7oc"]
 [ext_resource type="PackedScene" uid="uid://cajoor01jr72b" path="res://ui/hover.tscn" id="9_apg18"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dbkkx"]
@@ -41,7 +42,6 @@ script = ExtResource("1_ltvm2")
 text = "Button"
 _default_material = ExtResource("1_8lepr")
 _primary_material = ExtResource("3_5gh4g")
-sound_on_up = false
 
 [node name="Background" type="Panel" parent="."]
 unique_name_in_owner = true
@@ -81,6 +81,21 @@ visible = false
 material = ExtResource("3_iq0h2")
 layout_mode = 2
 texture = ExtResource("5_1yx7s")
+expand_mode = 3
+
+[node name="BackIcon" type="MarginContainer" parent="MarginContainer/HBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 1
+theme_override_constants/margin_bottom = 6
+
+[node name="Check" type="TextureRect" parent="MarginContainer/HBoxContainer/BackIcon"]
+material = ExtResource("3_iq0h2")
+layout_mode = 2
+texture = ExtResource("7_728cj")
 expand_mode = 3
 
 [node name="Label" parent="MarginContainer/HBoxContainer" instance=ExtResource("3_sa45u")]

@@ -4,6 +4,7 @@
 [ext_resource type="FastNoiseLite" uid="uid://4742lvi7m1cl" path="res://ui/noise.tres" id="2_0ll8o"]
 
 [sub_resource type="Gradient" id="Gradient_o56k5"]
+offsets = PackedFloat32Array(0, 0.633803)
 colors = PackedColorArray(1, 1, 1, 1, 0.780702, 0.780702, 0.780702, 1)
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_dcnl1"]

@@ -16,6 +16,8 @@ signal drag_ended
 
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		return
 	_slider.drag_started.connect(_on_drag_started)
 	_slider.drag_ended.connect(_on_drag_ended)
 	mouse_entered.connect(_on_mouse_entered)

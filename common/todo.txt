@@ -1,4 +1,6 @@
 - UI skinning
+  - Animate the control shader
+  - Handle browser ESC key bs
   - Animations
   - Allow user to select option in option button by clicking, holding,
     dragging, then releasing
@@ -8,7 +10,7 @@
   - Confirm quit popup
   - Blur background on pause
 - Preload
-  - Make preload step iterate over all environments
+  - Make preload step iterate over all environments and graphics settings
   - Cache preload step
 - Character controller
   - Fix underwater env being displayed too early

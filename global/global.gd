@@ -48,7 +48,6 @@ func set_graphics_preset(graphics_preset: GraphicsPreset) -> void:
 	var msaa_3d: Viewport.MSAA
 	var environment_volumetric_fog_enabled: bool
 	var environment_glow_enabled: bool
-	var environment_ssr_enabled: bool
 	var environment_ssao_enabled: bool
 	var environment_ssil_enabled: bool
 	var environment_sdfgi_enabled: bool
@@ -61,7 +60,6 @@ func set_graphics_preset(graphics_preset: GraphicsPreset) -> void:
 			msaa_3d = Viewport.MSAA_DISABLED
 			environment_volumetric_fog_enabled = false
 			environment_glow_enabled = false
-			environment_ssr_enabled = false
 			environment_ssao_enabled = false
 			environment_ssil_enabled = false
 			environment_sdfgi_enabled = false
@@ -72,7 +70,6 @@ func set_graphics_preset(graphics_preset: GraphicsPreset) -> void:
 			msaa_3d = Viewport.MSAA_2X
 			environment_volumetric_fog_enabled = false
 			environment_glow_enabled = true
-			environment_ssr_enabled = false
 			environment_ssao_enabled = false
 			environment_ssil_enabled = false
 			environment_sdfgi_enabled = false
@@ -83,7 +80,6 @@ func set_graphics_preset(graphics_preset: GraphicsPreset) -> void:
 			msaa_3d = Viewport.MSAA_2X
 			environment_volumetric_fog_enabled = false
 			environment_glow_enabled = true
-			environment_ssr_enabled = false
 			environment_ssao_enabled = true
 			environment_ssil_enabled = false
 			environment_sdfgi_enabled = false
@@ -94,7 +90,6 @@ func set_graphics_preset(graphics_preset: GraphicsPreset) -> void:
 			msaa_3d = Viewport.MSAA_4X
 			environment_volumetric_fog_enabled = true
 			environment_glow_enabled = true
-			environment_ssr_enabled = true
 			environment_ssao_enabled = true
 			environment_ssil_enabled = true
 			environment_sdfgi_enabled = true
@@ -108,7 +103,6 @@ func set_graphics_preset(graphics_preset: GraphicsPreset) -> void:
 			environment_volumetric_fog_enabled
 		)
 		environment.glow_enabled = environment_glow_enabled
-		environment.ssr_enabled = environment_ssr_enabled
 		environment.ssao_enabled = environment_ssao_enabled
 		environment.ssil_enabled = environment_ssil_enabled
 		environment.sdfgi_enabled = environment_sdfgi_enabled

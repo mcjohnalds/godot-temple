@@ -1,16 +1,20 @@
-[gd_scene load_steps=20 format=3 uid="uid://4xgl4drja75q"]
+[gd_scene load_steps=22 format=3 uid="uid://4xgl4drja75q"]
 
 [ext_resource type="Script" path="res://common/menu.gd" id="1_7s8hv"]
 [ext_resource type="PackedScene" uid="uid://ff3oqsj7dv02" path="res://ui/custom_label.tscn" id="2_0emkm"]
 [ext_resource type="PackedScene" uid="uid://7vdx2q26wpr2" path="res://ui/custom_button.tscn" id="2_ov1kc"]
+[ext_resource type="Shader" path="res://common/lod_blur.gdshader" id="2_tttq7"]
 [ext_resource type="PackedScene" uid="uid://b55xr8elvsr3e" path="res://ui/custom_h_slider.tscn" id="3_0d4lc"]
 [ext_resource type="FontFile" uid="uid://dnuikshmkv3b" path="res://ui/jaro_36pt_regular.ttf" id="3_nutcb"]
 [ext_resource type="PackedScene" uid="uid://bt1qqr8mqu70i" path="res://ui/custom_option_button.tscn" id="3_smgye"]
 [ext_resource type="FontFile" uid="uid://bvi0lhpwxksn" path="res://ui/turret_road_bold.ttf" id="4_3if03"]
 [ext_resource type="Script" path="res://ui/custom_option_item.gd" id="4_akuoj"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3p651"]
-bg_color = Color(0.3, 0.3, 0.3, 0.74902)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kgf3c"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t1i3x"]
+shader = ExtResource("2_tttq7")
+shader_parameter/strength = 4.0
 
 [sub_resource type="Resource" id="Resource_grdyi"]
 script = ExtResource("4_akuoj")
@@ -58,19 +62,22 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_3p651")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_kgf3c")
 script = ExtResource("1_7s8hv")
+
+[node name="LodBlur" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_t1i3x")
+layout_mode = 2
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
-custom_minimum_size = Vector2(2.08165e-12, 300)
+custom_minimum_size = Vector2(400, 330)
 layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="TitleContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(400, 2.08165e-12)
 layout_mode = 2
 
 [node name="Title" parent="CenterContainer/VBoxContainer/TitleContainer" instance=ExtResource("2_0emkm")]
@@ -93,7 +100,6 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Start"
 primary = true
-sound_on_up = false
 
 [node name="ResumeButton" parent="CenterContainer/VBoxContainer/ButtonsContainer" instance=ExtResource("2_ov1kc")]
 unique_name_in_owner = true
@@ -101,42 +107,40 @@ visible = false
 layout_mode = 2
 text = "Resume"
 primary = true
-sound_on_up = false
 
 [node name="RestartButton" parent="CenterContainer/VBoxContainer/ButtonsContainer" instance=ExtResource("2_ov1kc")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 text = "Restart"
-sound_on_up = false
 
 [node name="SettingsButton" parent="CenterContainer/VBoxContainer/ButtonsContainer" instance=ExtResource("2_ov1kc")]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Settings"
-sound_on_up = false
 
 [node name="QuitButton" parent="CenterContainer/VBoxContainer/ButtonsContainer" instance=ExtResource("2_ov1kc")]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Quit"
-sound_on_up = false
 
 [node name="SettingsContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
+[node name="MarginContainer2" type="MarginContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 layout_mode = 2
 
-[node name="BackButton" parent="CenterContainer/VBoxContainer/SettingsContainer/HBoxContainer" instance=ExtResource("2_ov1kc")]
+[node name="BackButton" parent="CenterContainer/VBoxContainer/SettingsContainer/MarginContainer2" instance=ExtResource("2_ov1kc")]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/margin_bottom = 4
 text = "Back"
-sound_on_up = false
+back_icon = true
 
-[node name="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/HBoxContainer" instance=ExtResource("2_0emkm")]
+[node name="Label" parent="CenterContainer/VBoxContainer/SettingsContainer" instance=ExtResource("2_0emkm")]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_3if03")
 theme_override_font_sizes/font_size = 20
