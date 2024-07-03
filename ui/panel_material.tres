@@ -4,7 +4,7 @@
 [ext_resource type="FastNoiseLite" uid="uid://4742lvi7m1cl" path="res://ui/noise.tres" id="2_lj6to"]
 
 [sub_resource type="Gradient" id="Gradient_2m6o1"]
-offsets = PackedFloat32Array(0.506494, 1)
+offsets = PackedFloat32Array(0.218579, 1)
 colors = PackedColorArray(0, 0, 0, 1, 0.1812, 0.1812, 0.1812, 1)
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_vskco"]
@@ -13,4 +13,5 @@ noise = ExtResource("2_lj6to")
 
 [resource]
 shader = ExtResource("1_pfmkm")
+shader_parameter/blend_amount = 0.5
 shader_parameter/albedo_texture = SubResource("NoiseTexture2D_vskco")

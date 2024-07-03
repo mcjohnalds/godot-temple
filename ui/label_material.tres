@@ -12,4 +12,5 @@ noise = ExtResource("2_0ll8o")
 
 [resource]
 shader = ExtResource("1_74bdy")
+shader_parameter/blend_amount = 0.5
 shader_parameter/albedo_texture = SubResource("NoiseTexture2D_dcnl1")

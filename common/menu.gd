@@ -29,11 +29,11 @@ signal restarted
 @onready var _mouse_sensitivity_slider: Slider = %MouseSensitivitySlider
 @onready var _effects_slider: Slider = %EffectsVolumeSlider
 @onready var _music_slider: Slider = %MusicVolumeSlider
-@onready var _invert_mouse_option_button: OptionButton = (
+@onready var _invert_mouse_option_button: CustomOptionButton = (
 	%InvertMouseOptionButton
 )
-@onready var _vsync_option_button: OptionButton = %VsyncOptionButton
-@onready var _performance_preset_option_button: OptionButton = (
+@onready var _vsync_option_button: CustomOptionButton = %VsyncOptionButton
+@onready var _performance_preset_option_button: CustomOptionButton = (
 	%PerformancePresetOptionButton
 )
 @onready var _buttons_container: Control = %ButtonsContainer
@@ -50,14 +50,16 @@ func _ready() -> void:
 	_quit_button.button_down.connect(get_tree().quit)
 	_settings_button.button_down.connect(_on_settings_button_down)
 	_back_button.button_down.connect(_on_back_button_down)
-	_performance_preset_option_button.clear()
-	_performance_preset_option_button.add_item("Low")
-	_performance_preset_option_button.add_item("Medium")
-	_performance_preset_option_button.add_item("High")
 	if Util.is_compatibility_renderer():
+		# Compatibility renderer does not support vsync setting at all
 		_vsync_option_button.get_parent().visible = false
-	else:
-		_performance_preset_option_button.add_item("Insane")
+		# Compatibility renderer does not support things like volumetric fog
+		_performance_preset_option_button.items = (
+			_performance_preset_option_button.items.slice(0, 3)
+		)
+	if OS.get_name() == "macOS":
+		# macOS does not support adaptive or mailbox vsync
+		_vsync_option_button.items = _vsync_option_button.items.slice(0, 2)
 	_mouse_sensitivity_slider.drag_ended.connect(
 		_on_mouse_sensitivity_slider_drag_ended
 	)
@@ -87,11 +89,13 @@ func _read_settings_from_environment() -> void:
 	_music_slider.value = _db_to_slider_value(
 		AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music"))
 	)
-	_invert_mouse_option_button.selected = int(global.invert_mouse)
-	_vsync_option_button.selected = (
+	_invert_mouse_option_button.selected_index = int(global.invert_mouse)
+	_vsync_option_button.selected_index = (
 		DisplayServer.window_get_vsync_mode()
 	)
-	_performance_preset_option_button.selected = global.get_graphics_preset()
+	_performance_preset_option_button.selected_index = (
+		global.get_graphics_preset()
+	)
 
 
 func _on_mouse_sensitivity_slider_drag_ended(
