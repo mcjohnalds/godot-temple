@@ -87,12 +87,14 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 text = "Start"
+primary = true
 
 [node name="ResumeButton" parent="CenterContainer/VBoxContainer/ButtonsContainer" instance=ExtResource("2_ov1kc")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 text = "Resume"
+primary = true
 
 [node name="RestartButton" parent="CenterContainer/VBoxContainer/ButtonsContainer" instance=ExtResource("2_ov1kc")]
 unique_name_in_owner = true

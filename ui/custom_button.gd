@@ -29,6 +29,15 @@ signal button_down
 		_update()
 
 
+@export var primary := false:
+	set(value):
+		primary = value
+		_update()
+
+
+@export var _default_material: Material
+@export var _primary_material: Material
+@onready var _background: Panel = %Background
 @onready var _label: Label = %Label
 @onready var _checkbox: Control = %Checkbox
 @onready var _check: Control = %Check
@@ -59,6 +68,9 @@ func _update() -> void:
 	_checkbox.visible = checkbox
 	_check.visible = checked
 	_chevron.visible = chevron
+	_background.material = (
+		_primary_material if primary else _default_material
+	)
 
 
 func _on_mouse_entered() -> void:

@@ -3,12 +3,12 @@
 [ext_resource type="Shader" path="res://ui/main.gdshader" id="1_pfmkm"]
 [ext_resource type="FastNoiseLite" uid="uid://4742lvi7m1cl" path="res://ui/noise.tres" id="2_lj6to"]
 
-[sub_resource type="Gradient" id="Gradient_2m6o1"]
+[sub_resource type="Gradient" id="Gradient_2wefk"]
 offsets = PackedFloat32Array(0.218579, 1)
-colors = PackedColorArray(0, 0, 0, 1, 0.1812, 0.1812, 0.1812, 1)
+colors = PackedColorArray(0, 0, 0, 1, 0.1, 0.1, 0.1, 1)
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_vskco"]
-color_ramp = SubResource("Gradient_2m6o1")
+color_ramp = SubResource("Gradient_2wefk")
 noise = ExtResource("2_lj6to")
 
 [resource]
