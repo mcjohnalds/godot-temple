@@ -1,6 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://ff3oqsj7dv02"]
+[gd_scene load_steps=6 format=3 uid="uid://ff3oqsj7dv02"]
 
 [ext_resource type="Material" uid="uid://iboom6g2fuca" path="res://ui/label_material.tres" id="1_e5ypg"]
+[ext_resource type="Script" path="res://ui/custom_label.gd" id="3_7ng57"]
+[ext_resource type="FontFile" uid="uid://c7jq2fs1psr23" path="res://ui/chakra_petch_regular.ttf" id="4_q0mgy"]
+[ext_resource type="FontFile" uid="uid://bvi0lhpwxksn" path="res://ui/turret_road_bold.ttf" id="5_15exn"]
+[ext_resource type="FontFile" uid="uid://dnuikshmkv3b" path="res://ui/jaro_36pt_regular.ttf" id="6_68lph"]
 
 [node name="Label" type="Label"]
 material = ExtResource("1_e5ypg")
@@ -9,4 +13,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_fonts/font = ExtResource("4_q0mgy")
+theme_override_font_sizes/font_size = 16
 text = "Label"
+script = ExtResource("3_7ng57")
+default_font = ExtResource("4_q0mgy")
+header_font = ExtResource("5_15exn")
+title_font = ExtResource("6_68lph")

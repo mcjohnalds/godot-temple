@@ -1,7 +1,6 @@
 - UI skinning
-  - Primary button
-  - Shader
   - Custom font
+  - Sounds
   - Animations
 - Settings
   - Make esc go back from settings

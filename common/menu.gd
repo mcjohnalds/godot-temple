@@ -19,7 +19,7 @@ signal restarted
 		_update_controls()
 
 
-@onready var _title_label: Label = %TitleLabel
+@onready var _title: CustomLabel = %Title
 @onready var _start_button: CustomButton = %StartButton
 @onready var _resume_button: CustomButton = %ResumeButton
 @onready var _restart_button: CustomButton = %RestartButton
@@ -27,8 +27,8 @@ signal restarted
 @onready var _quit_button: CustomButton = %QuitButton
 @onready var _back_button: CustomButton = %BackButton
 @onready var _mouse_sensitivity_slider: CustomHSlider = %MouseSensitivitySlider
-@onready var _effects_slider: Slider = %EffectsVolumeSlider
-@onready var _music_slider: Slider = %MusicVolumeSlider
+@onready var _effects_slider: CustomHSlider = %EffectsVolumeSlider
+@onready var _music_slider: CustomHSlider = %MusicVolumeSlider
 @onready var _invert_mouse_option_button: CustomOptionButton = (
 	%InvertMouseOptionButton
 )
@@ -102,18 +102,14 @@ func _on_mouse_sensitivity_slider_drag_ended() -> void:
 	global.mouse_sensitivity = _mouse_sensitivity_slider.value
 
 
-func _on_effects_slider_drag_ended(
-	_value_changed: bool
-) -> void:
+func _on_effects_slider_drag_ended() -> void:
 	AudioServer.set_bus_volume_db(
 		AudioServer.get_bus_index("Effects"),
 		_slider_value_to_db(_effects_slider.value)
 	)
 
 
-func _on_music_slider_drag_ended(
-	_value_changed: bool
-) -> void:
+func _on_music_slider_drag_ended() -> void:
 	AudioServer.set_bus_volume_db(
 		AudioServer.get_bus_index("Music"),
 		_slider_value_to_db(_music_slider.value)
@@ -155,14 +151,14 @@ func _update_controls() -> void:
 	_settings_container.visible = settings_open
 	_quit_button.visible = not Util.is_web_browser()
 	if pause_menu:
-		_title_label.text = "Paused"
-		_title_label.theme_type_variation = "HeaderMedium"
+		_title.text = "Paused"
+		_title.type = CustomLabel.Type.HEADER_MEDIUM
 		_start_button.visible = false
 		_resume_button.visible = true
 		_restart_button.visible = true
 	else:
-		_title_label.text = "Godot Temple"
-		_title_label.theme_type_variation = "HeaderLarge"
+		_title.text = "Godot Temple"
+		_title.type = CustomLabel.Type.TITLE
 		_start_button.visible = true
 		_resume_button.visible = false
 		_restart_button.visible = false

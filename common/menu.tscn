@@ -1,10 +1,12 @@
-[gd_scene load_steps=18 format=3 uid="uid://4xgl4drja75q"]
+[gd_scene load_steps=20 format=3 uid="uid://4xgl4drja75q"]
 
 [ext_resource type="Script" path="res://common/menu.gd" id="1_7s8hv"]
 [ext_resource type="PackedScene" uid="uid://ff3oqsj7dv02" path="res://ui/custom_label.tscn" id="2_0emkm"]
 [ext_resource type="PackedScene" uid="uid://7vdx2q26wpr2" path="res://ui/custom_button.tscn" id="2_ov1kc"]
 [ext_resource type="PackedScene" uid="uid://b55xr8elvsr3e" path="res://ui/custom_h_slider.tscn" id="3_0d4lc"]
+[ext_resource type="FontFile" uid="uid://dnuikshmkv3b" path="res://ui/jaro_36pt_regular.ttf" id="3_nutcb"]
 [ext_resource type="PackedScene" uid="uid://bt1qqr8mqu70i" path="res://ui/custom_option_button.tscn" id="3_smgye"]
+[ext_resource type="FontFile" uid="uid://bvi0lhpwxksn" path="res://ui/turret_road_bold.ttf" id="4_3if03"]
 [ext_resource type="Script" path="res://ui/custom_option_item.gd" id="4_akuoj"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3p651"]
@@ -71,11 +73,13 @@ theme_override_constants/separation = 10
 custom_minimum_size = Vector2(400, 2.08165e-12)
 layout_mode = 2
 
-[node name="TitleLabel" parent="CenterContainer/VBoxContainer/TitleContainer" instance=ExtResource("2_0emkm")]
+[node name="Title" parent="CenterContainer/VBoxContainer/TitleContainer" instance=ExtResource("2_0emkm")]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"HeaderLarge"
+theme_override_fonts/font = ExtResource("3_nutcb")
+theme_override_font_sizes/font_size = 32
 text = "Godot Temple"
+type = 4
 
 [node name="HSeparator" type="HSeparator" parent="CenterContainer/VBoxContainer/TitleContainer"]
 layout_mode = 2
@@ -128,8 +132,10 @@ text = "Back"
 
 [node name="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/HBoxContainer" instance=ExtResource("2_0emkm")]
 layout_mode = 2
-theme_type_variation = &"HeaderSmall"
+theme_override_fonts/font = ExtResource("4_3if03")
+theme_override_font_sizes/font_size = 20
 text = "Settings"
+type = 1
 
 [node name="MouseSensitivity" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
 custom_minimum_size = Vector2(0, 31)
