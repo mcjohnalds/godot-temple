@@ -1,6 +1,8 @@
 - UI skinning
   - Primary button
   - Shader
+  - Custom font
+  - Animations
 - Settings
   - Make esc go back from settings
   - Performance test various other rendering settings like filtering
