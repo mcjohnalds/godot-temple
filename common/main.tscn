@@ -12,6 +12,19 @@ loader_scene = ExtResource("2_06noq")
 start_scene = ExtResource("3_ke055")
 game_scene = ExtResource("4_7i60w")
 
+[node name="Container" type="Node" parent="."]
+unique_name_in_owner = true
+
+[node name="Transition" type="ColorRect" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
+
 [node name="FpsCounter" parent="." instance=ExtResource("5_xpii4")]
 unique_name_in_owner = true
 visible = false

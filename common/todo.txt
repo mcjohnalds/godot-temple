@@ -9,7 +9,7 @@
   - Make esc go back from settings
   - Performance test various other rendering settings like filtering
   - Confirm quit popup
-  - Blur background on pause
+- Lower blur shader quality depending on graphics preset
 - Preload
   - Make preload step iterate over all environments and graphics settings
   - Cache preload step

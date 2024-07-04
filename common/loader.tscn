@@ -15,10 +15,7 @@ script = ExtResource("1_e8l04")
 
 [node name="Camera3D" type="Camera3D" parent="Container"]
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-layer = 128
-
-[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer"]
+[node name="PanelContainer" type="PanelContainer" parent="."]
 material = ExtResource("2_ctets")
 anchors_preset = 15
 anchor_right = 1.0
@@ -27,14 +24,14 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_sflvo")
 
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/PanelContainer"]
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer"]
 layout_mode = 2
 
-[node name="HBoxContainer" type="VBoxContainer" parent="CanvasLayer/PanelContainer/CenterContainer"]
+[node name="HBoxContainer" type="VBoxContainer" parent="PanelContainer/CenterContainer"]
 custom_minimum_size = Vector2(400, 2.08165e-12)
 layout_mode = 2
 
-[node name="ProgressLabel" parent="CanvasLayer/PanelContainer/CenterContainer/HBoxContainer" instance=ExtResource("2_1cgju")]
+[node name="ProgressLabel" parent="PanelContainer/CenterContainer/HBoxContainer" instance=ExtResource("2_1cgju")]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_prba2")
@@ -42,14 +39,14 @@ theme_override_font_sizes/font_size = 24
 text = "Loading assets (0%)..."
 type = 2
 
-[node name="TherapyLabel" parent="CanvasLayer/PanelContainer/CenterContainer/HBoxContainer" instance=ExtResource("2_1cgju")]
+[node name="TherapyLabel" parent="PanelContainer/CenterContainer/HBoxContainer" instance=ExtResource("2_1cgju")]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_prba2")
 theme_override_font_sizes/font_size = 20
 text = "This will take a while"
 type = 1
 
-[node name="FileLabel" parent="CanvasLayer/PanelContainer/CenterContainer/HBoxContainer" instance=ExtResource("2_1cgju")]
+[node name="FileLabel" parent="PanelContainer/CenterContainer/HBoxContainer" instance=ExtResource("2_1cgju")]
 unique_name_in_owner = true
 layout_mode = 2
 text = "foo/foo.tscn"
