@@ -21,8 +21,8 @@ func _process(_delta: float) -> void:
 	# Deal with the bullshit that can happen when the browser takes away the
 	# game's pointer lock
 	if (
-		_desired_mouse_mode != Input.mouse_mode
-		and _desired_mouse_mode == Input.MOUSE_MODE_CAPTURED
+		_desired_mouse_mode == Input.MOUSE_MODE_CAPTURED
+		and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
 	):
 		_mouse_mode_mismatch_count += 1
 	else:
@@ -47,7 +47,7 @@ func _pause() -> void:
 	_paused = true
 	_container.process_mode = Node.PROCESS_MODE_DISABLED
 	_menu_container.visible = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 
 func _unpause() -> void:
@@ -55,7 +55,7 @@ func _unpause() -> void:
 	_container.process_mode = Node.PROCESS_MODE_INHERIT
 	_menu_container.visible = false
 	_menu.settings_open = false
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
 func set_mouse_mode(mode: Input.MouseMode) -> void:

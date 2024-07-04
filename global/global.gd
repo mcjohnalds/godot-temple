@@ -24,10 +24,15 @@ var _graphics_preset: GraphicsPreset = GraphicsPreset.MEDIUM
 func _ready() -> void:
 	set_graphics_preset(_graphics_preset)
 	if OS.is_debug_build():
-		get_window().mode = Window.MODE_WINDOWED
-		get_window().size *= 2
-	else:
-		_music_audio_stream_player.play()
+		# The music is annoying when developing
+		AudioServer.set_bus_volume_db(
+			AudioServer.get_bus_index("Music"), -80.0
+		)
+		if OS.get_name() != "Web":
+			# Convent size because you can still see the Godot editor console
+			get_window().mode = Window.MODE_WINDOWED
+			get_window().size *= 2
+	_music_audio_stream_player.play()
 
 
 func _input(event: InputEvent) -> void:

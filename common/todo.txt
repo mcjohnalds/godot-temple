@@ -1,11 +1,12 @@
+- Test jolt on godot 4.3b2
+- Fix graphics web errors
 - UI skinning
-  - Fix audio buses in browser
-  - Handle browser ESC key bs
   - Animations
   - FPS counter
   - Fade to black level transitions
   - Allow user to select option in option button by clicking, holding,
     dragging, then releasing
+- Turn off directional shadow in web build
 - Settings
   - Make esc go back from settings
   - Performance test various other rendering settings like filtering
