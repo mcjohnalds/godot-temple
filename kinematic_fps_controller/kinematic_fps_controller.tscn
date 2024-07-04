@@ -1,6 +1,7 @@
-[gd_scene load_steps=33 format=3 uid="uid://2oxdgu03lnbk"]
+[gd_scene load_steps=35 format=3 uid="uid://2oxdgu03lnbk"]
 
 [ext_resource type="Script" path="res://kinematic_fps_controller/kinematic_fps_controller.gd" id="2_8r0nc"]
+[ext_resource type="PackedScene" uid="uid://7nghfugqxiqf" path="res://common/metal_impact.tscn" id="2_86agt"]
 [ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://common/underwater_environment.tres" id="2_owsda"]
 [ext_resource type="PhysicsMaterial" path="res://kinematic_fps_controller/physics/grass.tres" id="4_ulqss"]
 [ext_resource type="PhysicsMaterial" uid="uid://bklf2cx3fydt3" path="res://kinematic_fps_controller/physics/stone.tres" id="5_a0l7u"]
@@ -27,6 +28,7 @@
 [ext_resource type="PhysicsMaterial" path="res://kinematic_fps_controller/physics/water.tres" id="23_kplyn"]
 [ext_resource type="AudioStream" uid="uid://c7pj78vafhema" path="res://kinematic_fps_controller/audios/uncrouch_2.ogg" id="24_knso1"]
 [ext_resource type="AudioStream" uid="uid://begnjae7wbr3m" path="res://kinematic_fps_controller/audios/uncrouch_3.ogg" id="25_0xsk3"]
+[ext_resource type="PackedScene" uid="uid://cf762veqbirs4" path="res://common/assault_rifle.glb" id="28_e1ex1"]
 
 [sub_resource type="Resource" id="Resource_ju83a"]
 script = ExtResource("10_3id2w")
@@ -61,6 +63,7 @@ step_audio_streams = Array[AudioStream]([ExtResource("21_1rkt1"), ExtResource("2
 [node name="KinematicFpsController" type="CharacterBody3D"]
 floor_snap_length = 0.5
 script = ExtResource("2_8r0nc")
+bullet_impact_scene = ExtResource("2_86agt")
 material_audios = Array[ExtResource("10_3id2w")]([SubResource("Resource_ju83a"), SubResource("Resource_3rmwo"), SubResource("Resource_rfw5k"), SubResource("Resource_kvpuo")])
 water_material_audio = SubResource("Resource_kvpuo")
 crouch_audios = Array[AudioStream]([ExtResource("19_dvqy3"), ExtResource("20_0e40x"), ExtResource("21_8kmms"), ExtResource("22_rfhmk")])
@@ -75,6 +78,14 @@ shape = SubResource("CapsuleShape3D_fn1rj")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
+fov = 80.0
+
+[node name="Gun" parent="Head/Camera3D" instance=ExtResource("28_e1ex1")]
+transform = Transform3D(-7.71288e-09, 0, 0.17645, 0, 0.17645, 0, -0.17645, 0, -7.71288e-09, 0.303, -0.307, -0.334)
+
+[node name="BulletStart" type="Node3D" parent="Head/Camera3D/Gun"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, -3.31134e-15, 0, 1, 0, 3.9575e-15, 0, 1, 0.838788, 0.61442, 0)
 
 [node name="HeadRayCast" type="RayCast3D" parent="."]
 target_position = Vector3(0, 1, 0)

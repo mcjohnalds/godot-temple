@@ -1,6 +1,10 @@
 extends CharacterBody3D
 class_name KinematicFpsController
 
+@export var fire_rate := 13.0
+@export var max_bullet_range := 1000.0
+@export var bullet_impact_scene: PackedScene
+
 @export_group("Audio")
 
 @export var material_audios: Array[MaterialAudio]
@@ -129,6 +133,7 @@ class_name KinematicFpsController
 
 @export var underwater_env: Environment
 
+var _last_fired_at := -1000.0
 var _step_cycle := 0.0
 var _is_flying := false
 var _last_is_on_water := false
@@ -163,6 +168,7 @@ var _quake_camera_tilt_ratio := 0.0
 @onready var _initial_fov := _camera.fov
 @onready var _initial_head_position := _head.position
 @onready var _initial_capsule_height = _capsule.height
+@onready var _bullet_start: Node3D = %BulletStart
 
 
 func _physics_process(delta: float) -> void:
@@ -291,6 +297,18 @@ func _physics_process(delta: float) -> void:
 		if is_landed_on_floor_this_frame:
 			next_step_cycle = 0.0
 
+	if Input.is_action_pressed("shoot") and Util.get_ticks_sec() - _last_fired_at > 1.0 / fire_rate:
+		_last_fired_at = Util.get_ticks_sec()
+		var query := PhysicsRayQueryParameters3D.new()
+		query.from = _bullet_start.global_position
+		query.to = query.from - _camera.global_basis.z * max_bullet_range
+		var collision := get_world_3d().direct_space_state.intersect_ray(query)
+		if collision:
+			var impact: GPUParticles3D = bullet_impact_scene.instantiate()
+			impact.position = collision.position
+			impact.one_shot = true
+			impact.emitting = true
+			get_parent().add_child(impact)
 	# Calculations happen above, side-effects happen below
 
 	if quake_camera_tilt_enabled:
@@ -534,7 +552,6 @@ func _get_next_velocity(
 
 		vel.x = w.x
 		vel.z = w.z
-
 
 	if is_floating:
 		var depth := floating_height - depth_on_water
