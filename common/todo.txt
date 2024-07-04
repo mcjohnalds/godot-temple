@@ -1,7 +1,10 @@
+Todo:
+
+Backlog:
+
 - Test jolt on godot 4.3b2
 - UI skinning
   - Animations
-  - Fade to black level transitions
   - Allow user to select option in option button by clicking, holding,
     dragging, then releasing
 - Test all OS/browsers
@@ -17,7 +20,6 @@
   - Fix underwater env being displayed too early
   - Overwatch like bob curve
   - Special head bob when jumping
-  - Better crouch/uncrouch sound
   - Change FOV and crouch height with smoothstep
   - Swimming should make more noise
   - Use shape cast or something instead of ray cast so that a bug doesn't

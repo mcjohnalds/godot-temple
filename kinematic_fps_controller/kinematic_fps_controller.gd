@@ -7,6 +7,10 @@ class_name KinematicFpsController
 
 @export var water_material_audio: MaterialAudio
 
+@export var crouch_audios: Array[AudioStream] = []
+
+@export var uncrouch_audios: Array[AudioStream] = []
+
 @export_group("FOV")
 
 ## Speed at which the FOV changes
@@ -346,8 +350,10 @@ func _input(event: InputEvent) -> void:
 			vertical_angle_limit
 		)
 	elif event.is_action_pressed("move_crouch"):
+		_crouch_audio_stream_player.stream = crouch_audios.pick_random()
 		_crouch_audio_stream_player.play()
 	elif event.is_action_released("move_crouch"):
+		_uncrouch_audio_stream_player.stream = uncrouch_audios.pick_random()
 		_uncrouch_audio_stream_player.play()
 
 
