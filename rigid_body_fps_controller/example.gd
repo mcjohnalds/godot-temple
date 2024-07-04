@@ -1,6 +1,5 @@
 extends Node3D
 
-@onready var light: DirectionalLight3D = $DirectionalLight3D
 @onready var camera: Camera3D = $Camera3D
 @onready var rigid_body_fps_controller: RigidBodyFpsController = (
 	$RigidBodyFpsController
@@ -8,7 +7,6 @@ extends Node3D
 
 
 func _ready() -> void:
-	light.shadow_enabled = Util.is_compatibility_renderer()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 

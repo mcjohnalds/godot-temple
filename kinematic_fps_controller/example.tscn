@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://c2t6smyr8xtty"]
+[gd_scene load_steps=32 format=3 uid="uid://c2t6smyr8xtty"]
 
 [ext_resource type="Script" path="res://kinematic_fps_controller/example.gd" id="1_4lthp"]
 [ext_resource type="PackedScene" uid="uid://2oxdgu03lnbk" path="res://kinematic_fps_controller/kinematic_fps_controller.tscn" id="2_nvo2f"]
@@ -12,6 +12,7 @@
 [ext_resource type="Material" uid="uid://c72msuxs6n2a8" path="res://kinematic_fps_controller/materials/leaves.tres" id="8_fcbu8"]
 [ext_resource type="Material" uid="uid://ckvcdcn2iue87" path="res://kinematic_fps_controller/materials/wood.tres" id="11_cakef"]
 [ext_resource type="Environment" uid="uid://cj5a4clofvpeq" path="res://common/main_environment.tres" id="12_5juut"]
+[ext_resource type="Script" path="res://common/custom_directional_light_3d.gd" id="13_a1mlj"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_mctgj"]
 size = Vector3(20, 5, 50)
@@ -466,3 +467,4 @@ environment = ExtResource("12_5juut")
 transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866026, -0.5, 0.75, -0.433013, 0, 5, 0)
 shadow_enabled = true
 directional_shadow_max_distance = 250.0
+script = ExtResource("13_a1mlj")

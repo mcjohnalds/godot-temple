@@ -1,6 +1,7 @@
-[gd_scene load_steps=12 format=3 uid="uid://bs18gwft61b5c"]
+[gd_scene load_steps=13 format=3 uid="uid://bs18gwft61b5c"]
 
 [ext_resource type="Script" path="res://custom_joint/example.gd" id="1_kokka"]
+[ext_resource type="Script" path="res://common/custom_directional_light_3d.gd" id="2_0rg01"]
 [ext_resource type="Environment" uid="uid://cj5a4clofvpeq" path="res://common/main_environment.tres" id="2_btcu4"]
 [ext_resource type="Material" uid="uid://cv05ul0jjqhnd" path="res://common/grass.tres" id="2_nsg21"]
 [ext_resource type="PackedScene" uid="uid://dop6qbt6vroii" path="res://custom_joint/custom_joint.tscn" id="3_2l8jc"]
@@ -30,6 +31,7 @@ script = ExtResource("1_kokka")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
 shadow_enabled = true
+script = ExtResource("2_0rg01")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = ExtResource("2_btcu4")
