@@ -7,13 +7,13 @@ var _paused := false
 var _desired_mouse_mode := Input.MOUSE_MODE_VISIBLE
 var _mouse_mode_mismatch_count := 0
 @onready var _container: Node3D = $Container
-@onready var _menu: Menu = %Menu
+@onready var _main_menu: MainMenu = %MainMenu
 @onready var _menu_container = %MenuContainer
 
 
 func _ready() -> void:
-	_menu.resumed.connect(_unpause)
-	_menu.restarted.connect(restarted.emit)
+	_main_menu.resumed.connect(_unpause)
+	_main_menu.restarted.connect(restarted.emit)
 	set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
@@ -54,7 +54,7 @@ func _unpause() -> void:
 	_paused = false
 	_container.process_mode = Node.PROCESS_MODE_INHERIT
 	_menu_container.visible = false
-	_menu.settings_open = false
+	_main_menu.settings_open = false
 	set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 

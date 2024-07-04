@@ -1,6 +1,6 @@
 @tool
 extends Control
-class_name Menu
+class_name MainMenu
 
 signal started
 signal resumed

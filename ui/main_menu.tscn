@@ -1,6 +1,6 @@
 [gd_scene load_steps=22 format=3 uid="uid://4xgl4drja75q"]
 
-[ext_resource type="Script" path="res://common/menu.gd" id="1_7s8hv"]
+[ext_resource type="Script" path="res://ui/main_menu.gd" id="1_7s8hv"]
 [ext_resource type="PackedScene" uid="uid://ff3oqsj7dv02" path="res://ui/custom_label.tscn" id="2_0emkm"]
 [ext_resource type="PackedScene" uid="uid://7vdx2q26wpr2" path="res://ui/custom_button.tscn" id="2_ov1kc"]
 [ext_resource type="PackedScene" uid="uid://b55xr8elvsr3e" path="res://ui/custom_h_slider.tscn" id="3_0d4lc"]
@@ -58,7 +58,7 @@ text = "High"
 script = ExtResource("4_akuoj")
 text = "Insane"
 
-[node name="Menu" type="PanelContainer"]
+[node name="MainMenu" type="PanelContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

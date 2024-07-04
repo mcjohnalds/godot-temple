@@ -1,7 +1,7 @@
 extends Node
 class_name Start
 
-@onready var menu: Menu = %Menu
+@onready var main_menu: MainMenu = %MainMenu
 @onready var _pivot: Node3D = %Pivot
 
 

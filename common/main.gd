@@ -24,7 +24,7 @@ func _ready() -> void:
 	var start: Start = start_scene.instantiate()
 	_container.add_child(start)
 	await _fade_in()
-	await start.menu.started
+	await start.main_menu.started
 	await _fade_out()
 	start.queue_free()
 	await start.tree_exited
