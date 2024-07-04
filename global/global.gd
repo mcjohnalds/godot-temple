@@ -22,7 +22,6 @@ var _graphics_preset: GraphicsPreset = GraphicsPreset.MEDIUM
 
 
 func _ready() -> void:
-	set_graphics_preset(_graphics_preset)
 	if OS.is_debug_build():
 		# The music is annoying when developing
 		AudioServer.set_bus_volume_db(

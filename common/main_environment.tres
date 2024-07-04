@@ -6,11 +6,6 @@
 background_mode = 2
 sky = ExtResource("1_li5tu")
 tonemap_mode = 2
-ssao_enabled = true
-ssil_enabled = true
-sdfgi_enabled = true
-glow_enabled = true
 fog_enabled = true
 fog_density = 0.0025
-volumetric_fog_enabled = true
 volumetric_fog_density = 0.02

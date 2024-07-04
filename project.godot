@@ -111,3 +111,4 @@ quit={
 textures/vram_compression/import_etc2_astc=true
 scaling_3d/scale=0.5
 anti_aliasing/quality/msaa_3d=2
+limits/global_shader_variables/buffer_size.web=1024
