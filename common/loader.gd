@@ -68,7 +68,8 @@ func compile_shaders() -> void:
 			if node is Camera3D:
 				var camera: Camera3D = node
 				camera.current = false
-			if node is DirectionalLight3D:
+			if node is DirectionalLight3D and OS.get_name() == "macOS":
+				# Prevents a crash. Some sort of bug in the Godot engine.
 				var light: DirectionalLight3D = node
 				light.shadow_enabled = false
 		_container.add_child(scene)

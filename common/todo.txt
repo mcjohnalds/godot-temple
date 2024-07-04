@@ -1,9 +1,5 @@
 Todo:
 
-- Preload
-  - Cache preload step
-- Test jolt on godot 4.3b2
-- Test all OS/browsers
 - Weapon
   - Shooting
   - Tracer
@@ -19,6 +15,7 @@ Todo:
 
 Backlog:
 
+- Reduce number of loading screens or make them look the same
 - UI skinning
   - Animations
   - Allow user to select option in option button by clicking, holding,
@@ -46,7 +43,6 @@ Backlog:
   - Bonk assist
 - Convert wavs to oggs
 - Interactive music
-- Preload step
 - Make export scripts more automated
 - Texture exporter
 - 3D heightmap
@@ -57,3 +53,4 @@ Backlog:
 - Make sure use of noise textures is efficient, render to webp if necessary.
 - Copy all assets from past projects
 - Only export necessary resources
+- Cache preload step - store a random checksum in the game with every release
