@@ -13,7 +13,9 @@ script = ExtResource("1_e8l04")
 
 [node name="Container" type="Node3D" parent="."]
 
-[node name="Camera3D" type="Camera3D" parent="Container"]
+[node name="Camera" type="Camera3D" parent="Container"]
+unique_name_in_owner = true
+current = true
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 material = ExtResource("2_ctets")

@@ -1,14 +1,13 @@
 extends Node
 class_name Loader
 
-signal finished
+@onready var _container: Node = $Container
+@onready var _progress_label: Label = %ProgressLabel
+@onready var _file_label: Label = %FileLabel
+@onready var _camera: Camera3D = %Camera
 
-@onready var container: Node = $Container
-@onready var progress_label: Label = %ProgressLabel
-@onready var file_label: Label = %FileLabel
 
-
-func _ready() -> void:
+func compile_shaders() -> void:
 	var file_paths := Util.get_files_recursive("res://")
 
 	var scene_file_paths: Array[String] = []
@@ -18,17 +17,19 @@ func _ready() -> void:
 		if file_path.ends_with(".tscn"):
 			scene_file_paths.append(file_path)
 
-	for i in scene_file_paths.size():
-		var file_path := scene_file_paths[i]
-		# Don't want to load the current scene since canvas layers would clash
-		# if file_path == "res://misc/loader.tscn":
-		# 	continue
-
-		var percent := floori(
-			float(i) / float(scene_file_paths.size()) * 100.0
-		)
-		progress_label.text = "Loading assets (%s%%)" % percent
-		file_label.text = file_path.lstrip("res://")
+	var initial_graphics_preset := global.get_graphics_preset()
+	var highest_graphics_preset := (
+		Global.GraphicsPreset.HIGH if OS.get_name() == "Web"
+		else Global.GraphicsPreset.INSANE
+	)
+	global.set_graphics_preset(highest_graphics_preset)
+	var step := 0
+	_camera.environment = global.environments[0]
+	for file_path in scene_file_paths:
+		var steps := scene_file_paths.size()
+		var percent := floori(float(step) / float(steps) * 100.0)
+		_progress_label.text = "Loading assets (%s%%)" % percent
+		_file_label.text = file_path.lstrip("res://")
 		await get_tree().process_frame
 
 		var scene: Node = load(file_path).instantiate()
@@ -38,7 +39,8 @@ func _ready() -> void:
 
 		for node: Node in nodes:
 			node.set_script(null)
-			# Don't want autoplaying sounds or anything else causing problems
+			# Don't want autoplaying sounds or anything else causing
+			# problems
 			node.process_mode = Node.PROCESS_MODE_DISABLED
 			if "visible" in node:
 				node.visible = true
@@ -55,13 +57,21 @@ func _ready() -> void:
 				var canvas_item: CanvasItem = node
 				canvas_item.z_index = 0
 			if node is ScrollContainer:
-				# The ScrollContainer associated with OptionButtons draw on top
-				# of everything else and I don't know why so I just hide them
+				# The ScrollContainer associated with OptionButtons draw on
+				# top of everything else and I don't know why so I just
+				# hide them
 				node.visible = false
 			if node is CanvasLayer:
 				var canvas_layer: CanvasLayer = node
 				# Don't want the scene's layer to clash with our layer
 				canvas_layer.layer = 1
-		container.add_child(scene)
+			if node is Camera3D:
+				var camera: Camera3D = node
+				camera.current = false
+			if node is DirectionalLight3D:
+				var light: DirectionalLight3D = node
+				light.shadow_enabled = false
+		_container.add_child(scene)
 		await get_tree().process_frame
-	finished.emit()
+		step += 1
+	global.set_graphics_preset(initial_graphics_preset)

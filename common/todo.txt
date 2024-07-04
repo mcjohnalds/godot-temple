@@ -1,21 +1,36 @@
 Todo:
 
+- Preload
+  - Cache preload step
+- Test jolt on godot 4.3b2
+- Test all OS/browsers
+- Weapon
+  - Shooting
+  - Tracer
+  - Muzzle flash
+  - Smoke
+  - Impact
+  - Make weapon bob with player breathing
+  - Overwatch-like weapon bob https://www.youtube.com/watch?v=7Dga-UqdBR8
+- Character controller
+  - Head check
+- Screen space shaders
+- Custom boot screen
+
 Backlog:
 
-- Test jolt on godot 4.3b2
 - UI skinning
   - Animations
   - Allow user to select option in option button by clicking, holding,
     dragging, then releasing
-- Test all OS/browsers
 - Settings
   - Make esc go back from settings
   - Performance test various other rendering settings like filtering
   - Confirm quit popup
+  - Dynamic fov toggle
+  - FOV slider
+  - Head bob toggle
 - Lower blur shader quality depending on graphics preset
-- Preload
-  - Make preload step iterate over all environments and graphics settings
-  - Cache preload step
 - Character controller
   - Fix underwater env being displayed too early
   - Overwatch like bob curve
@@ -27,32 +42,18 @@ Backlog:
     edge of something floating.
   - Started/stopped floating sounds
   - Disable crouch underwater, flying, jumping
-  - Weapon
-    - Make weapon bob with player breathing
-    - Overwatch-like weapon bobhttps://www.youtube.com/watch?v=7Dga-UqdBR8
   - Fix inconsistent jumping from water
-  - Head check
   - Bonk assist
-- Misc
-  - Convert wavs to oggs
-  - Interactive music
-  - Skinnable UI
-  - Mouse capture
-  - Global scene
-  - Global utils
-    - get intertia
-  - Maximized when not in debug mode
-  - Screen space shaders
-  - Settings menu
-    - Dynamic fov should be toggleable
-    - Head bob toggle
-  - Boot screen
-  - Preload step
-  - Exports and scripts
-  - Texture exporter
-  - Heightmap
-  - Vehicle controller
-  - Tracers
-  - Night vision
-  - Icon
-  - Make sure use of noise textures is efficient, render to webp if necessary.
+- Convert wavs to oggs
+- Interactive music
+- Preload step
+- Make export scripts more automated
+- Texture exporter
+- 3D heightmap
+- Vehicle
+- Tracers
+- Night vision
+- Custom icon
+- Make sure use of noise textures is efficient, render to webp if necessary.
+- Copy all assets from past projects
+- Only export necessary resources

@@ -14,10 +14,10 @@ var _fade_in_started_at := -1000.0
 
 
 func _ready() -> void:
-	if not OS.is_debug_build():
+	if not OS.is_debug_build() or true:
 		var loader: Loader = loader_scene.instantiate()
 		_container.add_child(loader)
-		await loader.finished
+		await loader.compile_shaders()
 		await _fade_out()
 		loader.queue_free()
 		await loader.tree_exited
