@@ -1,11 +1,9 @@
 - Test jolt on godot 4.3b2
 - UI skinning
   - Animations
-  - FPS counter
   - Fade to black level transitions
   - Allow user to select option in option button by clicking, holding,
     dragging, then releasing
-- Turn off directional shadow in web build
 - Test all OS/browsers
 - Settings
   - Make esc go back from settings
