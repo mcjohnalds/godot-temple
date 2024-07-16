@@ -89,21 +89,13 @@ func _update_ammo_label() -> void:
 
 
 func _update_crosshair() -> void:
-	var p := global.get_player()
-	_shoot_crosshair.visible = (
-		p.get_health() > 0.0
-		and not _screen_message.visible
-		and not p.is_switching_weapon()
-		and p._melee.get_state() == Melee.State.IDLE
-		and not p.can_use()
-	)
-	_grab_crosshair.visible = (
-		p.get_health() > 0.0
-		and not _screen_message.visible
-		and not p.is_switching_weapon()
-		and p._melee.get_state() == Melee.State.IDLE
-		and p.can_use()
-	)
+	_shoot_crosshair.visible = false
+	_grab_crosshair.visible = false
+	if not _screen_message.visible:
+		if global.get_player().can_use():
+			_grab_crosshair.visible = true
+		elif global.get_player().can_shoot():
+			_shoot_crosshair.visible = true
 
 
 func _update_item_icons() -> void:

@@ -1082,13 +1082,13 @@ func _update_melee() -> void:
 	)
 	match _melee.get_state():
 		Melee.State.PREPARE:
-			_target_weapon_position = _initial_weapon_position
-			_target_weapon_position.z += 10.0
+			_target_weapon_position = (
+				_initial_weapon_position + Vector3(0.0, 0.0, 10.0)
+			)
 		Melee.State.EXTEND:
-			_target_weapon_position = _initial_weapon_position
-			_target_weapon_position.x -= 1.5
-			_target_weapon_position.y += 1.4
-			_target_weapon_position.z -= 10.0
+			_target_weapon_position = (
+				_initial_weapon_position + Vector3(-1.5, 1.4, -10.0)
+			)
 			_target_weapon_rotation = Vector3(
 				0.01 * TAU, 0.05 * TAU, 0.1 * TAU
 			)
@@ -1188,6 +1188,14 @@ func _is_reloading() -> bool:
 	return _reloading_gun or _grenade_throw_cooldown_remaining > 0.0
 
 
+func can_shoot() -> bool:
+	return (
+		_health > 0.0
+		and not _switching_weapon
+		and _melee.get_state() == Melee.State.IDLE
+	)
+
+
 func can_use() -> bool:
 	return (
 		_health > 0.0
@@ -1197,10 +1205,6 @@ func can_use() -> bool:
 		and _melee.get_state() == Melee.State.IDLE
 		and not _sleeping
 	)
-
-
-func is_switching_weapon() -> bool:
-	return _switching_weapon
 
 
 func get_center() -> Vector3:
