@@ -94,14 +94,14 @@ func _update_crosshair() -> void:
 		p.get_health() > 0.0
 		and not _screen_message.visible
 		and not p.is_switching_weapon()
-		and not p.is_meleeing()
+		and p._melee.get_state() == Melee.State.IDLE
 		and not p.can_use()
 	)
 	_grab_crosshair.visible = (
 		p.get_health() > 0.0
 		and not _screen_message.visible
 		and not p.is_switching_weapon()
-		and not p.is_meleeing()
+		and p._melee.get_state() == Melee.State.IDLE
 		and p.can_use()
 	)
 

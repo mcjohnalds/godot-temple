@@ -5,8 +5,6 @@ enum WeaponType { GUN, GRENADE, BANDAGES }
 signal sleep_attemped
 signal died
 
-@export var melee_duration := 0.4
-@export var melee_range := 2.0
 @export var thrown_grenade_scene: PackedScene
 @export var fire_rate := 11.0
 @export var max_bullet_range := 1000.0
@@ -50,8 +48,6 @@ var _bandages_in_inventory := 0
 var _reloading_gun := false
 var _aiming_at_interactable: Node3D = null
 var _grabbing: Grabbable = null
-var _last_melee_at := -1000.0
-var _has_melee_applied_damage := false
 var _sleeping := false
 # We need to track shoot button down state instead of just relying on
 # Input.is_action_pressed("shoot") so the gun doesn't shoot when the player
@@ -242,11 +238,13 @@ var _quake_camera_tilt_ratio := 0.0
 @onready var _muzzle_flashes: Array[MeshInstance3D] = [
 	%MuzzleFlash1, %MuzzleFlash2, %MuzzleFlash3,
 ]
+@onready var _melee: Melee = %Melee
 
 
 func _ready() -> void:
 	_smoke.emitting = false
 	_update_muzzle_flash()
+	_melee.hit.connect(_on_melee_hit)
 
 
 func _physics_process(delta: float) -> void:
@@ -384,7 +382,7 @@ func _input(event: InputEvent) -> void:
 		and not _switching_weapon
 		and not _grabbing
 		and not _reloading_gun
-		and not is_meleeing()
+		and _melee.get_state() == Melee.State.IDLE
 		and not _sleeping
 	):
 		_reloading_gun = true
@@ -408,8 +406,6 @@ func _input(event: InputEvent) -> void:
 			sleep_attemped.emit()
 		else:
 			push_error("Unexpected state")
-	if event.is_action_pressed("melee") and can_melee():
-		_last_melee_at = Util.get_ticks_sec()
 	if event.is_action_pressed("toggle_night_vision") and _health > 0.0:
 		night_vision = not night_vision
 	if event.is_action_pressed("shoot"):
@@ -862,7 +858,7 @@ func _update_gun_shooting(delta: float) -> void:
 		and not _switching_weapon
 		and _shoot_button_down
 		and Util.get_ticks_sec() - _gun_last_fired_at > 1.0 / fire_rate
-		and not is_meleeing()
+		and _melee.get_state() == Melee.State.IDLE
 		and not _sleeping
 	)
 	if fire_bullet:
@@ -926,7 +922,7 @@ func _update_grenade(delta: float) -> void:
 		_health == 0.0
 		or _weapon_type != WeaponType.GRENADE
 		or _switching_weapon
-		or is_meleeing()
+		or _melee.get_state() != Melee.State.IDLE
 		or _sleeping
 	):
 		return
@@ -955,7 +951,7 @@ func _update_bandages(delta: float) -> void:
 		_health == 0.0
 		or _weapon_type != WeaponType.BANDAGES
 		or _switching_weapon
-		or is_meleeing()
+		or _melee.get_state() != Melee.State.IDLE
 		or _sleeping
 	):
 		return
@@ -1078,14 +1074,17 @@ func _update_interaction(delta: float) -> void:
 
 
 func _update_melee() -> void:
-	if _health == 0.0:
-		return
-	var d := Util.get_ticks_sec() - _last_melee_at
-	if d < melee_duration:
-		# TODO: a state machine would work better
-		_target_weapon_position = _initial_weapon_position
-		_target_weapon_position.z += 10.0
-		if d > 0.07 and d <= 0.2:
+	_melee.allowed = (
+		_health > 0.0
+		and not _switching_weapon
+		and not _grabbing
+		and not _sleeping
+	)
+	match _melee.get_state():
+		Melee.State.PREPARE:
+			_target_weapon_position = _initial_weapon_position
+			_target_weapon_position.z += 10.0
+		Melee.State.EXTEND:
 			_target_weapon_position = _initial_weapon_position
 			_target_weapon_position.x -= 1.5
 			_target_weapon_position.y += 1.4
@@ -1093,29 +1092,9 @@ func _update_melee() -> void:
 			_target_weapon_rotation = Vector3(
 				0.01 * TAU, 0.05 * TAU, 0.1 * TAU
 			)
-			if not _has_melee_applied_damage:
-				_do_melee_damage()
-				_has_melee_applied_damage = true
-		if d > 0.2:
+		Melee.State.RETRACT:
 			_target_weapon_position = _initial_weapon_position
 			_target_weapon_rotation = _initial_weapon_rotation
-			_has_melee_applied_damage = false
-
-
-func _do_melee_damage() -> void:
-	var query := PhysicsRayQueryParameters3D.new()
-	query.collision_mask = Global.PhysicsLayer.DEFAULT
-	query.from = _camera.global_position
-	var dir := -_weapon.global_basis.z
-	query.to = _camera.global_position + dir * melee_range
-	query.exclude = [get_rid()]
-	var collision := get_world_3d().direct_space_state.intersect_ray(query)
-	if collision:
-		var impact: GPUParticles3D = default_bullet_impact_scene.instantiate()
-		impact.position = collision.position
-		impact.one_shot = true
-		impact.emitting = true
-		get_parent().add_child(impact)
 
 
 func _update_muzzle_flash() -> void:
@@ -1144,6 +1123,7 @@ func damage(amount: float) -> void:
 		_health = 0.0
 		if _alive:
 			_alive = false
+			_melee.process_mode = Node.PROCESS_MODE_DISABLED
 			_target_weapon_position = (
 				_initial_weapon_position + Vector3.DOWN * 0.1
 			)
@@ -1214,27 +1194,13 @@ func can_use() -> bool:
 		and _aiming_at_interactable
 		and not _switching_weapon
 		and not _grabbing
-		and not is_meleeing()
+		and _melee.get_state() == Melee.State.IDLE
 		and not _sleeping
 	)
 
 
 func is_switching_weapon() -> bool:
 	return _switching_weapon
-
-
-func can_melee() -> bool:
-	return (
-		Util.get_ticks_sec() - _last_melee_at > melee_duration
-		and _health > 0.0
-		and not _switching_weapon
-		and not _grabbing 
-		and not _sleeping
-	)
-
-
-func is_meleeing() -> bool:
-	return Util.get_ticks_sec() - _last_melee_at <= melee_duration
 
 
 func get_center() -> Vector3:
@@ -1260,3 +1226,12 @@ func respawn() -> void:
 	_grenade_count /= 2
 	_bandages_in_inventory /= 2
 	global.get_death_overlay().modulate.a = 0.0
+
+
+func _on_melee_hit(collision: Dictionary) -> void:
+	if collision:
+		var impact: GPUParticles3D = default_bullet_impact_scene.instantiate()
+		impact.position = collision.position
+		impact.one_shot = true
+		impact.emitting = true
+		get_parent().add_child(impact)

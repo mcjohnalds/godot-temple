@@ -138,3 +138,12 @@ static func get_children_recursive(
 static func sample_curve_tangent(curve: Curve, offset: float) -> float:
 	var px := 1.0 / curve.point_count
 	return (curve.sample(offset + px) - curve.sample(offset - px)) / (2.0 * px)
+
+
+static func get_parent_collision_object_3d(node: Node) -> CollisionObject3D:
+	var p := node.get_parent()
+	if p is CollisionObject3D:
+		return p
+	if p == null:
+		return null
+	return get_parent_collision_object_3d(p)
