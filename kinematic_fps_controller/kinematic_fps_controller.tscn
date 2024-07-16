@@ -1,13 +1,14 @@
-[gd_scene load_steps=35 format=3 uid="uid://2oxdgu03lnbk"]
+[gd_scene load_steps=57 format=3 uid="uid://2oxdgu03lnbk"]
 
 [ext_resource type="Script" path="res://kinematic_fps_controller/kinematic_fps_controller.gd" id="2_8r0nc"]
 [ext_resource type="PackedScene" uid="uid://7nghfugqxiqf" path="res://common/metal_impact.tscn" id="2_86agt"]
+[ext_resource type="PackedScene" uid="uid://cypfq1s75umj6" path="res://common/thrown_grenade.tscn" id="2_anmft"]
 [ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://common/underwater_environment.tres" id="2_owsda"]
+[ext_resource type="PackedScene" uid="uid://dvepobheadtv4" path="res://common/tracer.tscn" id="3_83nad"]
 [ext_resource type="PhysicsMaterial" path="res://kinematic_fps_controller/physics/grass.tres" id="4_ulqss"]
 [ext_resource type="PhysicsMaterial" uid="uid://bklf2cx3fydt3" path="res://kinematic_fps_controller/physics/stone.tres" id="5_a0l7u"]
 [ext_resource type="PhysicsMaterial" path="res://kinematic_fps_controller/physics/wood.tres" id="6_ulh2i"]
 [ext_resource type="Script" path="res://kinematic_fps_controller/material_audio.gd" id="10_3id2w"]
-[ext_resource type="Curve" path="res://kinematic_fps_controller/bob_curve.tres" id="10_jwnxu"]
 [ext_resource type="AudioStream" uid="uid://c2cl56b4rns2u" path="res://kinematic_fps_controller/jute-dh-steps/stepdirt_2.wav" id="12_wuy6q"]
 [ext_resource type="AudioStream" uid="uid://7gjj4wse1p7s" path="res://kinematic_fps_controller/jute-dh-steps/stepdirt_3.wav" id="13_ydtah"]
 [ext_resource type="AudioStream" uid="uid://p8tdym4d3gwm" path="res://kinematic_fps_controller/jute-dh-steps/stepdirt_4.wav" id="14_78mnj"]
@@ -29,6 +30,15 @@
 [ext_resource type="AudioStream" uid="uid://c7pj78vafhema" path="res://kinematic_fps_controller/audios/uncrouch_2.ogg" id="24_knso1"]
 [ext_resource type="AudioStream" uid="uid://begnjae7wbr3m" path="res://kinematic_fps_controller/audios/uncrouch_3.ogg" id="25_0xsk3"]
 [ext_resource type="PackedScene" uid="uid://cf762veqbirs4" path="res://common/assault_rifle.glb" id="28_e1ex1"]
+[ext_resource type="PackedScene" uid="uid://cfh6b484xv5gf" path="res://common/grenade.blend" id="30_r6pvv"]
+[ext_resource type="Texture2D" uid="uid://nsrqdm2vli8a" path="res://addons/kenney_particle_pack/muzzle_02.png" id="31_q70iq"]
+[ext_resource type="Texture2D" uid="uid://8sg30406ftag" path="res://addons/kenney_particle_pack/magic_05.png" id="32_twhfu"]
+[ext_resource type="Texture2D" uid="uid://g6lgbd2idtjd" path="res://addons/kenney_particle_pack/smoke_08.png" id="33_7j817"]
+[ext_resource type="PackedScene" uid="uid://db8a8angieov0" path="res://common/bandages.tscn" id="36_yfbjp"]
+
+[sub_resource type="Curve" id="Curve_uibhf"]
+_data = [Vector2(0, 0.249071), 0.0, 0.0, 0, 0, Vector2(0.165854, 1), 0.0, 0.0, 0, 0, Vector2(0.273171, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
 
 [sub_resource type="Resource" id="Resource_ju83a"]
 script = ExtResource("10_3id2w")
@@ -58,44 +68,213 @@ jump_audio_stream = ExtResource("21_1rkt1")
 landed_audio_stream = ExtResource("22_p60vq")
 step_audio_streams = Array[AudioStream]([ExtResource("21_1rkt1"), ExtResource("22_p60vq")])
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fn1rj"]
+[sub_resource type="Curve" id="Curve_l0i00"]
+min_value = -1.0
+_data = [Vector2(0, 0), 0.0, 5.68421, 0, 0, Vector2(0.328302, 1), 0.0, 0.0, 0, 0, Vector2(0.709434, -1), 0.0, 0.0, 0, 0, Vector2(0.986956, 0), 4.8527, 0.0, 0, 0]
+point_count = 4
 
-[node name="KinematicFpsController" type="CharacterBody3D"]
+[sub_resource type="Curve" id="Curve_sgya5"]
+min_value = -1.0
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.181132, 0.593942), 0.0, 0.0, 0, 0, Vector2(0.411321, -0.168954), 0.0, 0.0, 0, 0, Vector2(0.592453, -1), 0.0, 0.0, 0, 0, Vector2(0.784906, -0.316612), 0.0, 0.0, 0, 0, Vector2(0.986956, 0), 0.0, 0.0, 0, 0]
+point_count = 6
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fn1rj"]
+radius = 0.3
+height = 1.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f8tu5"]
+resource_local_to_scene = true
+transparency = 1
+blend_mode = 1
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(1.476, 1.381, 1.059, 1)
+albedo_texture = ExtResource("31_q70iq")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_8kq7a"]
+size = Vector2(1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a6b2b"]
+resource_local_to_scene = true
+transparency = 1
+blend_mode = 1
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(1.476, 1.381, 1.059, 1)
+albedo_texture = ExtResource("32_twhfu")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_h6ix3"]
+size = Vector2(1, 1)
+
+[sub_resource type="Curve" id="Curve_ptkh4"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_7yq5w"]
+curve = SubResource("Curve_ptkh4")
+
+[sub_resource type="Curve" id="Curve_2b2ln"]
+min_value = 2.13163e-14
+max_value = 0.2
+_data = [Vector2(0, 2.13163e-14), 0.0, 0.28, 0, 0, Vector2(1, 0.2), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_oucc8"]
+curve = SubResource("Curve_2b2ln")
+
+[sub_resource type="Curve" id="Curve_8lrmi"]
+_data = [Vector2(0, 0.182156), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_st3no"]
+curve = SubResource("Curve_8lrmi")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_6lf27"]
+lifetime_randomness = 0.19
+angle_max = 360.0
+angle_curve = SubResource("CurveTexture_oucc8")
+direction = Vector3(2.08165e-12, 1, 2.08165e-12)
+spread = 0.853
+initial_velocity_min = 0.3
+initial_velocity_max = 0.3
+gravity = Vector3(2.08165e-12, 0.3, 2.08165e-12)
+scale_min = 2.0
+scale_max = 3.0
+scale_curve = SubResource("CurveTexture_st3no")
+color = Color(1, 1, 1, 0.235294)
+alpha_curve = SubResource("CurveTexture_7yq5w")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k3mb8"]
+transparency = 2
+alpha_scissor_threshold = 0.077
+alpha_antialiasing_mode = 0
+blend_mode = 1
+cull_mode = 2
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.678, 0.678, 0.678, 1)
+albedo_texture = ExtResource("33_7j817")
+disable_receive_shadows = true
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_cxfwg"]
+material = SubResource("StandardMaterial3D_k3mb8")
+
+[node name="KinematicFpsController" type="CharacterBody3D" groups=["player"]]
+collision_mask = 3
 floor_snap_length = 0.5
 script = ExtResource("2_8r0nc")
-bullet_impact_scene = ExtResource("2_86agt")
+thrown_grenade_scene = ExtResource("2_anmft")
+fire_rate = 10.0
+default_bullet_impact_scene = ExtResource("2_86agt")
+tracer_scene = ExtResource("3_83nad")
+muzzle_flash_alpha_curve = SubResource("Curve_uibhf")
+weapon_linear_pid_kp = 500.0
+weapon_linear_pid_kd = 50.0
+weapon_angular_pid_kp = 300.0
+weapon_angular_pid_kd = 20.0
+camera_linear_pid_kp = 100.0
+camera_linear_pid_kd = 10.0
+camera_angular_pid_kp = 100.0
+camera_angular_pid_kd = 10.0
 material_audios = Array[ExtResource("10_3id2w")]([SubResource("Resource_ju83a"), SubResource("Resource_3rmwo"), SubResource("Resource_rfw5k"), SubResource("Resource_kvpuo")])
 water_material_audio = SubResource("Resource_kvpuo")
 crouch_audios = Array[AudioStream]([ExtResource("19_dvqy3"), ExtResource("20_0e40x"), ExtResource("21_8kmms"), ExtResource("22_rfhmk")])
 uncrouch_audios = Array[AudioStream]([ExtResource("23_326x3"), ExtResource("24_knso1"), ExtResource("25_0xsk3")])
-head_bob_curve = ExtResource("10_jwnxu")
+vertical_horizontal_ratio = 4.0
+head_bob_x_curve = SubResource("Curve_l0i00")
+head_bob_y_curve = SubResource("Curve_sgya5")
+head_bob_curve_multiplier = Vector2(1, 1)
+gravity_multiplier = 1.5
+base_speed = 3.0
+walk_acceleration = 4.0
+walk_deceleration = 8.0
+air_control = 0.1
+sprint_speed_multiplier = 2.0
+step_interval = 5.0
+jump_height = 3.5
 underwater_env = ExtResource("2_owsda")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_fn1rj")
 
+[node name="Center" type="Node3D" parent="CollisionShape3D"]
+unique_name_in_owner = true
+
 [node name="Head" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 0.46, 2.08165e-12)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
 fov = 80.0
 
-[node name="Gun" parent="Head/Camera3D" instance=ExtResource("28_e1ex1")]
-transform = Transform3D(-7.71288e-09, 0, 0.17645, 0, 0.17645, 0, -0.17645, 0, -7.71288e-09, 0.303, -0.307, -0.334)
-
-[node name="BulletStart" type="Node3D" parent="Head/Camera3D/Gun"]
+[node name="Weapon" type="Node3D" parent="Head/Camera3D"]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, -3.31134e-15, 0, 1, 0, 3.9575e-15, 0, 1, 0.838788, 0.61442, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.303, -0.307, -0.334)
+
+[node name="Gun" parent="Head/Camera3D/Weapon" instance=ExtResource("28_e1ex1")]
+unique_name_in_owner = true
+transform = Transform3D(-7.71288e-09, 0, 0.17645, 0, 0.17645, 0, -0.17645, 0, -7.71288e-09, 0, 0, 0)
+
+[node name="BulletStart" type="Node3D" parent="Head/Camera3D/Weapon/Gun"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, -3.31134e-15, 0, 1, 0, 3.9575e-15, 0, 1, 3.59774, 0.614418, 1.19209e-07)
+
+[node name="MuzzleFlash1" type="MeshInstance3D" parent="Head/Camera3D/Weapon/Gun/BulletStart"]
+unique_name_in_owner = true
+transform = Transform3D(5.68106e-07, 0, -5.94547, 0, 2.49424, 0, 4.33224, 0, 7.79654e-07, 2.77231, 0, 1.19209e-07)
+material_override = SubResource("StandardMaterial3D_f8tu5")
+mesh = SubResource("PlaneMesh_8kq7a")
+
+[node name="MuzzleFlash2" type="MeshInstance3D" parent="Head/Camera3D/Weapon/Gun/BulletStart"]
+unique_name_in_owner = true
+transform = Transform3D(3.78738e-07, 1.09027e-07, -5.94547, -4.33224, -1.09027e-07, -5.19769e-07, -1.89368e-07, 2.49424, 2.59885e-07, 2.77231, 0, 1.19209e-07)
+material_override = SubResource("StandardMaterial3D_f8tu5")
+mesh = SubResource("PlaneMesh_8kq7a")
+
+[node name="MuzzleFlash3" type="MeshInstance3D" parent="Head/Camera3D/Weapon/Gun/BulletStart"]
+unique_name_in_owner = true
+transform = Transform3D(-1.23799e-07, 2.83218, -1.23799e-07, 8.49728e-22, -1.23799e-07, -2.83218, -2.83218, -1.23799e-07, 1.29908e-15, 0.942238, 0, 0)
+material_override = SubResource("StandardMaterial3D_a6b2b")
+mesh = SubResource("PlaneMesh_h6ix3")
+
+[node name="Smoke" type="GPUParticles3D" parent="Head/Camera3D/Weapon/Gun/BulletStart"]
+unique_name_in_owner = true
+transform = Transform3D(-3.57265e-08, 0, 0.817327, 0, 0.817327, 0, -0.817327, 0, -3.57265e-08, 0.402218, 0.0328035, 0)
+lifetime = 3.0
+randomness = 0.2
+fixed_fps = 60
+visibility_aabb = AABB(-1.62292, -1.09174, -1.68963, 3.18206, 4.79947, 3.20341)
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_6lf27")
+draw_pass_1 = SubResource("QuadMesh_cxfwg")
+
+[node name="Grenade" parent="Head/Camera3D/Weapon" instance=ExtResource("30_r6pvv")]
+unique_name_in_owner = true
+transform = Transform3D(0.998917, 0.00268531, 0.0464445, -0.00868368, 0.99155, 0.129438, -0.0457044, -0.129701, 0.990499, 0.076, 0.007, -0.042)
+visible = false
+
+[node name="Bandages" type="Node3D" parent="Head/Camera3D/Weapon"]
+unique_name_in_owner = true
+visible = false
+
+[node name="Model" parent="Head/Camera3D/Weapon/Bandages" instance=ExtResource("36_yfbjp")]
+transform = Transform3D(0.670507, 0.717213, 0.189806, -0.160834, -0.109233, 0.980918, 0.72426, -0.688239, 0.0421105, -0.0399644, 0.116153, -0.0382029)
 
 [node name="HeadRayCast" type="RayCast3D" parent="."]
-target_position = Vector3(0, 1, 0)
+target_position = Vector3(2.08165e-12, 0.85, 2.08165e-12)
+collision_mask = 3
 
 [node name="GroundRayCast" type="RayCast3D" parent="."]
-target_position = Vector3(0, -1.5, 0)
+target_position = Vector3(2.08165e-12, -1.2, 2.08165e-12)
+collision_mask = 3
 
 [node name="SwimRayCast" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-target_position = Vector3(0, -2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 0.85, 2.08165e-12)
+target_position = Vector3(2.08165e-12, -1.7, 2.08165e-12)
 collision_mask = 8
 hit_from_inside = true
 collide_with_areas = true

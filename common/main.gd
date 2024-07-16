@@ -6,8 +6,6 @@ const _FADE_DURATION = 0.15
 @export var start_scene: PackedScene
 @export var game_scene: PackedScene
 var _game: Game
-var _fade_out_started_at := -1000.0
-var _fade_in_started_at := -1000.0
 @onready var _container: Node = %Container
 @onready var _fps_counter: Label = %FpsCounter
 @onready var _transition: ColorRect = %Transition
@@ -24,8 +22,9 @@ func _ready() -> void:
 	var start: Start = start_scene.instantiate()
 	_container.add_child(start)
 	await _fade_in()
-	await start.main_menu.started
-	await _fade_out()
+	if not OS.is_debug_build():
+		await start.main_menu.started
+		await _fade_out()
 	start.queue_free()
 	await start.tree_exited
 	_restart()
@@ -33,18 +32,6 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_fps_counter.text = "%s FPS " % Engine.get_frames_per_second()
-	if Util.get_ticks_sec() - _fade_out_started_at < _FADE_DURATION:
-		_transition.color.a = smoothstep(
-			0.0,
-			1.0,
-			Util.get_ticks_sec() - _fade_out_started_at / _FADE_DURATION
-		)
-	if Util.get_ticks_sec() - _fade_in_started_at < _FADE_DURATION:
-		_transition.color.a = smoothstep(
-			0.0,
-			1.0,
-			1.0 - (Util.get_ticks_sec() - _fade_in_started_at) / _FADE_DURATION
-		)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -60,16 +47,24 @@ func _restart() -> void:
 	_game = game_scene.instantiate()
 	_container.add_child(_game)
 	_game.restarted.connect(_restart)
+	_game.started_sleeping.connect(_on_started_sleeping)
+	_game.finished_sleeping.connect(_fade_in)
 	await _fade_in()
 
 
 func _fade_out() -> void:
-	_fade_out_started_at = Util.get_ticks_sec()
-	await get_tree().create_timer(_FADE_DURATION).timeout
-	_transition.color.a = 1.0
+	var tween := create_tween()
+	tween.tween_property(_transition, "color:a", 1.0, _FADE_DURATION).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	await tween.finished
 
 
 func _fade_in() -> void:
-	_fade_in_started_at = Util.get_ticks_sec()
-	await get_tree().create_timer(_FADE_DURATION).timeout
-	_transition.color.a = 0.0
+	_transition.color.a = 1.0
+	var tween := create_tween()
+	tween.tween_property(_transition, "color:a", 0.0, _FADE_DURATION).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	await tween.finished
+
+
+func _on_started_sleeping() -> void:
+	await _fade_out()
+	_game.respawn_contents()

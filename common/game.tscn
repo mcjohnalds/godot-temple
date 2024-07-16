@@ -1,15 +1,205 @@
-[gd_scene load_steps=4 format=3 uid="uid://d1y8jdicca0ja"]
+[gd_scene load_steps=16 format=3 uid="uid://d1y8jdicca0ja"]
 
 [ext_resource type="Script" path="res://common/game.gd" id="1_nixut"]
-[ext_resource type="PackedScene" uid="uid://c2t6smyr8xtty" path="res://kinematic_fps_controller/example.tscn" id="2_ivxhn"]
+[ext_resource type="PackedScene" uid="uid://dsinasa0vu1ih" path="res://common/level.tscn" id="2_m3jn1"]
 [ext_resource type="PackedScene" uid="uid://4xgl4drja75q" path="res://ui/main_menu.tscn" id="3_3ao77"]
+[ext_resource type="Texture2D" uid="uid://c3e3e6qpqh5jl" path="res://ui/crosshair.svg" id="3_gck2x"]
+[ext_resource type="Shader" path="res://common/night_vision.gdshader" id="3_wn4tp"]
+[ext_resource type="Texture2D" uid="uid://7dmlqfg2dx63" path="res://common/blood_vignette.webp" id="5_8vg5e"]
+[ext_resource type="Script" path="res://common/blood_overlay.gd" id="6_h3boe"]
+[ext_resource type="PackedScene" uid="uid://ff3oqsj7dv02" path="res://ui/custom_label.tscn" id="6_pjl4h"]
+[ext_resource type="Texture2D" uid="uid://tm6l4hjbmsy6" path="res://ui/grab_crosshair.svg" id="8_k4ypl"]
+[ext_resource type="PackedScene" uid="uid://dg1jmayltrak5" path="res://common/item_icon.tscn" id="10_3f5gw"]
+
+[sub_resource type="Gradient" id="Gradient_tuorp"]
+colors = PackedColorArray(0, 0, 0, 0.043, 1, 1, 1, 0.059)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_iaim2"]
+frequency = 0.0066
+domain_warp_enabled = true
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_43mgo"]
+generate_mipmaps = false
+color_ramp = SubResource("Gradient_tuorp")
+noise = SubResource("FastNoiseLite_iaim2")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hmm4h"]
+shader = ExtResource("3_wn4tp")
+shader_parameter/dirt_texture = SubResource("NoiseTexture2D_43mgo")
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_bqx4t"]
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_nixut")
 
 [node name="Container" type="Node3D" parent="."]
 
-[node name="Example" parent="Container" instance=ExtResource("2_ivxhn")]
+[node name="Level" parent="Container" instance=ExtResource("2_m3jn1")]
+unique_name_in_owner = true
+
+[node name="NightVisionShader" type="ColorRect" parent="."]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_hmm4h")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BloodOverlayContainer" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BloodOverlay" type="TextureRect" parent="BloodOverlayContainer" groups=["blood_overlay"]]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_left = -288.0
+offset_top = -162.0
+offset_right = 1440.0
+offset_bottom = 810.0
+texture = ExtResource("5_8vg5e")
+expand_mode = 1
+script = ExtResource("6_h3boe")
+
+[node name="SprintBar" type="ColorRect" parent="."]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -36.0
+offset_right = 100.0
+offset_bottom = -32.0
+grow_vertical = 0
+
+[node name="HealthLabel" parent="." instance=ExtResource("6_pjl4h")]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_right = 0.0
+offset_left = 8.0
+offset_top = -29.0
+offset_right = 101.0
+offset_bottom = -8.0
+grow_horizontal = 1
+grow_vertical = 0
+text = "Health 100%"
+
+[node name="AmmoLabel" parent="." instance=ExtResource("6_pjl4h")]
+unique_name_in_owner = true
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+offset_left = -101.0
+offset_top = -29.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "30/90 - 5.56 mm"
+horizontal_alignment = 2
+
+[node name="ShootCrosshair" type="TextureRect" parent="."]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_bqx4t")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -11.0
+offset_top = -11.0
+offset_right = 11.0
+offset_bottom = 11.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_gck2x")
+expand_mode = 1
+
+[node name="GrabCrosshair" type="TextureRect" parent="."]
+unique_name_in_owner = true
+visible = false
+material = SubResource("CanvasItemMaterial_bqx4t")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -11.0
+offset_top = -11.0
+offset_right = 11.0
+offset_bottom = 11.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_k4ypl")
+expand_mode = 1
+
+[node name="ItemIcons" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ItemIcons"]
+layout_mode = 2
+alignment = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ItemIcons/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="GunIcon" parent="ItemIcons/VBoxContainer/HBoxContainer" instance=ExtResource("10_3f5gw")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+text = "90"
+
+[node name="GrenadeIcon" parent="ItemIcons/VBoxContainer/HBoxContainer" instance=ExtResource("10_3f5gw")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+item_type = 1
+text = "2"
+
+[node name="BandagesIcon" parent="ItemIcons/VBoxContainer/HBoxContainer" instance=ExtResource("10_3f5gw")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+item_type = 2
+text = "1"
+
+[node name="DeathOverlay" type="ColorRect" parent="." groups=["death_overlay"]]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="ScreenMessage" parent="." instance=ExtResource("6_pjl4h")]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -61.0
+offset_top = -10.5
+offset_right = 61.0
+offset_bottom = 10.5
+text = "Screen Message"
+horizontal_alignment = 1
 
 [node name="MenuContainer" type="PanelContainer" parent="."]
 unique_name_in_owner = true

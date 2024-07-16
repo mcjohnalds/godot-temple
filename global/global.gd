@@ -3,6 +3,13 @@ class_name Global
 
 signal graphics_preset_changed
 enum GraphicsPreset { LOW, MEDIUM, HIGH, INSANE }
+
+enum PhysicsLayer {
+	DEFAULT = 1 << 0,
+	INTERIOR = 1 << 1,
+	INTERACTABLE = 1 << 2,
+}
+
 @export var environments: Array[Environment] = []
 var mouse_sensitivity := 0.25
 var invert_mouse := false
@@ -74,7 +81,7 @@ func set_graphics_preset(graphics_preset: GraphicsPreset) -> void:
 			msaa_3d = Viewport.MSAA_2X
 			environment_volumetric_fog_enabled = false
 			environment_glow_enabled = true
-			environment_ssao_enabled = false
+			environment_ssao_enabled = true
 			environment_ssil_enabled = false
 			environment_sdfgi_enabled = false
 		GraphicsPreset.HIGH:
@@ -105,7 +112,7 @@ func set_graphics_preset(graphics_preset: GraphicsPreset) -> void:
 	if OS.get_name() == "Web":
 		for environment in environments:
 			environment.volumetric_fog_enabled = false
-			environment.glow_enabled = false
+			environment.glow_enabled = environment_glow_enabled
 			environment.ssao_enabled = false
 			environment.ssil_enabled = false
 			environment.sdfgi_enabled = false
@@ -132,3 +139,19 @@ func play_click_small_sound() -> void:
 
 func play_hover_sound() -> void:
 	_hover_audio_stream_player.play()
+
+
+func get_player() -> KinematicFpsController:
+	return get_tree().get_first_node_in_group("player")
+
+
+func get_blood_overlay() -> BloodOverlay:
+	return get_tree().get_first_node_in_group("blood_overlay")
+
+
+func get_death_overlay() -> ColorRect:
+	return get_tree().get_first_node_in_group("death_overlay")
+
+
+func get_level() -> Node3D:
+	return get_tree().get_first_node_in_group("level")

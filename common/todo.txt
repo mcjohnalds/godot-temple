@@ -1,11 +1,50 @@
-Todo:
+Beta:
+
+- Key owned icon
+- Make enemies harder
+- Enemy has 1-3 eyes depending on eye count
+- Enemies do not enter player home
+
+Full version:
+
+- Fill in in-between spaces with meshes
+- Tutorial
+  - "I need to get off this island"
+- Heightmap
+- Notes on wall or something that explains the lore
+- Fix pause to see in dark exploit
+- More buildings
+- Randomly appearing messages in black goo like "go away"
+- Make sleeping finished transition less glitchy
+
+- Hardcore mode
+- Bake lighting in blender
+- Make player home outside look pretty
+- Add more detail to homes
+- Baked lighting
+- Give a "+1 bandage" message/animation
+- Skin UI
+- Better melee animations
+- Textures
+- Out of sprint UI animation indicator
+- Better grenade raycast
+- Jump camera bob
+- Grenade throw animation
+- Draw weapon in front using viewport
+  - https://www.reddit.com/r/godot/comments/eb4ts6/how_to_render_fps_gun_over_main_camera/
+
+- Barrel gets red hot
+- Bug: gun fire rate not good because bullet firing might not match up with
+  frame rate
+
+- Make godot-snappy work with box colliders
+
+- Post game jam
+  - Generic PID
 
 - Weapon
-  - Shooting
-  - Tracer
-  - Muzzle flash
-  - Smoke
-  - Impact
+  - Shells
+  - More impact effects
   - Make weapon bob with player breathing
   - Overwatch-like weapon bob https://www.youtube.com/watch?v=7Dga-UqdBR8
 - Character controller
