@@ -166,7 +166,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not Input.is_action_pressed("shoot"):
 		_shoot_button_down = false
-	_update_movement(delta)
+	var is_jumping := _update_jumping()
+	_update_movement(is_jumping, delta)
 	_update_weapon_linear_velocity(delta)
 	_update_weapon_angular_velocity(delta)
 	var camera_linear_velocity := (
@@ -216,10 +217,9 @@ func _input(event: InputEvent) -> void:
 		_weapon_angular_velocity += Vector3(dx, dy, 0.0)
 
 
-func _update_movement(delta: float) -> void:
+func _update_movement(is_jumping: bool, delta: float) -> void:
 	var input_horizontal := Vector2.ZERO
 	var input_vertical := 0.0
-	var input_jump := false
 	var input_crouch := false
 	var input_sprint := false
 	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -229,7 +229,6 @@ func _update_movement(delta: float) -> void:
 			"move_left", "move_right", "move_backward", "move_forward"
 		)
 		input_vertical = Input.get_axis("move_crouch", "move_jump")
-		input_jump = Input.is_action_just_pressed("move_jump")
 		input_crouch = Input.is_action_pressed("move_crouch")
 		input_sprint = Input.is_action_pressed("move_sprint")
 
@@ -239,13 +238,6 @@ func _update_movement(delta: float) -> void:
 	if is_on_water:
 		var point := _swim_ray_cast.get_collision_point()
 		depth_on_water = -_swim_ray_cast.to_local(point).y
-
-	var is_jumping := (
-		input_jump
-		and is_on_floor()
-		and not _head_ray_cast.is_colliding()
-		and _sprint_energy >= sprint_energy_jump_cost
-	)
 
 	var is_submerged := (
 		depth_on_water < submerged_height and is_on_water and !_is_flying
@@ -379,8 +371,6 @@ func _update_movement(delta: float) -> void:
 		_camera_linear_velocity += dv * 1.5
 		_weapon_angular_velocity += Vector3(dv.y, dv.x, 0.0) * 2.0
 
-	if is_jumping:
-		_play_jump_audio(is_on_water, is_landed_on_floor_this_frame)
 	if is_landed_on_floor_this_frame or is_entered_water:
 		_play_land_audio(is_on_water, is_landed_on_floor_this_frame)
 	elif is_exited_water:
@@ -393,17 +383,13 @@ func _update_movement(delta: float) -> void:
 	var previous_capsule_height := _capsule.height
 	_capsule.height = _get_next_capsule_height(is_crouching, delta)
 	_camera.fov = _get_next_camera_fov(new_velocity, is_crouching, delta)
-	_head_bob_cycle_position = _get_next_head_bob_cycle_position(
-		horizontal_velocity, is_jumping, delta
-	)
+	_update_head_bob_cycle_position(horizontal_velocity, delta)
 
 	if is_crouching:
 		var dh := (_capsule.height - previous_capsule_height) * delta
 		_weapon_linear_velocity += Vector3(0.0, dh * 100.0, 0.0)
 		_weapon_angular_velocity += Vector3(dh * delta * 500.0, 0.0, 0.0)
 
-	if is_jumping:
-		_sprint_energy -= sprint_energy_jump_cost
 	elif is_sprinting:
 		_sprint_energy -= delta / sprint_seconds
 	elif not is_sprint_regen_cooldown:
@@ -451,24 +437,17 @@ func _get_head_bob_curve_tangent() -> Vector3:
 	return Vector3.ZERO
 
 
-func _get_next_head_bob_cycle_position(
-	horizontal_velocity: Vector3, is_jumping: bool, delta: float
-) -> Vector2:
-	if is_jumping:
-		return Vector2.ZERO
-
-	var new_pos := _head_bob_cycle_position
-
+func _update_head_bob_cycle_position(
+	horizontal_velocity: Vector3, delta: float
+) -> void:
 	var head_bob_interval := 2.0 * step_interval
 	var tick_speed = (horizontal_velocity.length() * delta) / head_bob_interval
-	new_pos.x += tick_speed
-	new_pos.y += tick_speed * vertical_horizontal_ratio
-
-	if new_pos.x > 1.0:
-		new_pos.x -= 1.0
-	if new_pos.y > 1.0:
-		new_pos.y -= 1.0
-	return new_pos
+	_head_bob_cycle_position.x += tick_speed
+	_head_bob_cycle_position.y += tick_speed * vertical_horizontal_ratio
+	if _head_bob_cycle_position.x > 1.0:
+		_head_bob_cycle_position.x -= 1.0
+	if _head_bob_cycle_position.y > 1.0:
+		_head_bob_cycle_position.y -= 1.0
 
 
 func _get_input_direction(
@@ -621,8 +600,6 @@ func _get_next_velocity(
 	if _is_flying:
 		vel = input_direction * move_speed
 
-	if is_jumping:
-		vel.y = jump_height
 	_weapon_angular_velocity += Vector3(
 		-vel.y * delta * 10.0,
 		0.0,
@@ -746,6 +723,26 @@ func _update_muzzle_flash() -> void:
 		material.albedo_color.a = (
 			muzzle_flash_alpha_curve.sample_baked(d / muzzle_flash_lifetime)
 		)
+
+
+func _update_jumping() -> bool:
+	var input_jump := false
+	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+		input_jump = Input.is_action_just_pressed("move_jump")
+	var is_jumping := (
+		input_jump
+		and is_on_floor()
+		and not _head_ray_cast.is_colliding()
+		and _sprint_energy >= sprint_energy_jump_cost
+	)
+	if is_jumping:
+		velocity.y = jump_height
+		_play_jump_audio(false, false)
+	if is_jumping:
+		_sprint_energy -= sprint_energy_jump_cost
+	if is_jumping:
+		_head_bob_cycle_position = Vector2.ZERO
+	return is_jumping
 
 
 func get_sprint_energy() -> float:

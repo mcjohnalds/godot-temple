@@ -1,5 +1,6 @@
 Todo:
 
+- Refactor kinematic char controller
 - Weapon
   - Shooting
   - Tracer
@@ -10,11 +11,14 @@ Todo:
   - Overwatch-like weapon bob https://www.youtube.com/watch?v=7Dga-UqdBR8
 - Character controller
   - Head check
+- Item icon
+- Grenades
+- Death
+- Melee
+- Crosshair
 - Screen space shaders
 - Custom boot screen
-
-Backlog:
-
+- Blood overlay
 - Reduce number of loading screens or make them look the same
 - UI skinning
   - Animations
