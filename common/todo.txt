@@ -36,6 +36,7 @@ Todo:
   - Head bob toggle
 - Lower blur shader quality depending on graphics preset
 - Character controller
+  - Different up and down acceleration when jumping
   - Fix underwater env being displayed too early
   - Overwatch like bob curve
   - Special head bob when jumping
