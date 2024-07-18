@@ -1,6 +1,9 @@
 Todo:
 
 - Refactor kinematic char controller
+- Fix swimming
+- Make player taller
+- Make aim less floppy
 - Weapon
   - Shooting
   - Tracer
