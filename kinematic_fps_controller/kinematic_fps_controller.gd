@@ -264,18 +264,7 @@ func _physics_process(delta: float) -> void:
 		and _sprint_energy >= sprint_energy_jump_cost
 	)
 
-	var new_velocity := _get_next_velocity(
-		is_jumping,
-		is_walking,
-		move_speed,
-		input_direction,
-		depth_on_water,
-		delta
-	)
-
-	var horizontal_velocity := Vector3(new_velocity.x, 0.0, new_velocity.z)
-
-	var is_shuffling_feet := absf(horizontal_velocity.length()) < 0.1
+	var is_shuffling_feet := absf(_get_horizontal_velocity().length()) < 0.1
 	var is_stepping := (
 		not _is_flying
 		and not _is_floating
@@ -287,7 +276,7 @@ func _physics_process(delta: float) -> void:
 	var is_step_completed := false
 	if is_stepping:
 		next_step_cycle += (
-			(horizontal_velocity.length() + step_lengthen) * delta
+			(_get_horizontal_velocity().length() + step_lengthen) * delta
 		)
 		is_step_completed = next_step_cycle > step_interval
 		if is_step_completed:
@@ -319,14 +308,7 @@ func _physics_process(delta: float) -> void:
 		)
 
 	if is_on_floor():
-		var dv := (
-			_get_head_bob_curve_tangent()
-				* delta
-				* horizontal_velocity.length()
-				* Vector3(10.0, 5.0, 0.0)
-		)
-		_camera_linear_velocity += dv * 1.5
-		_weapon_angular_velocity += Vector3(dv.y, dv.x, 0.0) * 2.0
+		_update_head_bob(delta)
 
 
 	if is_landed_on_floor_this_frame or is_entered_water:
@@ -340,8 +322,7 @@ func _physics_process(delta: float) -> void:
 	_step_cycle = next_step_cycle
 	var previous_capsule_height := _capsule.height
 	_capsule.height = _get_next_capsule_height(is_crouching, delta)
-	_camera.fov = _get_next_camera_fov(new_velocity, is_crouching, delta)
-	_update_head_bob_cycle_position(horizontal_velocity, delta)
+	_update_head_bob_cycle_position(delta)
 
 	if is_crouching:
 		var dh := (_capsule.height - previous_capsule_height) * delta
@@ -356,7 +337,22 @@ func _physics_process(delta: float) -> void:
 		_last_sprint_cooldown_at = Util.get_ticks_sec()
 	_sprint_energy = clampf(_sprint_energy, 0.0, 1.0)
 
-	velocity = new_velocity
+	var is_gravity_applied := (
+		not is_jumping
+		and not _is_flying
+		and not _is_submerged
+	)
+	if is_gravity_applied:
+		velocity.y -= Util.get_default_gravity() * gravity_multiplier * delta
+
+	_walk(
+		is_walking,
+		move_speed,
+		input_direction,
+		depth_on_water,
+		delta
+	)
+	_update_camera_fov(is_crouching, delta)
 	if is_jumping:
 		_jump(is_landed_on_floor_this_frame, is_on_water)
 	# No idea why but self sometimes gets scaled a little bit sometimes and we
@@ -425,7 +421,7 @@ func _get_next_capsule_height(is_crouching: bool, delta: float) -> float:
 	return clampf(h, height_in_crouch, _initial_capsule_height)
 
 
-func _get_head_bob_curve_tangent() -> Vector3:
+func _update_head_bob(delta: float) -> void:
 	if step_bob_enabled:
 		var x_pos := (
 			Util.sample_curve_tangent(
@@ -440,15 +436,20 @@ func _get_head_bob_curve_tangent() -> Vector3:
 			* head_bob_range.y
 		)
 		if is_on_floor():
-			return Vector3(x_pos, y_pos, 0.0)
-	return Vector3.ZERO
+			var dv := (
+				Vector3(x_pos, y_pos, 0.0)
+					* delta
+					* _get_horizontal_velocity().length()
+					* Vector3(10.0, 5.0, 0.0)
+			)
+			_camera_linear_velocity += dv * 1.5
+			_weapon_angular_velocity += Vector3(dv.y, dv.x, 0.0) * 2.0
 
 
-func _update_head_bob_cycle_position(
-	horizontal_velocity: Vector3, delta: float
-) -> void:
+func _update_head_bob_cycle_position(delta: float) -> void:
+	var hv := _get_horizontal_velocity()
 	var head_bob_interval := 2.0 * step_interval
-	var tick_speed = (horizontal_velocity.length() * delta) / head_bob_interval
+	var tick_speed = (hv.length() * delta) / head_bob_interval
 	_head_bob_cycle_position.x += tick_speed
 	_head_bob_cycle_position.y += tick_speed * vertical_horizontal_ratio
 	if _head_bob_cycle_position.x > 1.0:
@@ -536,43 +537,30 @@ func _play_step_audio(
 	_step_audio_stream_player.play()
 
 
-func _get_next_camera_fov(
-	vel: Vector3, is_crouching: bool, delta: float
-) -> float:
+func _update_camera_fov(
+	is_crouching: bool, delta: float
+) -> void:
 	var max_locomotion_speed := (
 		base_speed * maxf(sprint_speed_multiplier, fly_mode_speed_modifier)
 	)
-	var a := vel.length() / max_locomotion_speed
+	var a := velocity.length() / max_locomotion_speed
 	var b := max_speed_fov_multiplier - 1.0
 	var target_fov := _initial_fov * (1.0 + a * b)
 	if is_crouching:
 		target_fov *= crouch_fov_multiplier
-	return lerp(_camera.fov, target_fov, delta * fov_change_speed)
+	_camera.fov =  lerp(_camera.fov, target_fov, delta * fov_change_speed)
 
 
-func _get_next_velocity(
-	is_jumping: bool,
+func _walk(
 	is_walking: bool,
 	move_speed: float,
 	input_direction: Vector3,
 	depth_on_water: float,
 	delta: float
-) -> Vector3:
-	var vel := velocity
-
-	var is_gravity_applied := (
-		not is_jumping
-		and not _is_flying
-		and not _is_submerged
-	)
-	if is_gravity_applied:
-		vel.y -= Util.get_default_gravity() * gravity_multiplier * delta
-
+) -> void:
 	if is_walking:
-		var horizontal_velocity := vel
-		horizontal_velocity.y = 0.0
-
-		var is_accelerating := input_direction.dot(horizontal_velocity) > 0.0
+		var hv := _get_horizontal_velocity()
+		var is_accelerating := input_direction.dot(hv) > 0.0
 		var is_backward := input_direction.dot(global_basis.z) > 0.1
 		var back_penalty := (
 			back_speed if is_accelerating and  is_backward else 1.0
@@ -584,28 +572,26 @@ func _get_next_velocity(
 		a *= back_penalty
 
 		var target := input_direction * move_speed * back_penalty
-		var w := horizontal_velocity.lerp(target, a * delta)
+		var w := hv.lerp(target, a * delta)
 
-		vel.x = w.x
-		vel.z = w.z
+		velocity.x = w.x
+		velocity.z = w.z
 
 	if _is_floating:
 		var depth := floating_height - depth_on_water
-		vel = input_direction * move_speed
-#	if depth < 0.1: && !_is_flying:
+		velocity = input_direction * move_speed
 		if depth < 0.1:
 			# Prevent free sea movement from exceeding the water surface
-			vel.y = min(vel.y,0)
+			velocity.y = minf(velocity.y, 0.0)
 
 	if _is_flying:
-		vel = input_direction * move_speed
+		velocity = input_direction * move_speed
 
 	_weapon_angular_velocity += Vector3(
-		-vel.y * delta * 10.0,
+		-velocity.y * delta * 10.0,
 		0.0,
 		0.0,
 	)
-	return vel
 
 
 func _update_weapon_linear_velocity(delta: float) -> void:
@@ -734,3 +720,7 @@ func _jump(is_landed_on_floor_this_frame: bool, is_on_water: bool) -> void:
 	_play_jump_audio(is_landed_on_floor_this_frame, is_on_water)
 	_sprint_energy -= sprint_energy_jump_cost
 	_head_bob_cycle_position = Vector2.ZERO
+
+
+func _get_horizontal_velocity() -> Vector3:
+	return Vector3(velocity.x, 0.0, velocity.z)
