@@ -21,13 +21,13 @@ func _ready() -> void:
 		await _fade_out()
 		loader.queue_free()
 		await loader.tree_exited
-	var start: Start = start_scene.instantiate()
-	_container.add_child(start)
-	await _fade_in()
-	await start.main_menu.started
-	await _fade_out()
-	start.queue_free()
-	await start.tree_exited
+		var start: Start = start_scene.instantiate()
+		_container.add_child(start)
+		await _fade_in()
+		await start.main_menu.started
+		await _fade_out()
+		start.queue_free()
+		await start.tree_exited
 	_restart()
 
 
