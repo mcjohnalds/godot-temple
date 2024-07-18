@@ -14,14 +14,10 @@ class_name KinematicFpsController
 ## FOV multiplier applied at max speed
 @export var max_speed_fov_multiplier := 1.01
 @export_group("Head Bob")
-## Enables bob for made steps
-@export var step_bob_enabled := true
 ## Difference of step bob movement between vertical and horizontal angle
-@export var vertical_horizontal_ratio = 4.0
+@export var vertical_horizontal_ratio = 2.0
 @export var head_bob_x_curve : Curve
 @export var head_bob_y_curve : Curve
-## Maximum range value of headbob
-@export var head_bob_range := Vector2(0.07, 0.07)
 @export_group("Quake Camera Tilt")
 ## Enables camera angle for the direction the character controller moves
 @export var quake_camera_tilt_enabled := true
@@ -54,11 +50,9 @@ class_name KinematicFpsController
 @export var sprint_regen_time := 6.0
 @export var sprint_energy_jump_cost := 0.3
 @export_group("Footsteps")
-## Maximum counter value to be computed one step
-@export var step_lengthen := 0.7
 ## Value to be added to compute a step, each frame that the character is
 ## walking this value is added to a counter
-@export var step_interval := 5.0
+@export var step_interval := 4.0
 @export_group("Crouch")
 ## Collider height when crouch actived
 @export var height_in_crouch := 1.0
@@ -104,7 +98,6 @@ class_name KinematicFpsController
 @export var default_bullet_impact_scene: PackedScene
 var _sprint_energy := 1.0
 var _last_sprint_cooldown_at := -1000.0
-var _step_cycle := 0.0
 var _is_flying := false
 var _last_is_on_water := false
 var _last_is_floating := false
@@ -270,23 +263,9 @@ func _physics_process(delta: float) -> void:
 		and not is_shuffling_feet
 	)
 
-	var next_step_cycle := _step_cycle
-	var is_step_completed := false
-	if is_stepping:
-		next_step_cycle += (
-			(_get_horizontal_velocity().length() + step_lengthen) * delta
-		)
-		is_step_completed = next_step_cycle > step_interval
-		if is_step_completed:
-			next_step_cycle -= step_interval
-		if landed_on_floor_this_frame:
-			next_step_cycle = 0.0
-
 	var is_sprint_regen_cooldown := (
 		Util.get_ticks_sec() - _last_sprint_cooldown_at < 0.1
 	)
-
-	# Calculations happen above, side-effects happen below
 
 	if quake_camera_tilt_enabled:
 		var target := input_horizontal.x
@@ -305,22 +284,20 @@ func _physics_process(delta: float) -> void:
 			smoothstep(-1.0, 1.0, -_quake_camera_tilt_ratio)
 		)
 
-	if is_on_floor():
-		_update_head_bob(delta)
-
 
 	if landed_on_floor_this_frame or is_entered_water:
 		_play_land_audio(landed_on_floor_this_frame, is_on_water)
 	elif is_exited_water:
 		# TODO: this doesn't play
 		_play_jump_audio(landed_on_floor_this_frame, is_on_water)
-	if is_step_completed:
-		_play_step_audio(landed_on_floor_this_frame, is_on_water)
 
-	_step_cycle = next_step_cycle
 	var previous_capsule_height := _capsule.height
 	_capsule.height = _get_next_capsule_height(is_crouching, delta)
-	_update_head_bob_cycle_position(delta)
+
+	if is_stepping:
+		_update_head_bob_cycle_position(
+			landed_on_floor_this_frame, is_on_water, delta
+		)
 
 	if is_crouching:
 		var dh := (_capsule.height - previous_capsule_height) * delta
@@ -359,19 +336,19 @@ func _physics_process(delta: float) -> void:
 	scale = Vector3.ONE
 	_update_weapon_linear_velocity(delta)
 	_update_weapon_angular_velocity(delta)
-	var camera_linear_velocity := (
-		_last_camera_position - _camera.position
-	) / delta
-	_weapon_linear_velocity += Vector3(
-		0.1 * camera_linear_velocity.x,
-		0.1 * camera_linear_velocity.y,
-		0.0 * camera_linear_velocity.length(),
-	)
-	_weapon_angular_velocity += Vector3(
-		0.3 * camera_linear_velocity.y,
-		0.9 * camera_linear_velocity.x,
-		0.0
-	)
+	# var camera_linear_velocity := (
+	# 	_last_camera_position - _camera.position
+	# ) / delta
+	# _weapon_linear_velocity += Vector3(
+	# 	0.1 * camera_linear_velocity.x,
+	# 	0.1 * camera_linear_velocity.y,
+	# 	0.0 * camera_linear_velocity.length(),
+	# )
+	# _weapon_angular_velocity += Vector3(
+	# 	0.3 * camera_linear_velocity.y,
+	# 	0.9 * camera_linear_velocity.x,
+	# 	0.0
+	# )
 	_update_camera_linear_velocity(delta)
 	_update_camera_angular_velocity(delta)
 	_update_gun_shooting(delta)
@@ -418,43 +395,6 @@ func _get_next_capsule_height(is_crouching: bool, delta: float) -> float:
 	elif not _head_ray_cast.is_colliding():
 		h += delta * 8.0
 	return clampf(h, height_in_crouch, _initial_capsule_height)
-
-
-func _update_head_bob(delta: float) -> void:
-	if step_bob_enabled:
-		var x_pos := (
-			Util.sample_curve_tangent(
-				head_bob_x_curve, _head_bob_cycle_position.x
-			)
-			* head_bob_range.x
-		)
-		var y_pos := (
-			Util.sample_curve_tangent(
-				head_bob_y_curve, _head_bob_cycle_position.y
-			)
-			* head_bob_range.y
-		)
-		if is_on_floor():
-			var dv := (
-				Vector3(x_pos, y_pos, 0.0)
-					* delta
-					* _get_horizontal_velocity().length()
-					* Vector3(10.0, 5.0, 0.0)
-			)
-			_camera_linear_velocity += dv * 1.5
-			_weapon_angular_velocity += Vector3(dv.y, dv.x, 0.0) * 2.0
-
-
-func _update_head_bob_cycle_position(delta: float) -> void:
-	var hv := _get_horizontal_velocity()
-	var head_bob_interval := 2.0 * step_interval
-	var tick_speed = (hv.length() * delta) / head_bob_interval
-	_head_bob_cycle_position.x += tick_speed
-	_head_bob_cycle_position.y += tick_speed * vertical_horizontal_ratio
-	if _head_bob_cycle_position.x > 1.0:
-		_head_bob_cycle_position.x -= 1.0
-	if _head_bob_cycle_position.y > 1.0:
-		_head_bob_cycle_position.y -= 1.0
 
 
 func _get_input_direction(
@@ -587,11 +527,11 @@ func _walk(
 	if _is_flying:
 		velocity = input_direction * move_speed
 
-	_weapon_angular_velocity += Vector3(
-		-velocity.y * delta * 10.0,
-		0.0,
-		0.0,
-	)
+	# _weapon_angular_velocity += Vector3(
+	# 	-velocity.y * delta * 10.0,
+	# 	0.0,
+	# 	0.0,
+	# )
 
 
 func _update_weapon_linear_velocity(delta: float) -> void:
@@ -724,3 +664,33 @@ func _jump(landed_on_floor_this_frame: bool, is_on_water: bool) -> void:
 
 func _get_horizontal_velocity() -> Vector3:
 	return Vector3(velocity.x, 0.0, velocity.z)
+
+
+func _update_head_bob_cycle_position(
+	landed_on_floor_this_frame: bool, is_on_water: bool, delta: float
+) -> void:
+	var hv := _get_horizontal_velocity()
+	var tick_speed = hv.length() * delta / step_interval
+	var last_head_bob_cycle_position_y := _head_bob_cycle_position.y
+	_head_bob_cycle_position.x += tick_speed
+	_head_bob_cycle_position.y += tick_speed * vertical_horizontal_ratio
+	if _head_bob_cycle_position.x > 1.0:
+		_head_bob_cycle_position.x -= 1.0
+	if _head_bob_cycle_position.y > 1.0:
+		_head_bob_cycle_position.y -= 1.0
+	var step_threshold := 0.5
+	if (
+		last_head_bob_cycle_position_y < step_threshold
+		and _head_bob_cycle_position.y >= step_threshold
+	):
+		_play_step_audio(landed_on_floor_this_frame, is_on_water)
+
+	var a := _get_horizontal_velocity().length() * delta
+	var x := a * Util.sample_curve_tangent(
+		head_bob_x_curve, _head_bob_cycle_position.x
+	)
+	var y := a * Util.sample_curve_tangent(
+		head_bob_x_curve, _head_bob_cycle_position.y
+	)
+	_camera_linear_velocity += Vector3(0.2 * x, 0.8 * y, 0.0)
+	_weapon_angular_velocity += Vector3(-1.5 * y, -2.0 * x, 0.0)

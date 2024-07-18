@@ -63,13 +63,12 @@ step_audio_streams = Array[AudioStream]([ExtResource("21_1rkt1"), ExtResource("2
 
 [sub_resource type="Curve" id="Curve_l0i00"]
 min_value = -1.0
-_data = [Vector2(0, 0), 0.0, 5.68421, 0, 0, Vector2(0.328302, 1), 0.0, 0.0, 0, 0, Vector2(0.709434, -1), 0.0, 0.0, 0, 0, Vector2(0.986956, 0), 4.8527, 0.0, 0, 0]
+_data = [Vector2(0, 0), 0.0, -0.0429613, 0, 0, Vector2(0.328302, 1), 0.0, 0.0, 0, 0, Vector2(0.709434, -1), 0.0, 0.0, 0, 0, Vector2(0.986956, 0), 0.0349975, 0.0, 0, 0]
 point_count = 4
 
-[sub_resource type="Curve" id="Curve_sgya5"]
-min_value = -1.0
-_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.181132, 0.593942), 0.0, 0.0, 0, 0, Vector2(0.411321, -0.168954), 0.0, 0.0, 0, 0, Vector2(0.592453, -1), 0.0, 0.0, 0, 0, Vector2(0.784906, -0.316612), 0.0, 0.0, 0, 0, Vector2(0.986956, 0), 0.0, 0.0, 0, 0]
-point_count = 6
+[sub_resource type="Curve" id="Curve_3qcwd"]
+_data = [Vector2(0, 0.50243), 0.0, 0.0, 0, 0, Vector2(0.967172, 0.482685), -0.426488, -0.426488, 0, 0, Vector2(0.972222, 0), 0.0, 0.0, 0, 0, Vector2(1, 0.498481), 0.0, 0.0, 0, 0]
+point_count = 4
 
 [sub_resource type="Curve" id="Curve_4wj6w"]
 _data = [Vector2(0, 0.249071), 0.0, 0.0, 0, 0, Vector2(0.165854, 1), 0.0, 0.0, 0, 0, Vector2(0.273171, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
@@ -170,7 +169,7 @@ water_material_audio = SubResource("Resource_kvpuo")
 crouch_audios = Array[AudioStream]([ExtResource("19_dvqy3"), ExtResource("20_0e40x"), ExtResource("21_8kmms"), ExtResource("22_rfhmk")])
 uncrouch_audios = Array[AudioStream]([ExtResource("23_326x3"), ExtResource("24_knso1"), ExtResource("25_0xsk3")])
 head_bob_x_curve = SubResource("Curve_l0i00")
-head_bob_y_curve = SubResource("Curve_sgya5")
+head_bob_y_curve = SubResource("Curve_3qcwd")
 underwater_env = ExtResource("2_owsda")
 muzzle_flash_alpha_curve = SubResource("Curve_4wj6w")
 tracer_scene = ExtResource("3_83nad")

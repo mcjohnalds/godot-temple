@@ -4,6 +4,8 @@ Todo:
 - Fix swimming
 - Make player taller
 - Make aim less floppy
+  - Apply force at position instead of angular velocity
+- Don't make foot step sounds a 3D steam player
 - Weapon
   - Shooting
   - Tracer
