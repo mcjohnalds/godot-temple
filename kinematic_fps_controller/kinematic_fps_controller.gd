@@ -28,7 +28,7 @@ class_name KinematicFpsController
 ## Speed at which the camera angle moves
 @export var quake_camera_tilt_speed := 0.1
 ## Rotation angle limit per move
-@export var quake_camera_tilt_angle_limit := 0.007
+@export var quake_camera_tilt_angle_limit := 0.004
 @export_group("Movement")
 ## Controller Gravity Multiplier
 ## The higher the number, the faster the controller will fall to the ground and 
@@ -124,8 +124,6 @@ var _last_camera_rotation := Vector3.ZERO
 # clicks the unpause button.
 var _shoot_button_down := false
 var _gun_last_fired_at := -1000.0
-var _is_floating := false
-var _is_submerged := false
 @onready var _head: Node3D = $Head
 @onready var _camera: Camera3D =  $Head/Camera3D
 @onready var _collision: CollisionShape3D = $CollisionShape3D
@@ -191,40 +189,40 @@ func _physics_process(delta: float) -> void:
 		var point := _swim_ray_cast.get_collision_point()
 		depth_on_water = -_swim_ray_cast.to_local(point).y
 
-	_is_submerged = (
+	var is_submerged := (
 		depth_on_water < submerged_height and is_on_water and !_is_flying
 	)
 
-	_is_floating = (
+	var is_floating := (
 		depth_on_water < floating_height and is_on_water and !_is_flying
 	)
 
 	var is_entered_water := is_on_water and not _last_is_on_water
 	var is_exited_water := not is_on_water and _last_is_on_water
 
-	var is_landed_on_floor_this_frame := (
-		not _is_floating and is_on_floor() and not _last_is_on_floor
+	var landed_on_floor_this_frame := (
+		not is_floating and is_on_floor() and not _last_is_on_floor
 	)
 
-	if _is_floating and !_last_is_floating:
+	if is_floating and !_last_is_floating:
 		# TODO: play started floating sound
 		pass
-	elif !_is_floating and _last_is_floating:
+	elif !is_floating and _last_is_floating:
 		# TODO: play stopped floating sound
 		pass
 
-	if _is_submerged and not _last_is_submerged:
+	if is_submerged and not _last_is_submerged:
 		_camera.environment = underwater_env
-	if not _is_submerged and _last_is_submerged:
+	if not is_submerged and _last_is_submerged:
 		_camera.environment = null
 
-	var is_walking := not _is_flying and not _is_floating
+	var is_walking := not _is_flying and not is_floating
 
 	var is_crouching := (
 		input_crouch
 		and is_on_floor()
-		and not _is_floating
-		and not _is_submerged
+		and not is_floating
+		and not is_submerged
 		and not _is_flying
 	)
 
@@ -234,8 +232,8 @@ func _physics_process(delta: float) -> void:
 		and  input_horizontal.y >= 0.5
 		and !is_crouching
 		and not _is_flying
-		and not _is_floating
-		and not _is_submerged
+		and not is_floating
+		and not is_submerged
 		and _sprint_energy > 0.0
 	)
 
@@ -246,9 +244,9 @@ func _physics_process(delta: float) -> void:
 		speed_multiplier *= sprint_speed_multiplier
 	if _is_flying:
 		speed_multiplier *= fly_mode_speed_modifier
-	if _is_submerged:
+	if is_submerged:
 		speed_multiplier *= submerged_speed_multiplier
-	elif _is_floating:
+	elif is_floating:
 		speed_multiplier *= on_water_speed_multiplier
 
 	var move_speed := base_speed * speed_multiplier
@@ -267,8 +265,8 @@ func _physics_process(delta: float) -> void:
 	var is_shuffling_feet := absf(_get_horizontal_velocity().length()) < 0.1
 	var is_stepping := (
 		not _is_flying
-		and not _is_floating
-		and not _is_submerged
+		and not is_floating
+		and not is_submerged
 		and not is_shuffling_feet
 	)
 
@@ -281,7 +279,7 @@ func _physics_process(delta: float) -> void:
 		is_step_completed = next_step_cycle > step_interval
 		if is_step_completed:
 			next_step_cycle -= step_interval
-		if is_landed_on_floor_this_frame:
+		if landed_on_floor_this_frame:
 			next_step_cycle = 0.0
 
 	var is_sprint_regen_cooldown := (
@@ -290,7 +288,7 @@ func _physics_process(delta: float) -> void:
 
 	# Calculations happen above, side-effects happen below
 
-	if quake_camera_tilt_enabled and false:
+	if quake_camera_tilt_enabled:
 		var target := input_horizontal.x
 		var direction := signf(target - _quake_camera_tilt_ratio)
 		var new_ratio := (
@@ -311,13 +309,13 @@ func _physics_process(delta: float) -> void:
 		_update_head_bob(delta)
 
 
-	if is_landed_on_floor_this_frame or is_entered_water:
-		_play_land_audio(is_landed_on_floor_this_frame, is_on_water)
+	if landed_on_floor_this_frame or is_entered_water:
+		_play_land_audio(landed_on_floor_this_frame, is_on_water)
 	elif is_exited_water:
 		# TODO: this doesn't play
-		_play_jump_audio(is_landed_on_floor_this_frame, is_on_water)
+		_play_jump_audio(landed_on_floor_this_frame, is_on_water)
 	if is_step_completed:
-		_play_step_audio(is_landed_on_floor_this_frame, is_on_water)
+		_play_step_audio(landed_on_floor_this_frame, is_on_water)
 
 	_step_cycle = next_step_cycle
 	var previous_capsule_height := _capsule.height
@@ -340,13 +338,14 @@ func _physics_process(delta: float) -> void:
 	var is_gravity_applied := (
 		not is_jumping
 		and not _is_flying
-		and not _is_submerged
+		and not is_submerged
 	)
 	if is_gravity_applied:
 		velocity.y -= Util.get_default_gravity() * gravity_multiplier * delta
 
 	_walk(
 		is_walking,
+		is_floating,
 		move_speed,
 		input_direction,
 		depth_on_water,
@@ -354,11 +353,10 @@ func _physics_process(delta: float) -> void:
 	)
 	_update_camera_fov(is_crouching, delta)
 	if is_jumping:
-		_jump(is_landed_on_floor_this_frame, is_on_water)
+		_jump(landed_on_floor_this_frame, is_on_water)
 	# No idea why but self sometimes gets scaled a little bit sometimes and we
 	# have to reset it or else move_and_slide will error
 	scale = Vector3.ONE
-	move_and_slide()
 	_update_weapon_linear_velocity(delta)
 	_update_weapon_angular_velocity(delta)
 	var camera_linear_velocity := (
@@ -378,9 +376,10 @@ func _physics_process(delta: float) -> void:
 	_update_camera_angular_velocity(delta)
 	_update_gun_shooting(delta)
 	_last_is_on_water = is_on_water
-	_last_is_floating = _is_floating
-	_last_is_submerged = _is_submerged
+	_last_is_floating = is_floating
+	_last_is_submerged = is_submerged
 	_last_is_on_floor = is_on_floor()
+	move_and_slide()
 
 
 func _input(event: InputEvent) -> void:
@@ -487,11 +486,11 @@ func _get_material_audio_for_object(object: Object) -> MaterialAudio:
 
 
 func _get_current_material_audio(
-	is_landed_on_floor_this_frame: bool, is_on_water: bool
+	landed_on_floor_this_frame: bool, is_on_water: bool
 ) -> MaterialAudio:
 	if is_on_water:
 		return water_material_audio
-	if is_landed_on_floor_this_frame:
+	if landed_on_floor_this_frame:
 		var k_col = get_last_slide_collision()
 		return _get_material_audio_for_object(k_col.get_collider(0))
 	if _ground_ray_cast.get_collider():
@@ -500,10 +499,10 @@ func _get_current_material_audio(
 
 
 func _play_jump_audio(
-	is_landed_on_floor_this_frame: bool, is_on_water: bool
+	landed_on_floor_this_frame: bool, is_on_water: bool
 ) -> void:
 	var material_audio: MaterialAudio = _get_current_material_audio(
-		is_landed_on_floor_this_frame, is_on_water
+		landed_on_floor_this_frame, is_on_water
 	)
 	if not material_audio:
 		return
@@ -512,10 +511,10 @@ func _play_jump_audio(
 
 
 func _play_land_audio(
-	is_landed_on_floor_this_frame: bool, is_on_water: bool
+	landed_on_floor_this_frame: bool, is_on_water: bool
 ) -> void:
 	var material_audio: MaterialAudio = _get_current_material_audio(
-		is_landed_on_floor_this_frame, is_on_water
+		landed_on_floor_this_frame, is_on_water
 	)
 	if not material_audio:
 		return
@@ -524,10 +523,10 @@ func _play_land_audio(
 
 
 func _play_step_audio(
-	is_landed_on_floor_this_frame: bool, is_on_water: bool
+	landed_on_floor_this_frame: bool, is_on_water: bool
 ) -> void:
 	var material_audio: MaterialAudio = _get_current_material_audio(
-		is_landed_on_floor_this_frame, is_on_water
+		landed_on_floor_this_frame, is_on_water
 	)
 	if not material_audio:
 		return
@@ -553,6 +552,7 @@ func _update_camera_fov(
 
 func _walk(
 	is_walking: bool,
+	is_floating: bool,
 	move_speed: float,
 	input_direction: Vector3,
 	depth_on_water: float,
@@ -577,7 +577,7 @@ func _walk(
 		velocity.x = w.x
 		velocity.z = w.z
 
-	if _is_floating:
+	if is_floating:
 		var depth := floating_height - depth_on_water
 		velocity = input_direction * move_speed
 		if depth < 0.1:
@@ -715,9 +715,9 @@ func get_sprint_energy() -> float:
 	return _sprint_energy
 
 
-func _jump(is_landed_on_floor_this_frame: bool, is_on_water: bool) -> void:
+func _jump(landed_on_floor_this_frame: bool, is_on_water: bool) -> void:
 	velocity.y = jump_height
-	_play_jump_audio(is_landed_on_floor_this_frame, is_on_water)
+	_play_jump_audio(landed_on_floor_this_frame, is_on_water)
 	_sprint_energy -= sprint_energy_jump_cost
 	_head_bob_cycle_position = Vector2.ZERO
 
