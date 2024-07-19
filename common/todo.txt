@@ -1,5 +1,6 @@
 Todo:
 
+- Fix bug where gun clips through things
 - Make aim less floppy
   - Apply force at position instead of angular velocity
 - Grab crosshair
@@ -16,7 +17,6 @@ Todo:
 - Screen space shaders
 - Fix swimming
 - Custom boot screen
-- Blood overlay
 - Reduce number of loading screens or make them look the same
 - UI skinning
   - Animations

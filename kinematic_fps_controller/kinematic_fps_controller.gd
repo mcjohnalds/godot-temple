@@ -98,6 +98,9 @@ class_name KinematicFpsController
 @export var weapon_angular_pid_kp := 300.0
 @export var weapon_angular_pid_kd := 20.0
 @export var bullet_impact_scene: PackedScene
+@export_group("Health")
+@export var max_health := 100.0
+@export var blood_vignette_change_speed := 3.0
 var _sprint_energy := 1.0
 var _last_sprint_cooldown_at := -1000.0
 var _is_flying := false
@@ -119,6 +122,7 @@ var _last_camera_rotation := Vector3.ZERO
 # clicks the unpause button.
 var _shoot_button_down := false
 var _gun_last_fired_at := -1000.0
+var _blood_flash_alpha_target := 0.0
 @onready var _head: Node3D = $Head
 @onready var _camera: Camera3D =  $Head/Camera3D
 @onready var _collision: CollisionShape3D = $CollisionShape3D
@@ -147,10 +151,13 @@ var _gun_last_fired_at := -1000.0
 	%MuzzleFlash1, %MuzzleFlash2, %MuzzleFlash3
 ]
 @onready var _bullet_start: Node3D = %BulletStart
+@onready var _blood_vignette: BloodVignette = %BloodVignette
+@onready var _blood_flash: TextureRect = %BloodFlash
 @onready var _initial_fov := _camera.fov
 @onready var _initial_capsule_height = _capsule.height
 @onready var _initial_weapon_position := _weapon.position
 @onready var _weapon_last_position := _weapon.position
+@onready var _health := max_health
 
 
 func _ready() -> void:
@@ -272,6 +279,8 @@ func _physics_process(delta: float) -> void:
 	_update_camera_linear_velocity(delta)
 	_update_camera_angular_velocity(delta)
 	_update_gun_shooting(delta)
+	_update_muzzle_flash()
+	_update_blood_effects(delta)
 	_last_is_on_water = is_on_water
 	_last_is_floating = is_floating
 	_last_is_submerged = is_submerged
@@ -309,6 +318,10 @@ func _input(event: InputEvent) -> void:
 		var dy := angle_difference(rotation.y, last_y)
 		_weapon_linear_velocity += Vector3(-dy, dx, 0.0)
 		_weapon_angular_velocity += Vector3(dx, dy, 0.0)
+	if event is InputEventKey and OS.is_debug_build():
+		var e: InputEventKey = event
+		if e.keycode == KEY_L and e.pressed:
+			_damage(10.0)
 
 
 func _update_quake_camera_tilt(input_horizontal: Vector2) -> void:
@@ -544,6 +557,20 @@ func _update_camera_angular_velocity(delta: float) -> void:
 	_camera.rotation += _camera_angular_velocity * delta
 
 
+func _update_blood_effects(delta: float) -> void:
+	_blood_vignette.strength = lerpf(
+		_blood_vignette.strength,
+		1.0 - _health / max_health,
+		delta * blood_vignette_change_speed
+	)
+	_blood_flash.modulate.a = lerpf(
+		_blood_flash.modulate.a, _blood_flash_alpha_target, 50.0 * delta
+	)
+	_blood_flash_alpha_target = lerpf(
+		_blood_flash_alpha_target, 0.0, 6.0 * delta
+	)
+
+
 func _update_gun_shooting(delta: float) -> void:
 	var fire_bullet := (
 		_shoot_button_down
@@ -593,7 +620,6 @@ func _update_gun_shooting(delta: float) -> void:
 	_smoke.emitting = (
 		Util.get_ticks_sec() - _gun_last_fired_at < smoke_lifetime
 	)
-	_update_muzzle_flash()
 
 
 func _update_muzzle_flash() -> void:
@@ -654,6 +680,21 @@ func _update_head_bob_cycle_position(
 		_head_bob_cycle_position.y -= maxf(
 			tick_speed * vertical_horizontal_ratio, 0.0
 		)
+
+
+func _damage(amount: float) -> void:
+	_health -= amount
+	_health = maxf(_health, 0.0)
+	var r := Vector3(
+		randf_range(-0.5, 0.5),
+		randf_range(0.5, 1.0),
+		randf_range(1.0, 5.0)
+	)
+	_camera_linear_velocity += r
+	_camera_angular_velocity += Vector3(r.y * 0.3, r.x, 0.0)
+	_weapon_linear_velocity += r * 0.2
+	_weapon_angular_velocity += Vector3(r.y, r.x, randf_range(-3.0, 3.0))
+	_blood_flash_alpha_target = 0.3
 
 
 func get_sprint_energy() -> float:
