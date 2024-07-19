@@ -51,6 +51,9 @@ class_name KinematicFpsController
 ## Value to be added to compute a step, each frame that the character is
 ## walking this value is added to a counter
 @export var step_interval := 4.0
+## Value between 0 and 1 that determines when in a step cycle a step sound
+## should play
+@export var step_threshold := 0.5
 @export_group("Crouch")
 ## Collider height when crouch actived
 @export var height_in_crouch := 1.0
@@ -66,6 +69,7 @@ class_name KinematicFpsController
 ## Minimum height for [CharacterController3D] to be completely submerged in
 ## water.
 @export var submerged_height := 0.36
+@export var depth_on_water := 2.1
 ## Minimum height for [CharacterController3D] to be float in water.
 @export var floating_height := 0.75
 ## Speed multiplier when floating water
@@ -173,7 +177,6 @@ func _physics_process(delta: float) -> void:
 		input_sprint = Input.is_action_pressed("move_sprint")
 		input_jump = Input.is_action_just_pressed("move_jump")
 	var is_on_water = _swim_ray_cast.is_colliding()
-	var depth_on_water := 2.1
 	if is_on_water:
 		var point := _swim_ray_cast.get_collision_point()
 		depth_on_water = -_swim_ray_cast.to_local(point).y
@@ -237,10 +240,9 @@ func _physics_process(delta: float) -> void:
 		_play_land_audio(landed_on_floor_this_frame, is_on_water)
 	elif is_exited_water:
 		_play_jump_audio(landed_on_floor_this_frame, is_on_water)
-	if is_stepping:
-		_update_head_bob_cycle_position(
-			landed_on_floor_this_frame, is_on_water, delta
-		)
+	_update_head_bob_cycle_position(
+		is_stepping, landed_on_floor_this_frame, is_on_water, delta
+	)
 	_update_crouch_height(is_crouching, delta)
 	var is_sprint_regen_cooldown := (
 		Util.get_ticks_sec() - _last_sprint_cooldown_at < 0.1
@@ -260,7 +262,6 @@ func _physics_process(delta: float) -> void:
 		is_submerged,
 		is_floating,
 		input_direction,
-		depth_on_water,
 		delta
 	)
 	_update_camera_fov(is_crouching, delta)
@@ -453,7 +454,6 @@ func _walk(
 	is_submerged: bool,
 	is_floating: bool,
 	input_direction: Vector3,
-	depth_on_water: float,
 	delta: float
 ) -> void:
 	var speed_multiplier := 1.0
@@ -467,9 +467,7 @@ func _walk(
 		speed_multiplier *= submerged_speed_multiplier
 	elif is_floating:
 		speed_multiplier *= on_water_speed_multiplier
-
 	var move_speed := base_speed * speed_multiplier
-
 	if is_walking:
 		var hv := _get_horizontal_velocity()
 		var is_accelerating := input_direction.dot(hv) > 0.0
@@ -477,25 +475,20 @@ func _walk(
 		var back_penalty := (
 			back_speed if is_accelerating and  is_backward else 1.0
 		)
-
 		var a := walk_acceleration if is_accelerating else walk_deceleration
 		if not is_on_floor():
 			a *= air_control
 		a *= back_penalty
-
 		var target := input_direction * move_speed * back_penalty
 		var w := hv.lerp(target, a * delta)
-
 		velocity.x = w.x
 		velocity.z = w.z
-
 	if is_floating:
 		var depth := floating_height - depth_on_water
 		velocity = input_direction * move_speed
 		if depth < 0.1:
 			# Prevent free sea movement from exceeding the water surface
 			velocity.y = minf(velocity.y, 0.0)
-
 	if _is_flying:
 		velocity = input_direction * move_speed
 
@@ -568,13 +561,11 @@ func _update_gun_shooting(delta: float) -> void:
 		var collision: Dictionary = (
 			get_world_3d().direct_space_state.intersect_ray(query)
 		)
-
 		var bullet_end: Vector3
 		if collision:
 			bullet_end = collision.position
 		else:
 			bullet_end = query.to
-
 		var tracer: Tracer = tracer_scene.instantiate()
 		tracer.start = _bullet_start.global_position + velocity * delta
 		tracer.end = bullet_end
@@ -617,10 +608,6 @@ func _update_muzzle_flash() -> void:
 		)
 
 
-func get_sprint_energy() -> float:
-	return _sprint_energy
-
-
 func _jump(landed_on_floor_this_frame: bool, is_on_water: bool) -> void:
 	velocity.y = jump_height
 	_play_jump_audio(landed_on_floor_this_frame, is_on_water)
@@ -633,30 +620,43 @@ func _get_horizontal_velocity() -> Vector3:
 
 
 func _update_head_bob_cycle_position(
-	landed_on_floor_this_frame: bool, is_on_water: bool, delta: float
+	is_stepping: bool,
+	landed_on_floor_this_frame: bool,
+	is_on_water: bool,
+	delta: float
 ) -> void:
 	var hv := _get_horizontal_velocity()
 	var tick_speed = hv.length() * delta / step_interval
-	var last_head_bob_cycle_position_y := _head_bob_cycle_position.y
-	_head_bob_cycle_position.x += tick_speed
-	_head_bob_cycle_position.y += tick_speed * vertical_horizontal_ratio
-	if _head_bob_cycle_position.x > 1.0:
-		_head_bob_cycle_position.x -= 1.0
-	if _head_bob_cycle_position.y > 1.0:
-		_head_bob_cycle_position.y -= 1.0
-	var step_threshold := 0.5
-	if (
-		last_head_bob_cycle_position_y < step_threshold
-		and _head_bob_cycle_position.y >= step_threshold
-	):
-		_play_step_audio(landed_on_floor_this_frame, is_on_water)
+	if is_stepping:
+		_head_bob_cycle_position.x += tick_speed
+		_head_bob_cycle_position.y += tick_speed * vertical_horizontal_ratio
+		var last_head_bob_cycle_position_y := _head_bob_cycle_position.y
+		if _head_bob_cycle_position.x > 1.0:
+			_head_bob_cycle_position.x -= 1.0
+		if _head_bob_cycle_position.y > 1.0:
+			_head_bob_cycle_position.y -= 1.0
+		if (
+			last_head_bob_cycle_position_y < step_threshold
+			and _head_bob_cycle_position.y >= step_threshold
+		):
+			_play_step_audio(landed_on_floor_this_frame, is_on_water)
+		var a := _get_horizontal_velocity().length() * delta
+		var x := a * Util.sample_curve_tangent(
+			head_bob_x_curve, _head_bob_cycle_position.x
+		)
+		var y := a * Util.sample_curve_tangent(
+			head_bob_x_curve, _head_bob_cycle_position.y
+		)
+		_camera_linear_velocity += Vector3(0.2 * x, 0.8 * y, 0.0)
+		_weapon_angular_velocity += Vector3(-1.5 * y, -2.0 * x, 0.0)
+	else:
+		_head_bob_cycle_position.x -= maxf(
+			tick_speed, 0.0
+		)
+		_head_bob_cycle_position.y -= maxf(
+			tick_speed * vertical_horizontal_ratio, 0.0
+		)
 
-	var a := _get_horizontal_velocity().length() * delta
-	var x := a * Util.sample_curve_tangent(
-		head_bob_x_curve, _head_bob_cycle_position.x
-	)
-	var y := a * Util.sample_curve_tangent(
-		head_bob_x_curve, _head_bob_cycle_position.y
-	)
-	_camera_linear_velocity += Vector3(0.2 * x, 0.8 * y, 0.0)
-	_weapon_angular_velocity += Vector3(-1.5 * y, -2.0 * x, 0.0)
+
+func get_sprint_energy() -> float:
+	return _sprint_energy
