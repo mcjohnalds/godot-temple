@@ -19,8 +19,6 @@ class_name KinematicFpsController
 @export var head_bob_x_curve : Curve
 @export var head_bob_y_curve : Curve
 @export_group("Quake Camera Tilt")
-## Enables camera angle for the direction the character controller moves
-@export var quake_camera_tilt_enabled := true
 ## Speed at which the camera angle moves
 @export var quake_camera_tilt_speed := 0.1
 ## Rotation angle limit per move
@@ -174,43 +172,33 @@ func _physics_process(delta: float) -> void:
 		input_crouch = Input.is_action_pressed("move_crouch")
 		input_sprint = Input.is_action_pressed("move_sprint")
 		input_jump = Input.is_action_just_pressed("move_jump")
-
 	var is_on_water = _swim_ray_cast.is_colliding()
-
 	var depth_on_water := 2.1
 	if is_on_water:
 		var point := _swim_ray_cast.get_collision_point()
 		depth_on_water = -_swim_ray_cast.to_local(point).y
-
 	var is_submerged := (
 		depth_on_water < submerged_height and is_on_water and !_is_flying
 	)
-
 	var is_floating := (
 		depth_on_water < floating_height and is_on_water and !_is_flying
 	)
-
 	var is_entered_water := is_on_water and not _last_is_on_water
 	var is_exited_water := not is_on_water and _last_is_on_water
-
 	var landed_on_floor_this_frame := (
 		not is_floating and is_on_floor() and not _last_is_on_floor
 	)
-
 	if is_floating and !_last_is_floating:
 		# TODO: play started floating sound
 		pass
 	elif !is_floating and _last_is_floating:
 		# TODO: play stopped floating sound
 		pass
-
 	if is_submerged and not _last_is_submerged:
 		_camera.environment = underwater_env
 	if not is_submerged and _last_is_submerged:
 		_camera.environment = null
-
 	var is_walking := not _is_flying and not is_floating
-
 	var is_crouching := (
 		input_crouch
 		and is_on_floor()
@@ -218,7 +206,6 @@ func _physics_process(delta: float) -> void:
 		and not is_submerged
 		and not _is_flying
 	)
-
 	var is_sprinting := (
 		input_sprint
 		and is_on_floor()
@@ -229,32 +216,15 @@ func _physics_process(delta: float) -> void:
 		and not is_submerged
 		and _sprint_energy > 0.0
 	)
-
-	var speed_multiplier := 1.0
-	if is_crouching:
-		speed_multiplier *= crouch_speed_multiplier
-	if is_sprinting:
-		speed_multiplier *= sprint_speed_multiplier
-	if _is_flying:
-		speed_multiplier *= fly_mode_speed_modifier
-	if is_submerged:
-		speed_multiplier *= submerged_speed_multiplier
-	elif is_floating:
-		speed_multiplier *= on_water_speed_multiplier
-
-	var move_speed := base_speed * speed_multiplier
-
 	var input_direction := _get_input_direction(
 		input_horizontal, input_vertical
 	)
-
 	var is_jumping := (
 		input_jump
 		and is_on_floor()
 		and not _head_ray_cast.is_colliding()
 		and _sprint_energy >= sprint_energy_jump_cost
 	)
-
 	var is_shuffling_feet := absf(_get_horizontal_velocity().length()) < 0.1
 	var is_stepping := (
 		not _is_flying
@@ -262,68 +232,33 @@ func _physics_process(delta: float) -> void:
 		and not is_submerged
 		and not is_shuffling_feet
 	)
-
-	var is_sprint_regen_cooldown := (
-		Util.get_ticks_sec() - _last_sprint_cooldown_at < 0.1
-	)
-
-	if quake_camera_tilt_enabled:
-		var target := input_horizontal.x
-		var direction := signf(target - _quake_camera_tilt_ratio)
-		var new_ratio := (
-			_quake_camera_tilt_ratio + quake_camera_tilt_speed * direction
-		)
-		var new_direction := signf(target - new_ratio)
-		if new_direction != direction:
-			_quake_camera_tilt_ratio = target
-		else:
-			_quake_camera_tilt_ratio += quake_camera_tilt_speed * direction
-		_camera.rotation.z = lerp(
-			-quake_camera_tilt_angle_limit,
-			quake_camera_tilt_angle_limit,
-			smoothstep(-1.0, 1.0, -_quake_camera_tilt_ratio)
-		)
-
-
+	_update_quake_camera_tilt(input_horizontal)
 	if landed_on_floor_this_frame or is_entered_water:
 		_play_land_audio(landed_on_floor_this_frame, is_on_water)
 	elif is_exited_water:
-		# TODO: this doesn't play
 		_play_jump_audio(landed_on_floor_this_frame, is_on_water)
-
-	var previous_capsule_height := _capsule.height
-	_capsule.height = _get_next_capsule_height(is_crouching, delta)
-
 	if is_stepping:
 		_update_head_bob_cycle_position(
 			landed_on_floor_this_frame, is_on_water, delta
 		)
-
-	if is_crouching:
-		var dh := (_capsule.height - previous_capsule_height) * delta
-		_weapon_linear_velocity += Vector3(0.0, dh * 100.0, 0.0)
-		_weapon_angular_velocity += Vector3(dh * delta * 500.0, 0.0, 0.0)
-
-	elif is_sprinting:
+	_update_crouch_height(is_crouching, delta)
+	var is_sprint_regen_cooldown := (
+		Util.get_ticks_sec() - _last_sprint_cooldown_at < 0.1
+	)
+	if is_sprinting:
 		_sprint_energy -= delta / sprint_seconds
 	elif not is_sprint_regen_cooldown:
 		_sprint_energy += delta / sprint_regen_time
+	_sprint_energy = clampf(_sprint_energy, 0.0, 1.0)
 	if _sprint_energy <= 0.0 and input_sprint:
 		_last_sprint_cooldown_at = Util.get_ticks_sec()
-	_sprint_energy = clampf(_sprint_energy, 0.0, 1.0)
-
-	var is_gravity_applied := (
-		not is_jumping
-		and not _is_flying
-		and not is_submerged
-	)
-	if is_gravity_applied:
-		velocity.y -= Util.get_default_gravity() * gravity_multiplier * delta
-
+	_apply_gravity(is_jumping, is_submerged, delta)
 	_walk(
 		is_walking,
+		is_crouching,
+		is_sprinting,
+		is_submerged,
 		is_floating,
-		move_speed,
 		input_direction,
 		depth_on_water,
 		delta
@@ -331,24 +266,8 @@ func _physics_process(delta: float) -> void:
 	_update_camera_fov(is_crouching, delta)
 	if is_jumping:
 		_jump(landed_on_floor_this_frame, is_on_water)
-	# No idea why but self sometimes gets scaled a little bit sometimes and we
-	# have to reset it or else move_and_slide will error
-	scale = Vector3.ONE
 	_update_weapon_linear_velocity(delta)
 	_update_weapon_angular_velocity(delta)
-	# var camera_linear_velocity := (
-	# 	_last_camera_position - _camera.position
-	# ) / delta
-	# _weapon_linear_velocity += Vector3(
-	# 	0.1 * camera_linear_velocity.x,
-	# 	0.1 * camera_linear_velocity.y,
-	# 	0.0 * camera_linear_velocity.length(),
-	# )
-	# _weapon_angular_velocity += Vector3(
-	# 	0.3 * camera_linear_velocity.y,
-	# 	0.9 * camera_linear_velocity.x,
-	# 	0.0
-	# )
 	_update_camera_linear_velocity(delta)
 	_update_camera_angular_velocity(delta)
 	_update_gun_shooting(delta)
@@ -356,6 +275,9 @@ func _physics_process(delta: float) -> void:
 	_last_is_floating = is_floating
 	_last_is_submerged = is_submerged
 	_last_is_on_floor = is_on_floor()
+	# No idea why but self sometimes gets scaled a little bit and we have to
+	# reset it or else move_and_slide will error
+	scale = Vector3.ONE
 	move_and_slide()
 
 
@@ -388,13 +310,35 @@ func _input(event: InputEvent) -> void:
 		_weapon_angular_velocity += Vector3(dx, dy, 0.0)
 
 
-func _get_next_capsule_height(is_crouching: bool, delta: float) -> float:
+func _update_quake_camera_tilt(input_horizontal: Vector2) -> void:
+	var target := input_horizontal.x
+	var direction := signf(target - _quake_camera_tilt_ratio)
+	var new_ratio := (
+		_quake_camera_tilt_ratio + quake_camera_tilt_speed * direction
+	)
+	var new_direction := signf(target - new_ratio)
+	if new_direction != direction:
+		_quake_camera_tilt_ratio = target
+	else:
+		_quake_camera_tilt_ratio += quake_camera_tilt_speed * direction
+	_camera.rotation.z = lerp(
+		-quake_camera_tilt_angle_limit,
+		quake_camera_tilt_angle_limit,
+		smoothstep(-1.0, 1.0, -_quake_camera_tilt_ratio)
+	)
+
+
+func _update_crouch_height(is_crouching: bool, delta: float) -> void:
 	var h := _capsule.height
 	if is_crouching:
 		h -= delta * 8.0
 	elif not _head_ray_cast.is_colliding():
 		h += delta * 8.0
-	return clampf(h, height_in_crouch, _initial_capsule_height)
+	var previous_capsule_height := _capsule.height
+	_capsule.height = clampf(h, height_in_crouch, _initial_capsule_height)
+	var dh := (_capsule.height - previous_capsule_height) * delta
+	_weapon_linear_velocity += Vector3(0.0, dh * 100.0, 0.0)
+	_weapon_angular_velocity += Vector3(dh * delta * 500.0, 0.0, 0.0)
 
 
 func _get_input_direction(
@@ -490,14 +434,42 @@ func _update_camera_fov(
 	_camera.fov =  lerp(_camera.fov, target_fov, delta * fov_change_speed)
 
 
+func _apply_gravity(
+	is_jumping: bool, is_submerged: bool, delta: float
+) -> void:
+	var is_gravity_applied := (
+		not is_jumping
+		and not _is_flying
+		and not is_submerged
+	)
+	if is_gravity_applied:
+		velocity.y -= Util.get_default_gravity() * gravity_multiplier * delta
+
+
 func _walk(
 	is_walking: bool,
+	is_crouching: bool,
+	is_sprinting: bool,
+	is_submerged: bool,
 	is_floating: bool,
-	move_speed: float,
 	input_direction: Vector3,
 	depth_on_water: float,
 	delta: float
 ) -> void:
+	var speed_multiplier := 1.0
+	if is_crouching:
+		speed_multiplier *= crouch_speed_multiplier
+	if is_sprinting:
+		speed_multiplier *= sprint_speed_multiplier
+	if _is_flying:
+		speed_multiplier *= fly_mode_speed_modifier
+	if is_submerged:
+		speed_multiplier *= submerged_speed_multiplier
+	elif is_floating:
+		speed_multiplier *= on_water_speed_multiplier
+
+	var move_speed := base_speed * speed_multiplier
+
 	if is_walking:
 		var hv := _get_horizontal_velocity()
 		var is_accelerating := input_direction.dot(hv) > 0.0
@@ -526,12 +498,6 @@ func _walk(
 
 	if _is_flying:
 		velocity = input_direction * move_speed
-
-	# _weapon_angular_velocity += Vector3(
-	# 	-velocity.y * delta * 10.0,
-	# 	0.0,
-	# 	0.0,
-	# )
 
 
 func _update_weapon_linear_velocity(delta: float) -> void:
