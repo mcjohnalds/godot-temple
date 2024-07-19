@@ -97,7 +97,7 @@ class_name KinematicFpsController
 @export var weapon_linear_pid_kd := 50.0
 @export var weapon_angular_pid_kp := 300.0
 @export var weapon_angular_pid_kd := 20.0
-@export var default_bullet_impact_scene: PackedScene
+@export var bullet_impact_scene: PackedScene
 var _sprint_energy := 1.0
 var _last_sprint_cooldown_at := -1000.0
 var _is_flying := false
@@ -585,9 +585,7 @@ func _update_gun_shooting(delta: float) -> void:
 		_camera_linear_velocity += dlv * 1.0 * Vector3(1.0, 1.0, 1.2)
 		_camera_angular_velocity += dav * 0.05
 		if collision:
-			var impact: GPUParticles3D = (
-				default_bullet_impact_scene.instantiate()
-			)
+			var impact: GPUParticles3D = bullet_impact_scene.instantiate()
 			impact.position = collision.position
 			impact.one_shot = true
 			impact.emitting = true

@@ -2,6 +2,7 @@ class_name CustomParticles
 extends GPUParticles3D
 
 @export var free_after_lifetime := false
+@export var face_camera := false
 
 
 func _init() -> void:
@@ -10,9 +11,20 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	if face_camera:
+		Util.safe_look_at(
+			self, get_viewport().get_camera_3d().global_position, true
+		)
 	if free_after_lifetime:
 		await get_tree().create_timer(lifetime).timeout
 		queue_free()
+
+
+func _process(delta: float) -> void:
+	if face_camera:
+		Util.safe_look_at(
+			self, get_viewport().get_camera_3d().global_position, true
+		)
 
 
 func _update() -> void:

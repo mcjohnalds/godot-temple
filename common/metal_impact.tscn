@@ -54,3 +54,4 @@ process_material = SubResource("ParticleProcessMaterial_hvpfd")
 draw_pass_1 = SubResource("QuadMesh_jwyr2")
 script = ExtResource("2_apj63")
 free_after_lifetime = true
+face_camera = true

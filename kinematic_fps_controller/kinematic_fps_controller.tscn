@@ -173,7 +173,7 @@ head_bob_y_curve = SubResource("Curve_3qcwd")
 underwater_env = ExtResource("2_owsda")
 muzzle_flash_alpha_curve = SubResource("Curve_4wj6w")
 tracer_scene = ExtResource("3_83nad")
-default_bullet_impact_scene = ExtResource("2_86agt")
+bullet_impact_scene = ExtResource("2_86agt")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)

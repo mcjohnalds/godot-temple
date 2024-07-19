@@ -2,7 +2,6 @@ Todo:
 
 - Make aim less floppy
   - Apply force at position instead of angular velocity
-- Fix metal impact rotation
 - Crosshair
 - Grab crosshair
 - Weapon
