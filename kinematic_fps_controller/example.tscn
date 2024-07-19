@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://c2t6smyr8xtty"]
+[gd_scene load_steps=33 format=3 uid="uid://c2t6smyr8xtty"]
 
 [ext_resource type="Script" path="res://kinematic_fps_controller/example.gd" id="1_4lthp"]
 [ext_resource type="PackedScene" uid="uid://2oxdgu03lnbk" path="res://kinematic_fps_controller/kinematic_fps_controller.tscn" id="2_nvo2f"]
@@ -13,6 +13,7 @@
 [ext_resource type="Material" uid="uid://ckvcdcn2iue87" path="res://kinematic_fps_controller/materials/wood.tres" id="11_cakef"]
 [ext_resource type="Environment" uid="uid://cj5a4clofvpeq" path="res://common/main_environment.tres" id="12_5juut"]
 [ext_resource type="Script" path="res://common/custom_directional_light_3d.gd" id="13_a1mlj"]
+[ext_resource type="Texture2D" uid="uid://b8o6731eyjxtr" path="res://ui/crosshair.svg" id="14_2xn2j"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_mctgj"]
 size = Vector3(20, 5, 50)
@@ -109,7 +110,7 @@ transform = Transform3D(-2.98942e-07, 0, -10, 0, 1, 0, 6.839, 0, -4.37114e-07, 0
 material_override = ExtResource("3_7vb8p")
 
 [node name="KinematicFpsController" parent="." instance=ExtResource("2_nvo2f")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.62268e-06, 6, 13)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.62268e-06, 4.52475, 13)
 
 [node name="Area3D" type="Area3D" parent="."]
 transform = Transform3D(0.491574, 0, 0, 0, 1, 0, 0, 0, 0.555284, 0, -3, 5.93584)
@@ -468,3 +469,16 @@ transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866026, -0.5, 0.75
 shadow_enabled = true
 directional_shadow_max_distance = 250.0
 script = ExtResource("13_a1mlj")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Crosshair" type="TextureRect" parent="CenterContainer"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+texture = ExtResource("14_2xn2j")
+expand_mode = 1

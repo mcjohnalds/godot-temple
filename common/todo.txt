@@ -2,7 +2,6 @@ Todo:
 
 - Make aim less floppy
   - Apply force at position instead of angular velocity
-- Crosshair
 - Grab crosshair
 - Weapon
   - Make weapon bob with player breathing
