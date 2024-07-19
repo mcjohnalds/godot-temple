@@ -1,18 +1,11 @@
 Todo:
 
-- Refactor kinematic char controller
-- Fix swimming
-- Make player taller
 - Make aim less floppy
   - Apply force at position instead of angular velocity
-- Don't make foot step sounds a 3D steam player
-- Fix tracer rotation
+- Fix metal impact rotation
+- Crosshair
+- Grab crosshair
 - Weapon
-  - Shooting
-  - Tracer
-  - Muzzle flash
-  - Smoke
-  - Impact
   - Make weapon bob with player breathing
   - Overwatch-like weapon bob https://www.youtube.com/watch?v=7Dga-UqdBR8
 - Character controller
@@ -23,6 +16,7 @@ Todo:
 - Melee
 - Crosshair
 - Screen space shaders
+- Fix swimming
 - Custom boot screen
 - Blood overlay
 - Reduce number of loading screens or make them look the same

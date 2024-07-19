@@ -628,9 +628,9 @@ func _update_head_bob_cycle_position(
 	var hv := _get_horizontal_velocity()
 	var tick_speed = hv.length() * delta / step_interval
 	if is_stepping:
+		var last_head_bob_cycle_position_y := _head_bob_cycle_position.y
 		_head_bob_cycle_position.x += tick_speed
 		_head_bob_cycle_position.y += tick_speed * vertical_horizontal_ratio
-		var last_head_bob_cycle_position_y := _head_bob_cycle_position.y
 		if _head_bob_cycle_position.x > 1.0:
 			_head_bob_cycle_position.x -= 1.0
 		if _head_bob_cycle_position.y > 1.0:

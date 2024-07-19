@@ -176,13 +176,14 @@ tracer_scene = ExtResource("3_83nad")
 default_bullet_impact_scene = ExtResource("2_86agt")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 shape = SubResource("CapsuleShape3D_fn1rj")
 
 [node name="Center" type="Node3D" parent="CollisionShape3D"]
 unique_name_in_owner = true
 
 [node name="Head" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 0.46, 2.08165e-12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 1.31, 2.08165e-12)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
 fov = 80.0
@@ -232,15 +233,17 @@ process_material = SubResource("ParticleProcessMaterial_6lf27")
 draw_pass_1 = SubResource("QuadMesh_cxfwg")
 
 [node name="HeadRayCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 target_position = Vector3(2.08165e-12, 0.85, 2.08165e-12)
 collision_mask = 3
 
 [node name="GroundRayCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 target_position = Vector3(2.08165e-12, -1.2, 2.08165e-12)
 collision_mask = 3
 
 [node name="SwimRayCast" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 0.85, 2.08165e-12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 1.7, 2.08165e-12)
 target_position = Vector3(2.08165e-12, -1.7, 2.08165e-12)
 collision_mask = 8
 hit_from_inside = true
