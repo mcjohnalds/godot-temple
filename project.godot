@@ -42,6 +42,7 @@ import/blender/enabled=false
 [gui]
 
 theme/custom="res://ui/theme.tres"
+theme/custom_font="res://ui/chakra_petch_medium.ttf"
 
 [input]
 

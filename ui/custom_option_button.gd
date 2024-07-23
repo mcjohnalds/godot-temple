@@ -68,6 +68,8 @@ func _update_ui() -> void:
 		_dropdown.remove_child(child)
 	for i in items.size():
 		var item := items[i]
+		if not item:
+			continue
 		if not item.changed.is_connected(_update_ui):
 			item.changed.connect(_update_ui)
 		var button: CustomButton = custom_button_scene.instantiate()

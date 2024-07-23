@@ -1,6 +1,5 @@
 Todo:
 
-- Tooltip
 - Tutorial UI?
 - Kinematic FPS controller
   - Fix bug where gun clips through things
