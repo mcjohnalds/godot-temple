@@ -2,8 +2,6 @@ Todo:
 
 - switching weapons
 - Use preload instead of exports
-- Remove get_parent() usage
-- Remove player group
 - Enable stricter typing
 - Rename things to Foo3D or Foo2D
 - move_up, move_down inputs

@@ -1,6 +1,7 @@
 extends CharacterBody3D
 class_name KinematicFpsController
 
+signal effect_created(effect: Node3D)
 @export_group("Audio")
 @export var material_audios: Array[MaterialAudio]
 @export var water_material_audio: MaterialAudio
@@ -583,7 +584,7 @@ func _update_gun_shooting(delta: float) -> void:
 		var tracer := Tracer.SCENE.instantiate()
 		tracer.start = _bullet_start.global_position + velocity * delta
 		tracer.end = bullet_end
-		get_parent().add_child(tracer)
+		effect_created.emit(tracer)
 		var dlv := Vector3(
 			randf_range(-0.1, 0.1),
 			randf_range(0.5, 0.6),
@@ -603,7 +604,7 @@ func _update_gun_shooting(delta: float) -> void:
 			impact.position = collision.position
 			impact.one_shot = true
 			impact.emitting = true
-			get_parent().add_child(impact)
+			effect_created.emit(impact)
 	_smoke.emitting = (
 		Util.get_ticks_sec() - _gun_last_fired_at < smoke_lifetime
 	)
