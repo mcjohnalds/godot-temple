@@ -118,7 +118,7 @@ var _weapon_angular_velocity := Vector3.ZERO
 var _last_camera_position := Vector3.ZERO
 var _last_camera_rotation := Vector3.ZERO
 # We need to track shoot button down state instead of just relying on
-# Input.is_action_pressed("shoot") so the gun doesn't shoot when the player
+# Input.is_action_pressed("primary") so the gun doesn't shoot when the player
 # clicks the unpause button.
 var _shoot_button_down := false
 var _gun_last_fired_at := -1000.0
@@ -166,7 +166,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if not Input.is_action_pressed("shoot"):
+	if not Input.is_action_pressed("primary"):
 		_shoot_button_down = false
 	var input_horizontal := Vector2.ZERO
 	var input_vertical := 0.0
@@ -174,7 +174,7 @@ func _physics_process(delta: float) -> void:
 	var input_sprint := false
 	var input_jump := false
 	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		if Input.is_action_just_pressed("move_fly_mode"):
+		if Input.is_action_just_pressed("fly"):
 			_is_flying = not _is_flying
 		input_horizontal = Input.get_vector(
 			"move_left", "move_right", "move_backward", "move_forward"
@@ -294,9 +294,9 @@ func _physics_process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		return
-	if event.is_action_pressed("shoot"):
+	if event.is_action_pressed("primary"):
 		_shoot_button_down = true
-	if event.is_action_released("shoot"):
+	if event.is_action_released("primary"):
 		_shoot_button_down = false
 	if event.is_action_pressed("move_crouch"):
 		_crouch_audio_stream_player.stream = crouch_audios.pick_random()

@@ -1,7 +1,6 @@
 Todo:
 
 - switching weapons
-- Remove old input maps
 - Change collision mask on kinfpscontroller
 - Add create() function to Tracer and others
 - Use preload instead of exports
