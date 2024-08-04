@@ -1,6 +1,5 @@
 Todo:
 
-- Turn on banding
 - Fix PIDs bouncing around 0
   - Fix bug where FPS camera is tiled right slightly
 - Don't set _camera.rotation.z, use angular_velocity instead
