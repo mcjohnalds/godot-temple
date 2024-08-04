@@ -90,7 +90,6 @@ class_name KinematicFpsController
 @export var muzzle_flash_alpha_curve: Curve
 @export var muzzle_flash_lifetime := 0.05
 @export var smoke_lifetime := 0.3
-@export var tracer_scene: PackedScene
 @export var max_bullet_range := 1000.0
 @export var fire_rate := 10.0
 @export var weapon_linear_pid_kp := 500.0
@@ -581,7 +580,7 @@ func _update_gun_shooting(delta: float) -> void:
 			bullet_end = collision.position
 		else:
 			bullet_end = query.to
-		var tracer: Tracer = tracer_scene.instantiate()
+		var tracer := Tracer.SCENE.instantiate()
 		tracer.start = _bullet_start.global_position + velocity * delta
 		tracer.end = bullet_end
 		get_parent().add_child(tracer)

@@ -1,6 +1,16 @@
-class_name Tracer
 extends Node3D
+class_name Tracer
+## Bullet tracer.
+##
+## Usage:
+## [codeblock]
+## var tracer := Tracer.SCENE.instantiate()
+## tracer.start = _bullet_start.global_position + velocity * delta
+## tracer.end = bullet_end
+## add_child(tracer)
+## [/codeblock]
 
+const SCENE := preload("res://common/tracer.tscn")
 @export var min_length := 2.0
 @export var max_length := 10.0
 @export var min_lifetime := 0.05
