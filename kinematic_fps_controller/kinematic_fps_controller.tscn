@@ -163,7 +163,7 @@ particles_anim_loop = false
 [sub_resource type="QuadMesh" id="QuadMesh_cxfwg"]
 material = SubResource("StandardMaterial3D_k3mb8")
 
-[node name="KinematicFpsController" type="CharacterBody3D" groups=["player"]]
+[node name="KinematicFpsController" type="CharacterBody3D"]
 floor_snap_length = 0.5
 script = ExtResource("2_8r0nc")
 material_audios = Array[ExtResource("10_3id2w")]([SubResource("Resource_ju83a"), SubResource("Resource_3rmwo"), SubResource("Resource_rfw5k"), SubResource("Resource_kvpuo")])
