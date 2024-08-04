@@ -2,7 +2,6 @@ Todo:
 
 - switching weapons
 - Use preload instead of exports
-- Rename things to Foo3D or Foo2D
 - 2D fog of war
 - Tutorial UI?
 - Kinematic FPS controller

@@ -1,4 +1,4 @@
-class_name CustomParticles
+class_name CustomParticles3D
 extends GPUParticles3D
 
 @export var free_after_lifetime := false

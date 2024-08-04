@@ -1,5 +1,5 @@
 extends Node3D
-class_name CustomJoint
+class_name CustomJoint3D
 
 var _initial_position_head: Vector3
 var _initial_position_body: Vector3

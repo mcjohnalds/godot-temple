@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://common/custom_directional_light_3d.gd" id="2_0rg01"]
 [ext_resource type="Environment" uid="uid://cj5a4clofvpeq" path="res://common/main_environment.tres" id="2_btcu4"]
 [ext_resource type="Material" uid="uid://cv05ul0jjqhnd" path="res://common/grass.tres" id="2_nsg21"]
-[ext_resource type="PackedScene" uid="uid://dop6qbt6vroii" path="res://custom_joint/custom_joint.tscn" id="3_2l8jc"]
+[ext_resource type="PackedScene" uid="uid://dop6qbt6vroii" path="res://custom_joint/custom_joint_3d.tscn" id="3_2l8jc"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_hnte1"]
 material = ExtResource("2_nsg21")
@@ -170,4 +170,4 @@ size = Vector3(2, 0.25, 5.96152)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000775337, 3.6599, 7.08934)
 size = Vector3(2, 0.25, 4.1)
 
-[node name="CustomJoint" parent="." instance=ExtResource("3_2l8jc")]
+[node name="CustomJoint3D" parent="." instance=ExtResource("3_2l8jc")]

@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://yu283afprq74"]
 
 [ext_resource type="Texture2D" uid="uid://bq44ahcfkeg75" path="res://addons/kenney_particle_pack/smoke_03.png" id="1_ufu6r"]
-[ext_resource type="Script" path="res://common/custom_particles.gd" id="2_fcqoy"]
+[ext_resource type="Script" path="res://common/custom_particles_3d.gd" id="2_fcqoy"]
 
 [sub_resource type="Curve" id="Curve_qx60y"]
 _data = [Vector2(0, 0.390335), 0.0, 1.89366, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]

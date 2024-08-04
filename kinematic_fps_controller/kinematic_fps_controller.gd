@@ -581,7 +581,7 @@ func _update_gun_shooting(delta: float) -> void:
 			bullet_end = collision.position
 		else:
 			bullet_end = query.to
-		var tracer: Tracer = Tracer.SCENE.instantiate()
+		var tracer: Tracer3D = Tracer3D.SCENE.instantiate()
 		tracer.start = _bullet_start.global_position + velocity * delta
 		tracer.end = bullet_end
 		effect_created.emit(tracer)

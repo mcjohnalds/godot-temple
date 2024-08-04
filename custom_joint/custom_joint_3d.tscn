@@ -1,6 +1,6 @@
 [gd_scene load_steps=12 format=3 uid="uid://dop6qbt6vroii"]
 
-[ext_resource type="Script" path="res://custom_joint/custom_joint.gd" id="1_k5ink"]
+[ext_resource type="Script" path="res://custom_joint/custom_joint_3d.gd" id="1_k5ink"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_au1mq"]
 radius = 0.2
@@ -47,7 +47,7 @@ material = SubResource("StandardMaterial3D_ewuqu")
 radius = 0.2
 height = 0.4
 
-[node name="CustomJoint" type="Node3D"]
+[node name="CustomJoint3D" type="Node3D"]
 script = ExtResource("1_k5ink")
 
 [node name="Head" type="RigidBody3D" parent="."]
