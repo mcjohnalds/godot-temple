@@ -277,3 +277,26 @@ static func from_dict(dict: Dictionary) -> Variant:
 		if key != "_script":
 			instance.set(key, dict[key])
 	return instance
+
+
+## Like [method CanvasItem.draw_arc] except filled instead of outlined.
+static func draw_arc_filled(
+	canvas_item: CanvasItem,
+	center: Vector2,
+	radius: float, 
+	start_angle: float, 
+	end_angle: float, 
+	point_count: int,
+	color: Color,
+):
+	var points_arc := PackedVector2Array()
+	points_arc.push_back(center)
+	var colors = PackedColorArray([color])
+	for i in range(point_count + 1):
+		var angle_point := (
+			end_angle + i * (start_angle - end_angle) / point_count - TAU / 4.0
+		)
+		points_arc.push_back(
+			center + Vector2(cos(angle_point), sin(angle_point)) * radius
+		)
+	canvas_item.draw_polygon(points_arc, colors)

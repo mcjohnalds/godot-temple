@@ -20,7 +20,7 @@ class_name KinematicFpsController
 @export var head_bob_y_curve : Curve
 @export_group("Quake Camera Tilt")
 ## Speed at which the camera angle moves
-@export var quake_camera_tilt_speed := 0.1
+@export var quake_camera_tilt_speed := 1.0
 ## Rotation angle limit per move
 @export var quake_camera_tilt_angle_limit := 0.004
 @export_group("Movement")
@@ -44,9 +44,9 @@ class_name KinematicFpsController
 @export_group("Sprint")
 ## Speed to be multiplied when active the ability
 @export var sprint_speed_multiplier := 2.0
-@export var sprint_seconds := 3.0
+@export var sprint_seconds := 30000.0
 @export var sprint_regen_time := 6.0
-@export var sprint_energy_jump_cost := 0.3
+@export var sprint_energy_jump_cost := 0.0
 @export_group("Footsteps")
 ## Value to be added to compute a step, each frame that the character is
 ## walking this value is added to a counter
@@ -98,6 +98,7 @@ class_name KinematicFpsController
 @export var weapon_angular_pid_kp := 300.0
 @export var weapon_angular_pid_kd := 20.0
 @export var bullet_impact_scene: PackedScene
+@export var enable_shooting := true
 @export_group("Health")
 @export var max_health := 100.0
 @export var blood_vignette_change_speed := 3.0
@@ -242,7 +243,7 @@ func _physics_process(delta: float) -> void:
 		and not is_submerged
 		and not is_shuffling_feet
 	)
-	_update_quake_camera_tilt(input_horizontal)
+	_update_quake_camera_tilt(input_horizontal, delta)
 	if landed_on_floor_this_frame or is_entered_water:
 		_play_land_audio(landed_on_floor_this_frame, is_on_water)
 	elif is_exited_water:
@@ -292,6 +293,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
+		return
 	if event.is_action_pressed("shoot"):
 		_shoot_button_down = true
 	if event.is_action_released("shoot"):
@@ -324,17 +327,17 @@ func _input(event: InputEvent) -> void:
 			_damage(10.0)
 
 
-func _update_quake_camera_tilt(input_horizontal: Vector2) -> void:
+func _update_quake_camera_tilt(input_horizontal: Vector2, delta: float) -> void:
 	var target := input_horizontal.x
 	var direction := signf(target - _quake_camera_tilt_ratio)
 	var new_ratio := (
-		_quake_camera_tilt_ratio + quake_camera_tilt_speed * direction
+		_quake_camera_tilt_ratio + quake_camera_tilt_speed * direction * delta
 	)
 	var new_direction := signf(target - new_ratio)
 	if new_direction != direction:
 		_quake_camera_tilt_ratio = target
 	else:
-		_quake_camera_tilt_ratio += quake_camera_tilt_speed * direction
+		_quake_camera_tilt_ratio = new_ratio
 	_camera.rotation.z = lerp(
 		-quake_camera_tilt_angle_limit,
 		quake_camera_tilt_angle_limit,
@@ -547,6 +550,7 @@ func _update_camera_linear_velocity(delta: float) -> void:
 
 
 func _update_camera_angular_velocity(delta: float) -> void:
+	var prev_z := _camera.rotation.z
 	var error := -_camera.rotation
 	var error_delta := (_last_camera_rotation - _camera.rotation) / delta
 	var accel := (
@@ -555,6 +559,7 @@ func _update_camera_angular_velocity(delta: float) -> void:
 	_camera_angular_velocity += accel * delta
 	_last_camera_rotation = _camera.rotation
 	_camera.rotation += _camera_angular_velocity * delta
+	_camera.rotation.z = prev_z
 
 
 func _update_blood_effects(delta: float) -> void:
@@ -699,3 +704,7 @@ func _damage(amount: float) -> void:
 
 func get_sprint_energy() -> float:
 	return _sprint_energy
+
+
+func get_camera() -> Camera3D:
+	return _camera

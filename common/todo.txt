@@ -1,9 +1,7 @@
 Todo:
 
-- Fix PIDs bouncing around 0
-  - Fix bug where FPS camera is tiled right slightly
-- Don't set _camera.rotation.z, use angular_velocity instead
-- draw_arc_filled
+- In KFPSC.gd, Don't set _camera.rotation.z directly, use angular_velocity
+  instead
 - switching weapons
 - 2D shapes asset
 - Remove old input maps
