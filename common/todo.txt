@@ -1,7 +1,6 @@
 Todo:
 
 - switching weapons
-- 2D shapes asset
 - Remove old input maps
 - Change collision mask on kinfpscontroller
 - Add create() function to Tracer and others
