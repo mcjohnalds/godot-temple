@@ -20,7 +20,7 @@ class_name KinematicFpsController
 @export var head_bob_y_curve : Curve
 @export_group("Quake Camera Tilt")
 ## Speed at which the camera angle moves
-@export var quake_camera_tilt_speed := 1.0
+@export var quake_camera_tilt_speed := 0.2
 ## Rotation angle limit per move
 @export var quake_camera_tilt_angle_limit := 0.004
 @export_group("Movement")
@@ -111,7 +111,6 @@ var _last_is_submerged := false
 var _last_is_on_floor := false
 var _weapon_last_rotation := Vector3.ZERO
 var _head_bob_cycle_position := Vector2.ZERO
-var _quake_camera_tilt_ratio := 0.0
 var _camera_linear_velocity := Vector3.ZERO
 var _camera_angular_velocity := Vector3.ZERO
 var _weapon_linear_velocity := Vector3.ZERO
@@ -328,21 +327,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _update_quake_camera_tilt(input_horizontal: Vector2, delta: float) -> void:
-	var target := input_horizontal.x
-	var direction := signf(target - _quake_camera_tilt_ratio)
-	var new_ratio := (
-		_quake_camera_tilt_ratio + quake_camera_tilt_speed * direction * delta
-	)
-	var new_direction := signf(target - new_ratio)
-	if new_direction != direction:
-		_quake_camera_tilt_ratio = target
-	else:
-		_quake_camera_tilt_ratio = new_ratio
-	_camera.rotation.z = lerp(
-		-quake_camera_tilt_angle_limit,
-		quake_camera_tilt_angle_limit,
-		smoothstep(-1.0, 1.0, -_quake_camera_tilt_ratio)
-	)
+	_camera_angular_velocity.z += -input_horizontal.x * quake_camera_tilt_speed * delta
 
 
 func _update_crouch_height(is_crouching: bool, delta: float) -> void:
@@ -550,7 +535,6 @@ func _update_camera_linear_velocity(delta: float) -> void:
 
 
 func _update_camera_angular_velocity(delta: float) -> void:
-	var prev_z := _camera.rotation.z
 	var error := -_camera.rotation
 	var error_delta := (_last_camera_rotation - _camera.rotation) / delta
 	var accel := (
@@ -559,7 +543,6 @@ func _update_camera_angular_velocity(delta: float) -> void:
 	_camera_angular_velocity += accel * delta
 	_last_camera_rotation = _camera.rotation
 	_camera.rotation += _camera_angular_velocity * delta
-	_camera.rotation.z = prev_z
 
 
 func _update_blood_effects(delta: float) -> void:

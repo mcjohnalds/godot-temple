@@ -1,7 +1,5 @@
 Todo:
 
-- In KFPSC.gd, Don't set _camera.rotation.z directly, use angular_velocity
-  instead
 - switching weapons
 - 2D shapes asset
 - Remove old input maps
