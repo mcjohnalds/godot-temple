@@ -261,3 +261,19 @@ static func get_children_recursive(
 static func sample_curve_tangent(curve: Curve, offset: float) -> float:
 	var px := 1.0 / curve.point_count
 	return (curve.sample(offset + px) - curve.sample(offset - px)) / (2.0 * px)
+
+
+static func to_dict(object: Object) -> Dictionary:
+	var result := { "_script": object.get_script().get_path() }
+	for property in object.get_property_list():
+		if property.usage & PROPERTY_USAGE_SCRIPT_VARIABLE:
+			result[property.name] = object.get(property.name)
+	return result
+
+
+static func from_dict(dict: Dictionary) -> Variant:
+	var instance: Variant = load(dict["_script"]).new()
+	for key in dict.keys():
+		if key != "_script":
+			instance.set(key, dict[key])
+	return instance
