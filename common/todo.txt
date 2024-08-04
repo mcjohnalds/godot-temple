@@ -2,7 +2,6 @@ Todo:
 
 - switching weapons
 - Use preload instead of exports
-- Enable stricter typing
 - Rename things to Foo3D or Foo2D
 - move_up, move_down inputs
 - 2D fog of war

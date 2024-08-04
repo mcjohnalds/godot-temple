@@ -204,32 +204,37 @@ static func vector_3_to_dictionary(v: Vector3) -> Dictionary:
 
 
 static func dictionary_to_vector_3(d: Dictionary) -> Vector3:
-	return Vector3(d["x"], d["y"], d["z"])
+	var x: float = d.x
+	var y: float = d.y
+	var z: float = d.z
+	return Vector3(x, y, z)
 
 
 static func is_graph_connected(pairs: Array) -> bool:
 	if pairs.size() == 0:
 		return true
 
-	var graph = {}
-	for pair in pairs:
-		var a = pair[0]
-		var b = pair[1]
+	var graph := {}
+	for pair: Array in pairs:
+		var a: Variant = pair[0]
+		var b: Variant = pair[1]
 		if not graph.has(a):
 			graph[a] = []
 		if not graph.has(b):
 			graph[b] = []
-		graph[a].append(b)
-		graph[b].append(a)
+		var a_arr: Array = graph[a]
+		var b_arr: Array = graph[b]
+		a_arr.append(b)
+		b_arr.append(a)
 
-	var visited = {}
-	var nodes = graph.keys()
-	var stack = [nodes[0]]
+	var visited := {}
+	var nodes := graph.keys()
+	var stack := [nodes[0]]
 	visited[nodes[0]] = true
 
 	while stack.size() > 0:
-		var node = stack.pop_back()
-		for neighbor in graph[node]:
+		var node: Variant = stack.pop_back()
+		for neighbor: Variant in graph[node]:
 			if not visited.has(neighbor):
 				visited[neighbor] = true
 				stack.append(neighbor)
@@ -238,10 +243,10 @@ static func is_graph_connected(pairs: Array) -> bool:
 
 
 static func direction_to_quaternion(direction: Vector3) -> Quaternion:
-	var forward = Vector3(0.0, 0.0, 1.0)
-	var dot = forward.dot(direction)
-	var cross = forward.cross(direction).normalized()
-	var angle = acos(dot)
+	var forward := Vector3(0.0, 0.0, 1.0)
+	var dot := forward.dot(direction)
+	var cross := forward.cross(direction).normalized()
+	var angle := acos(dot)
 	if is_zero_approx(angle):
 		return Quaternion.IDENTITY
 	return Quaternion(cross, angle)
@@ -263,18 +268,23 @@ static func sample_curve_tangent(curve: Curve, offset: float) -> float:
 	return (curve.sample(offset + px) - curve.sample(offset - px)) / (2.0 * px)
 
 
-static func to_dict(object: Object) -> Dictionary:
-	var result := { "_script": object.get_script().get_path() }
+static func object_to_dict(object: Object) -> Dictionary:
+	var script: Script = object.get_script()
+	var result := { "_script_path": script.get_path() }
 	for property in object.get_property_list():
 		if property.usage & PROPERTY_USAGE_SCRIPT_VARIABLE:
-			result[property.name] = object.get(property.name)
+			var name: String = property.name
+			result[property.name] = object.get(name)
 	return result
 
 
-static func from_dict(dict: Dictionary) -> Variant:
-	var instance: Variant = load(dict["_script"]).new()
-	for key in dict.keys():
-		if key != "_script":
+static func dict_to_object(dict: Dictionary) -> Variant:
+	var path: String = dict._script_path
+	var script: Script = load(path)
+	@warning_ignore("unsafe_method_access")
+	var instance: Object = script.new()
+	for key: String in dict.keys():
+		if key != "_script_path":
 			instance.set(key, dict[key])
 	return instance
 
@@ -288,10 +298,10 @@ static func draw_arc_filled(
 	end_angle: float, 
 	point_count: int,
 	color: Color,
-):
+) -> void:
 	var points_arc := PackedVector2Array()
 	points_arc.push_back(center)
-	var colors = PackedColorArray([color])
+	var colors := PackedColorArray([color])
 	for i in range(point_count + 1):
 		var angle_point := (
 			end_angle + i * (start_angle - end_angle) / point_count - TAU / 4.0

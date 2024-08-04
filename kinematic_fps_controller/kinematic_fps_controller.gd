@@ -16,7 +16,7 @@ signal effect_created(effect: Node3D)
 @export var max_speed_fov_multiplier := 1.01
 @export_group("Head Bob")
 ## Difference of step bob movement between vertical and horizontal angle
-@export var vertical_horizontal_ratio = 2.0
+@export var vertical_horizontal_ratio := 2.0
 @export var head_bob_x_curve : Curve
 @export var head_bob_y_curve : Curve
 @export_group("Quake Camera Tilt")
@@ -154,7 +154,7 @@ var _blood_flash_alpha_target := 0.0
 @onready var _blood_vignette: BloodVignette = %BloodVignette
 @onready var _blood_flash: TextureRect = %BloodFlash
 @onready var _initial_fov := _camera.fov
-@onready var _initial_capsule_height = _capsule.height
+@onready var _initial_capsule_height := _capsule.height
 @onready var _initial_weapon_position := _weapon.position
 @onready var _weapon_last_position := _weapon.position
 @onready var _health := max_health
@@ -183,7 +183,7 @@ func _physics_process(delta: float) -> void:
 		input_crouch = Input.is_action_pressed("move_crouch")
 		input_sprint = Input.is_action_pressed("move_sprint")
 		input_jump = Input.is_action_just_pressed("move_jump")
-	var is_on_water = _swim_ray_cast.is_colliding()
+	var is_on_water := _swim_ray_cast.is_colliding()
 	if is_on_water:
 		var point := _swim_ray_cast.get_collision_point()
 		depth_on_water = -_swim_ray_cast.to_local(point).y
@@ -364,7 +364,7 @@ func _get_input_direction(
 
 func _get_material_audio_for_object(object: Object) -> MaterialAudio:
 	if object.get("physics_material_override") is PhysicsMaterial:
-		var material: PhysicsMaterial = object.physics_material_override
+		var material: PhysicsMaterial = object.get("physics_material_override")
 		for m in material_audios:
 			if m.physics_material == material:
 				return m
@@ -377,7 +377,7 @@ func _get_current_material_audio(
 	if is_on_water:
 		return water_material_audio
 	if landed_on_floor_this_frame:
-		var k_col = get_last_slide_collision()
+		var k_col := get_last_slide_collision()
 		return _get_material_audio_for_object(k_col.get_collider(0))
 	if _ground_ray_cast.get_collider():
 		return _get_material_audio_for_object(_ground_ray_cast.get_collider())
@@ -581,7 +581,7 @@ func _update_gun_shooting(delta: float) -> void:
 			bullet_end = collision.position
 		else:
 			bullet_end = query.to
-		var tracer := Tracer.SCENE.instantiate()
+		var tracer: Tracer = Tracer.SCENE.instantiate()
 		tracer.start = _bullet_start.global_position + velocity * delta
 		tracer.end = bullet_end
 		effect_created.emit(tracer)
@@ -638,7 +638,7 @@ func _update_head_bob_cycle_position(
 	delta: float
 ) -> void:
 	var hv := _get_horizontal_velocity()
-	var tick_speed = hv.length() * delta / step_interval
+	var tick_speed := hv.length() * delta / step_interval
 	if is_stepping:
 		var last_head_bob_cycle_position_y := _head_bob_cycle_position.y
 		_head_bob_cycle_position.x += tick_speed

@@ -8,7 +8,7 @@ var _desired_mouse_mode := Input.MOUSE_MODE_VISIBLE
 var _mouse_mode_mismatch_count := 0
 @onready var _container: Node3D = $Container
 @onready var _main_menu: MainMenu = %MainMenu
-@onready var _menu_container = %MenuContainer
+@onready var _menu_container: Control = %MenuContainer
 
 
 func _ready() -> void:

@@ -7,6 +7,7 @@ class_name Loader
 @onready var _camera: Camera3D = %Camera
 
 
+@warning_ignore("unsafe_property_access")
 func compile_shaders() -> void:
 	var file_paths := Util.get_files_recursive("res://")
 
@@ -32,7 +33,8 @@ func compile_shaders() -> void:
 		_file_label.text = file_path.lstrip("res://")
 		await get_tree().process_frame
 
-		var scene: Node = load(file_path).instantiate()
+		var packed_scene: PackedScene = load(file_path)
+		var scene: Node = packed_scene.instantiate()
 
 		var nodes := Util.get_children_recursive(scene, true)
 		nodes.append(scene)

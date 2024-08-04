@@ -206,16 +206,17 @@ layout_mode = 2
 size_flags_horizontal = 3
 items = Array[ExtResource("4_akuoj")]([SubResource("Resource_grdyi"), SubResource("Resource_iu57r")])
 
-[node name="Vsync" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
+[node name="VsyncOption" type="HBoxContainer" parent="CenterContainer/VBoxContainer/SettingsContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 
-[node name="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/Vsync" instance=ExtResource("2_0emkm")]
+[node name="Label" parent="CenterContainer/VBoxContainer/SettingsContainer/VsyncOption" instance=ExtResource("2_0emkm")]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Vsync"
 
-[node name="VsyncOptionButton" parent="CenterContainer/VBoxContainer/SettingsContainer/Vsync" instance=ExtResource("3_smgye")]
+[node name="VsyncOptionButton" parent="CenterContainer/VBoxContainer/SettingsContainer/VsyncOption" instance=ExtResource("3_smgye")]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3

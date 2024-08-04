@@ -38,6 +38,7 @@ signal restarted
 )
 @onready var _buttons_container: Control = %ButtonsContainer
 @onready var _settings_container: Control = %SettingsContainer
+@onready var _vsync_option: Control = %VsyncOption
 
 
 func _ready() -> void:
@@ -52,7 +53,7 @@ func _ready() -> void:
 	_back_button.button_down.connect(_on_back_button_down)
 	if Util.is_compatibility_renderer():
 		# Compatibility renderer does not support vsync setting at all
-		_vsync_option_button.get_parent().visible = false
+		_vsync_option.visible = false
 		# Compatibility renderer does not support things like volumetric fog
 		_performance_preset_option_button.items = (
 			_performance_preset_option_button.items.slice(0, 3)
