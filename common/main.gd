@@ -2,9 +2,9 @@ extends Node
 class_name Main
 
 const _FADE_DURATION = 0.15
-@export var loader_scene: PackedScene
-@export var start_scene: PackedScene
-@export var game_scene: PackedScene
+const _LOADER_SCENE := preload("res://common/loader.tscn")
+const _START_SCENE := preload("res://common/start.tscn")
+const _GAME_SCENE := preload("res://common/game.tscn")
 var _game: Game
 var _fade_out_started_at := -1000.0
 var _fade_in_started_at := -1000.0
@@ -15,13 +15,13 @@ var _fade_in_started_at := -1000.0
 
 func _ready() -> void:
 	if not OS.is_debug_build():
-		var loader: Loader = loader_scene.instantiate()
+		var loader: Loader = _LOADER_SCENE.instantiate()
 		_container.add_child(loader)
 		await loader.compile_shaders()
 		await _fade_out()
 		loader.queue_free()
 		await loader.tree_exited
-		var start: Start = start_scene.instantiate()
+		var start: Start = _START_SCENE.instantiate()
 		_container.add_child(start)
 		await _fade_in()
 		await start.main_menu.started
@@ -57,7 +57,7 @@ func _restart() -> void:
 		await _fade_out()
 		_game.queue_free()
 		await _game.tree_exited
-	_game = game_scene.instantiate()
+	_game = _GAME_SCENE.instantiate()
 	_container.add_child(_game)
 	_game.restarted.connect(_restart)
 	await _fade_in()

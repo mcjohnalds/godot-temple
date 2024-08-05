@@ -1,7 +1,6 @@
 Todo:
 
 - switching weapons
-- Use preload instead of exports
 - 2D fog of war
 - Tutorial UI?
 - Kinematic FPS controller

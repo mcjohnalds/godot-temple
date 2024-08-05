@@ -3,6 +3,7 @@ extends Control
 class_name CustomOptionButton
 
 signal item_selected(item_index: int)
+const _CUSTOM_BUTTON_SCENE := preload("res://ui/custom_button.tscn")
 
 
 @export var selected_index := -1:
@@ -17,7 +18,6 @@ signal item_selected(item_index: int)
 		_update_ui()
 
 
-@export var custom_button_scene: PackedScene
 @onready var _main_button: CustomButton = $MainButton
 @onready var _dropdown: Control = $Dropdown
 var _button_down_event_received := false
@@ -72,7 +72,7 @@ func _update_ui() -> void:
 			continue
 		if not item.changed.is_connected(_update_ui):
 			item.changed.connect(_update_ui)
-		var button: CustomButton = custom_button_scene.instantiate()
+		var button: CustomButton = _CUSTOM_BUTTON_SCENE.instantiate()
 		button.text = item.text
 		button.button_down.connect(_on_dropdown_button_down.bind(i))
 		button.checkbox = true

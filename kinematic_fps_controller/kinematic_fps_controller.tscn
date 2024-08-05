@@ -1,7 +1,6 @@
-[gd_scene load_steps=57 format=3 uid="uid://2oxdgu03lnbk"]
+[gd_scene load_steps=56 format=3 uid="uid://2oxdgu03lnbk"]
 
 [ext_resource type="Script" path="res://kinematic_fps_controller/kinematic_fps_controller.gd" id="2_8r0nc"]
-[ext_resource type="PackedScene" uid="uid://7nghfugqxiqf" path="res://common/metal_impact.tscn" id="2_86agt"]
 [ext_resource type="Environment" uid="uid://b3cn01u84faiy" path="res://common/underwater_environment.tres" id="2_owsda"]
 [ext_resource type="PhysicsMaterial" path="res://kinematic_fps_controller/physics/grass.tres" id="4_ulqss"]
 [ext_resource type="PhysicsMaterial" uid="uid://bklf2cx3fydt3" path="res://kinematic_fps_controller/physics/stone.tres" id="5_a0l7u"]
@@ -174,7 +173,6 @@ head_bob_x_curve = SubResource("Curve_l0i00")
 head_bob_y_curve = SubResource("Curve_3qcwd")
 underwater_env = ExtResource("2_owsda")
 muzzle_flash_alpha_curve = SubResource("Curve_4wj6w")
-bullet_impact_scene = ExtResource("2_86agt")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)

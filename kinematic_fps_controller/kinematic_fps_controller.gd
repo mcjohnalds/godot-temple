@@ -2,6 +2,7 @@ extends CharacterBody3D
 class_name KinematicFpsController
 
 signal effect_created(effect: Node3D)
+const _BULLET_IMPACT_SCENE := preload("res://common/metal_impact.tscn")
 @export_group("Audio")
 @export var material_audios: Array[MaterialAudio]
 @export var water_material_audio: MaterialAudio
@@ -97,7 +98,6 @@ signal effect_created(effect: Node3D)
 @export var weapon_linear_pid_kd := 50.0
 @export var weapon_angular_pid_kp := 300.0
 @export var weapon_angular_pid_kd := 20.0
-@export var bullet_impact_scene: PackedScene
 @export var enable_shooting := true
 @export_group("Health")
 @export var max_health := 100.0
@@ -600,7 +600,7 @@ func _update_gun_shooting(delta: float) -> void:
 		_camera_linear_velocity += dlv * 1.0 * Vector3(1.0, 1.0, 1.2)
 		_camera_angular_velocity += dav * 0.05
 		if collision:
-			var impact: GPUParticles3D = bullet_impact_scene.instantiate()
+			var impact: GPUParticles3D = _BULLET_IMPACT_SCENE.instantiate()
 			impact.position = collision.position
 			impact.one_shot = true
 			impact.emitting = true
