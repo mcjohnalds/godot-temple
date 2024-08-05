@@ -318,17 +318,20 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		var event_key: InputEventKey = event
 		if (
-			event_key.pressed and event_key.keycode >= KEY_1
+			event_key.pressed and event_key.keycode >= KEY_0
 			and event_key.keycode <= KEY_9
 		):
+			# Note that KEY_0 sets the index to -1
 			_active_inventory_item_index = event_key.keycode - KEY_1
 			for i in _inventory_item_icons.get_child_count():
-				var active := i == _active_inventory_item_index
 				var item_icon: ItemIcon = _inventory_item_icons.get_child(i)
-				item_icon.primary = active
+				item_icon.primary = i == _active_inventory_item_index
 			for weapon_model: Node3D in _weapon.get_children():
 				weapon_model.visible = false
-			if _active_inventory_item_index < _inventory.size():
+			if (
+				_active_inventory_item_index != -1
+				and _active_inventory_item_index < _inventory.size()
+			):
 				var inventory_item: InventoryItem = _inventory[
 					_active_inventory_item_index
 				]

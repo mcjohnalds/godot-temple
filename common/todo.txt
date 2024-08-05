@@ -2,8 +2,6 @@ Todo:
 
 - switching weapons
   - Grabbable item
-  - Uniquep with KEY_0
-  - Make weapon switching actually do something
   - Proper item icons
   - Ammo limit
   - Switch weapon transition
@@ -13,6 +11,7 @@ Todo:
 - 2D fog of war
 - Tutorial UI?
 - Kinematic FPS controller
+  - Apply velocity when stepping off a ledge or landing
   - Fix bug where gun clips through things
   - Make aim less floppy
     - Apply force at position instead of angular velocity
