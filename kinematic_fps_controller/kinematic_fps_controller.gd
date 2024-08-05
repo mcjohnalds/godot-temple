@@ -45,10 +45,11 @@ const _BULLET_IMPACT_SCENE := preload("res://common/metal_impact.tscn")
 @export var air_control := 0.2
 @export_group("Sprint")
 ## Speed to be multiplied when active the ability
+@export var unlimited_sprint_energy := false
 @export var sprint_speed_multiplier := 2.0
-@export var sprint_seconds := 30000.0
+@export var sprint_seconds := 3.0
 @export var sprint_regen_time := 6.0
-@export var sprint_energy_jump_cost := 0.0
+@export var sprint_energy_jump_cost := 0.3
 @export_group("Footsteps")
 ## Value to be added to compute a step, each frame that the character is
 ## walking this value is added to a counter
@@ -235,7 +236,7 @@ func _physics_process(delta: float) -> void:
 		and not _is_flying
 		and not is_floating
 		and not is_submerged
-		and _sprint_energy > 0.0
+		and (_sprint_energy > 0.0 or unlimited_sprint_energy)
 	)
 	var input_direction := _get_input_direction(
 		input_horizontal, input_vertical
@@ -244,7 +245,10 @@ func _physics_process(delta: float) -> void:
 		input_jump
 		and is_on_floor()
 		and not _head_ray_cast.is_colliding()
-		and _sprint_energy >= sprint_energy_jump_cost
+		and (
+			_sprint_energy >= sprint_energy_jump_cost
+			or unlimited_sprint_energy
+		)
 	)
 	var is_shuffling_feet := absf(_get_horizontal_velocity().length()) < 0.1
 	var is_stepping := (

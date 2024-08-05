@@ -1,13 +1,7 @@
 Todo:
 
-- switching weapons
-  - Grabbable item
-  - Proper item icons
-  - Ammo limit
-  - Switch weapon transition
-  - Fix bug where gun smoke does not finish emitting when not wielded
+- Fix bug where gun smoke does not finish emitting when not wielded
 - Don't shove everything in common/
-- Delete old branch
 - 2D fog of war
 - Tutorial UI?
 - Kinematic FPS controller
@@ -15,7 +9,6 @@ Todo:
   - Fix bug where gun clips through things
   - Make aim less floppy
     - Apply force at position instead of angular velocity
-  - Grab crosshair
   - Weapon
     - Make weapon and camera bob with player breathing
     - Overwatch-like weapon bob https://www.youtube.com/watch?v=7Dga-UqdBR8
