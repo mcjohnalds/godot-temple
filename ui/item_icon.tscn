@@ -7,9 +7,8 @@
 
 [sub_resource type="World3D" id="World3D_asdww"]
 
-[node name="ItemIcon" type="Control"]
+[node name="ItemIcon" type="MarginContainer"]
 custom_minimum_size = Vector2(30, 30)
-layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -21,14 +20,7 @@ script = ExtResource("1_re1f3")
 
 [node name="Button" parent="." instance=ExtResource("1_gyn8b")]
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 text = ""
 
 [node name="Label" parent="Button/MarginContainer/HBoxContainer" index="2"]

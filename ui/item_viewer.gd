@@ -2,7 +2,7 @@
 extends Node3D
 class_name ItemViewer
 
-enum ItemType { CUBE, SPHERE, TORUS }
+enum ItemType { NONE, CUBE, SPHERE, TORUS }
 
 
 @export var item_type := ItemType.CUBE:

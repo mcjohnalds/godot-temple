@@ -120,9 +120,11 @@ var _last_camera_rotation := Vector3.ZERO
 # We need to track shoot button down state instead of just relying on
 # Input.is_action_pressed("primary") so the gun doesn't shoot when the player
 # clicks the unpause button.
-var _shoot_button_down := false
+var _primary_button_down := false
 var _gun_last_fired_at := -1000.0
 var _blood_flash_alpha_target := 0.0
+var _inventory: Array[InventoryItem] = []
+var _active_inventory_item_index := -1
 @onready var _head: Node3D = $Head
 @onready var _camera: Camera3D =  $Head/Camera3D
 @onready var _collision: CollisionShape3D = $CollisionShape3D
@@ -153,6 +155,7 @@ var _blood_flash_alpha_target := 0.0
 @onready var _bullet_start: Node3D = %BulletStart
 @onready var _blood_vignette: BloodVignette = %BloodVignette
 @onready var _blood_flash: TextureRect = %BloodFlash
+@onready var _inventory_item_icons: Control = %InventoryItemIcons
 @onready var _initial_fov := _camera.fov
 @onready var _initial_capsule_height := _capsule.height
 @onready var _initial_weapon_position := _weapon.position
@@ -163,11 +166,19 @@ var _blood_flash_alpha_target := 0.0
 func _ready() -> void:
 	_smoke.emitting = false
 	_update_muzzle_flash()
+	_inventory.append(InventoryItem.M4.new())
+	_inventory.append(InventoryItem.Grenade.new())
+	for item_icon: ItemIcon in _inventory_item_icons.get_children():
+		item_icon.item_type = ItemViewer.ItemType.NONE
+	var item_icon_0: ItemIcon = _inventory_item_icons.get_child(0)
+	var item_icon_1: ItemIcon = _inventory_item_icons.get_child(1)
+	item_icon_0.item_type = ItemViewer.ItemType.CUBE
+	item_icon_1.item_type = ItemViewer.ItemType.SPHERE
 
 
 func _physics_process(delta: float) -> void:
 	if not Input.is_action_pressed("primary"):
-		_shoot_button_down = false
+		_primary_button_down = false
 	var input_horizontal := Vector2.ZERO
 	var input_vertical := 0.0
 	var input_crouch := false
@@ -295,15 +306,40 @@ func _input(event: InputEvent) -> void:
 	if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		return
 	if event.is_action_pressed("primary"):
-		_shoot_button_down = true
+		_primary_button_down = true
 	if event.is_action_released("primary"):
-		_shoot_button_down = false
+		_primary_button_down = false
 	if event.is_action_pressed("move_crouch"):
 		_crouch_audio_stream_player.stream = crouch_audios.pick_random()
 		_crouch_audio_stream_player.play()
 	if event.is_action_released("move_crouch"):
 		_uncrouch_audio_stream_player.stream = uncrouch_audios.pick_random()
 		_uncrouch_audio_stream_player.play()
+	if event is InputEventKey:
+		var event_key: InputEventKey = event
+		if (
+			event_key.pressed and event_key.keycode >= KEY_1
+			and event_key.keycode <= KEY_9
+		):
+			_active_inventory_item_index = event_key.keycode - KEY_1
+			for i in _inventory_item_icons.get_child_count():
+				var active := i == _active_inventory_item_index
+				var item_icon: ItemIcon = _inventory_item_icons.get_child(i)
+				item_icon.primary = active
+			for weapon_model: Node3D in _weapon.get_children():
+				weapon_model.visible = false
+			if _active_inventory_item_index < _inventory.size():
+				var inventory_item: InventoryItem = _inventory[
+					_active_inventory_item_index
+				]
+				var script := ""
+				match inventory_item.get_script():
+					InventoryItem.M4:
+						script = "M4"
+					InventoryItem.Grenade:
+						script = "Grenade"
+				var model: Node3D = _weapon.get_node(script)
+				model.visible = true
 	if event is InputEventMouseMotion:
 		var e: InputEventMouseMotion = event
 		var s: float = mouse_sensitivity / 1000.0 * global.mouse_sensitivity
@@ -326,8 +362,12 @@ func _input(event: InputEvent) -> void:
 			_damage(10.0)
 
 
-func _update_quake_camera_tilt(input_horizontal: Vector2, delta: float) -> void:
-	_camera_angular_velocity.z += -input_horizontal.x * quake_camera_tilt_speed * delta
+func _update_quake_camera_tilt(
+	input_horizontal: Vector2, delta: float
+) -> void:
+	_camera_angular_velocity.z += (
+		-input_horizontal.x * quake_camera_tilt_speed * delta
+	)
 
 
 func _update_crouch_height(is_crouching: bool, delta: float) -> void:
@@ -561,8 +601,11 @@ func _update_blood_effects(delta: float) -> void:
 
 func _update_gun_shooting(delta: float) -> void:
 	var fire_bullet := (
-		_shoot_button_down
+		_primary_button_down
 		and Util.get_ticks_sec() - _gun_last_fired_at > 1.0 / fire_rate
+		and _active_inventory_item_index != -1
+		and _active_inventory_item_index < _inventory.size()
+		and _inventory[_active_inventory_item_index] is InventoryItem.M4
 	)
 	if fire_bullet:
 		_gun_last_fired_at = Util.get_ticks_sec()
@@ -691,3 +734,10 @@ func get_sprint_energy() -> float:
 
 func get_camera() -> Camera3D:
 	return _camera
+
+
+class InventoryItem:
+	class M4 extends InventoryItem:
+		pass
+	class Grenade extends InventoryItem:
+		pass

@@ -1,6 +1,15 @@
 Todo:
 
 - switching weapons
+  - Grabbable item
+  - Uniquep with KEY_0
+  - Make weapon switching actually do something
+  - Proper item icons
+  - Ammo limit
+  - Switch weapon transition
+  - Fix bug where gun smoke does not finish emitting when not wielded
+- Don't shove everything in common/
+- Delete old branch
 - 2D fog of war
 - Tutorial UI?
 - Kinematic FPS controller
