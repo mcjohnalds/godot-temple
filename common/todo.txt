@@ -1,7 +1,6 @@
 Todo:
 
 - Fix bug where gun smoke does not finish emitting when not wielded
-- Don't shove everything in common/
 - 2D fog of war
 - Tutorial UI?
 - Kinematic FPS controller
@@ -16,7 +15,7 @@ Todo:
     - Head check
   - Death
   - Melee
-  - Crosshair
+  - Dynamic crosshair
   - Fix swimming
   - Different up and down acceleration when jumping
   - Fix underwater env being displayed too early
